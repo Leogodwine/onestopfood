@@ -1,0 +1,324 @@
+@extends('layouts.dashboard')
+
+@section('content')
+<div class="page-header">
+    <h2>User Management</h2>
+    <p>Review and manage all users on the platform</p>
+</div>
+
+<!-- Filters & Search -->
+<div class="dashboard-card mb-4">
+    <form method="GET" action="{{ route('admin.users.index') }}" class="row g-3 align-items-end">
+        <div class="col-md-3">
+            <label class="form-label small text-muted">Search</label>
+            <input type="text" name="search" value="{{ $search }}" class="form-control" placeholder="Name, email, phone, ID">
+        </div>
+        <div class="col-md-3">
+            <label class="form-label small text-muted">Role</label>
+            <select name="role" class="form-select">
+                <option value="">All roles</option>
+                <option value="customer" @selected($role === 'customer')>Customer</option>
+                <option value="chef" @selected($role === 'chef')>Chef</option>
+                <option value="traveler" @selected($role === 'traveler')>Traveler</option>
+                <option value="admin" @selected($role === 'admin')>Admin</option>
+            </select>
+        </div>
+        <div class="col-md-3">
+            <label class="form-label small text-muted">Status</label>
+            <select name="status" class="form-select">
+                <option value="">All statuses</option>
+                <option value="approved" @selected($status === 'approved')>Approved</option>
+                <option value="pending" @selected($status === 'pending')>Pending</option>
+                <option value="rejected" @selected($status === 'rejected')>Rejected</option>
+                <option value="suspended" @selected($status === 'suspended')>Suspended</option>
+            </select>
+        </div>
+        <div class="col-md-3 d-flex gap-2">
+            <div class="flex-grow-1">
+                <label class="form-label small text-muted d-block">&nbsp;</label>
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="bi bi-funnel"></i> Apply Filters
+                </button>
+            </div>
+            <div class="flex-grow-1">
+                <label class="form-label small text-muted d-block">&nbsp;</label>
+                <a href="{{ route('admin.users.index') }}" class="btn btn-outline-secondary w-100">
+                    Reset
+                </a>
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- Statistics Cards -->
+<div class="row g-4 mb-4">
+    <div class="col-md-3">
+        <a class="stat-card stat-green d-block text-decoration-none" href="{{ route('admin.users.index', ['filter' => 'pending_approvals']) }}#pending-approvals">
+            <div class="stat-icon">
+                <i class="bi bi-people"></i>
+            </div>
+            <div class="stat-value">{{ $pendingApprovalsCount }}</div>
+            <div class="stat-label">Pending Approvals</div>
+            <div class="stat-change small mt-2 text-warning">
+                <i class="bi bi-arrow-right"></i> View pending approvals
+            </div>
+        </a>
+    </div>
+    <div class="col-md-3">
+        <a class="stat-card stat-blue d-block text-decoration-none" href="{{ route('admin.users.index', ['filter' => 'pending_chefs']) }}#pending-chefs">
+            <div class="stat-icon">
+                <i class="bi bi-person-check"></i>
+            </div>
+            <div class="stat-value">{{ $pendingChefs->count() }}</div>
+            <div class="stat-label">Pending Chefs</div>
+            <div class="stat-change small mt-2 text-primary">
+                <i class="bi bi-arrow-right"></i> Review chef requests
+            </div>
+        </a>
+    </div>
+    <div class="col-md-3">
+        <a class="stat-card stat-green d-block text-decoration-none" href="{{ route('admin.users.index', ['filter' => 'pending_travelers']) }}#pending-travelers">
+            <div class="stat-icon">
+                <i class="bi bi-truck"></i>
+            </div>
+            <div class="stat-value">{{ $pendingTravelers->count() }}</div>
+            <div class="stat-label">Pending Travelers</div>
+            <div class="stat-change small mt-2 text-success">
+                <i class="bi bi-arrow-right"></i> Review traveler requests
+            </div>
+        </a>
+    </div>
+    <div class="col-md-3">
+        <a class="stat-card stat-blue d-block text-decoration-none" href="{{ route('admin.users.index', ['filter' => 'active_partners']) }}#all-users">
+            <div class="stat-icon">
+                <i class="bi bi-shield-check"></i>
+            </div>
+            <div class="stat-value">{{ $activePartnersCount }}</div>
+            <div class="stat-label">Active Partners</div>
+            <div class="stat-change small mt-2 text-primary">
+                <i class="bi bi-arrow-right"></i> View active partners
+            </div>
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12" id="pending-approvals"></div>
+</div>
+
+<div class="row g-4">
+    <!-- Pending Chefs -->
+    <div class="col-md-6" id="pending-chefs">
+        <div class="dashboard-card">
+            <div class="card-header">
+                <h5 class="card-title">
+                    <i class="bi bi-person-check"></i> Pending Chefs ({{ $pendingChefs->count() }})
+                </h5>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($pendingChefs as $chef)
+                            <tr>
+                                <td>
+                                    <div class="fw-semibold">{{ $chef->name }}</div>
+                                    @if($chef->phone)
+                                        <small class="text-muted">{{ $chef->phone }}</small>
+                                    @endif
+                                </td>
+                                <td>{{ $chef->email }}</td>
+                                <td>
+                                    <a class="btn btn-sm btn-primary" href="{{ route('admin.users.show', $chef) }}">
+                                        <i class="bi bi-eye"></i> Review
+                                    </a>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="3" class="text-center text-muted">No pending chefs</td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pending Travelers -->
+    <div class="col-md-6" id="pending-travelers">
+        <div class="dashboard-card">
+            <div class="card-header">
+                <h5 class="card-title">
+                    <i class="bi bi-truck"></i> Pending Travelers ({{ $pendingTravelers->count() }})
+                </h5>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($pendingTravelers as $traveler)
+                            <tr>
+                                <td>
+                                    <div class="fw-semibold">{{ $traveler->name }}</div>
+                                    @if($traveler->phone)
+                                        <small class="text-muted">{{ $traveler->phone }}</small>
+                                    @endif
+                                </td>
+                                <td>{{ $traveler->email }}</td>
+                                <td>
+                                    <a class="btn btn-sm btn-primary" href="{{ route('admin.users.show', $traveler) }}">
+                                        <i class="bi bi-eye"></i> Review
+                                    </a>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="3" class="text-center text-muted">No pending travelers</td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- All Users Table -->
+<div class="dashboard-card mt-4" id="all-users">
+    <div class="card-header">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <h5 class="card-title mb-0">
+                <i class="bi bi-people"></i> {{ $filterLabel }}
+            </h5>
+            <div class="d-flex align-items-center gap-2">
+                <a class="btn btn-sm btn-outline-success" href="{{ route('admin.users.export', request()->query()) }}">
+                    <i class="bi bi-download"></i> Export CSV
+                </a>
+                <a class="btn btn-sm btn-outline-secondary" href="{{ route('admin.users.index') }}#all-users">
+                    Clear filter
+                </a>
+                <div class="dropdown">
+                    <button class="btn btn-sm btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                        Per page: {{ (int)$perPage }}
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        @foreach([10, 20, 50, 100] as $size)
+                            <li>
+                                <a class="dropdown-item @if((int)$perPage === $size) active @endif"
+                                   href="{{ route('admin.users.index', array_filter(['filter' => $filter ?: null, 'per_page' => $size])) }}#all-users">
+                                    {{ $size }} per page
+                                </a>
+                            </li>
+                        @endforeach
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    <form method="POST" action="{{ route('admin.users.bulk') }}">
+        @csrf
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th style="width: 40px;">
+                            <input type="checkbox" id="select_all_users" class="form-check-input">
+                        </th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>Status</th>
+                        <th>Registered</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($allUsers as $user)
+                        <tr>
+                            <td>
+                                @if($user->role !== 'admin')
+                                    <input type="checkbox" name="selected_users[]" value="{{ $user->id }}" class="form-check-input user-checkbox">
+                                @endif
+                            </td>
+                            <td>
+                                <div class="fw-semibold">{{ $user->name }}</div>
+                                @if($user->phone)
+                                    <small class="text-muted">{{ $user->phone }}</small>
+                                @endif
+                            </td>
+                            <td>{{ $user->email }}</td>
+                            <td>
+                                <span class="badge badge-primary">{{ ucfirst($user->role) }}</span>
+                            </td>
+                            <td>
+                                <span class="badge badge-{{ $user->status === 'approved' ? 'success' : ($user->status === 'pending' ? 'warning' : ($user->status === 'suspended' ? 'danger' : 'secondary')) }}">
+                                    {{ ucfirst($user->status) }}
+                                </span>
+                            </td>
+                            <td>{{ $user->created_at->format('M d, Y') }}</td>
+                            <td>
+                                <a class="btn btn-sm btn-outline-primary" href="{{ route('admin.users.show', $user) }}">
+                                    <i class="bi bi-eye"></i> View
+                                </a>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="7" class="text-center text-muted">No users found</td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+            <div class="d-flex justify-content-center">
+                {{ $allUsers->links() }}
+            </div>
+        </div>
+
+        <div class="mt-3 d-flex flex-wrap gap-2 align-items-end">
+            <div style="min-width: 220px;">
+                <label class="form-label small text-muted">Bulk action</label>
+                <select name="action" class="form-select form-select-sm" required>
+                    <option value="">Select action</option>
+                    <option value="approve">Approve (chefs/travelers)</option>
+                    <option value="suspend">Suspend</option>
+                    <option value="activate">Activate</option>
+                    <option value="delete">Delete (non-admins only)</option>
+                </select>
+            </div>
+            <div class="flex-grow-1">
+                <label class="form-label small text-muted">Reason (for audit trail)</label>
+                <input type="text" name="reason" class="form-control form-control-sm" placeholder="Optional reason for this action">
+            </div>
+            <div>
+                <button type="submit" class="btn btn-sm btn-success">
+                    <i class="bi bi-check2-circle"></i> Apply to selected
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+@push('scripts')
+<script>
+document.getElementById('select_all_users')?.addEventListener('change', function () {
+    const checked = this.checked;
+    document.querySelectorAll('.user-checkbox').forEach(function (cb) {
+        cb.checked = checked;
+    });
+});
+</script>
+@endpush
+@endsection
