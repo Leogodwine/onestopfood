@@ -57,7 +57,8 @@
         #themeIcon {
             transition: transform 0.3s ease, opacity 0.3s ease;
         }
-        #themeToggle:hover #themeIcon {
+        #themeToggle:hover #themeIcon,
+        #themeToggleMobile:hover #themeIconMobile {
             transform: rotate(15deg);
         }
         /* Dark theme overrides for custom elements */
@@ -105,6 +106,10 @@
             border-color: var(--bs-border-color);
             color: var(--bs-body-color);
         }
+        [data-bs-theme="dark"] .chefs-section {
+            background-color: rgba(15, 23, 42, 0.55);
+            border: 1px solid rgba(148, 163, 184, 0.18);
+        }
         [data-bs-theme="dark"] .chefs-section .chef-card .card-title {
             color: var(--bs-body-color);
         }
@@ -121,6 +126,47 @@
         [data-bs-theme="dark"] .chefs-section .btn-view:hover {
             background-color: rgba(74, 222, 128, 0.2);
             color: #4ade80;
+        }
+
+        /* Join Our Chef Community – dark theme */
+        [data-bs-theme="dark"] .chef-community-card {
+            background: rgba(15, 23, 42, 0.35);
+        }
+        [data-bs-theme="dark"] .chef-community-card-inner {
+            background: rgba(30, 41, 59, 0.65);
+            border-color: rgba(148, 163, 184, 0.2);
+            box-shadow: 0 12px 34px rgba(0, 0, 0, 0.28);
+        }
+        [data-bs-theme="dark"] .footer-chef-cta-title {
+            color: rgba(248, 250, 252, 0.95);
+        }
+        [data-bs-theme="dark"] .footer-chef-cta-tagline {
+            color: #4ade80;
+        }
+        [data-bs-theme="dark"] .footer-chef-cta-desc,
+        [data-bs-theme="dark"] .footer-chef-cta-list,
+        [data-bs-theme="dark"] .footer-chef-cta-contact {
+            color: rgba(226, 232, 240, 0.85) !important;
+        }
+        [data-bs-theme="dark"] .footer-chef-cta-contact a {
+            color: rgba(248, 250, 252, 0.95) !important;
+        }
+        [data-bs-theme="dark"] .partner-community-pane-traveler .footer-traveler-cta-title {
+            color: rgba(248, 250, 252, 0.95);
+        }
+        [data-bs-theme="dark"] .partner-community-pane-traveler .footer-traveler-cta-tagline {
+            color: #4ade80;
+        }
+        [data-bs-theme="dark"] .partner-community-pane-traveler .footer-traveler-cta-desc,
+        [data-bs-theme="dark"] .partner-community-pane-traveler .footer-traveler-cta-list,
+        [data-bs-theme="dark"] .partner-community-pane-traveler .footer-traveler-cta-contact {
+            color: rgba(226, 232, 240, 0.85) !important;
+        }
+        [data-bs-theme="dark"] .partner-community-pane-traveler .footer-traveler-cta-contact a {
+            color: rgba(248, 250, 252, 0.95) !important;
+        }
+        [data-bs-theme="dark"] .partner-community-divider {
+            border-color: rgba(148, 163, 184, 0.2);
         }
         @media (max-width: 991.98px) {
             a, button {
@@ -249,6 +295,125 @@
             gap: 0.5rem;
         }
 
+        /* Mobile toolbar: keep key actions visible without opening the menu */
+        .navbar-toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            width: 100%;
+        }
+        .navbar-quick-actions {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 0.25rem;
+            margin-left: auto;
+        }
+        .navbar-quick-actions-desktop {
+            margin-left: 0;
+            padding-left: 0.25rem;
+        }
+        .navbar-quick-btn {
+            min-width: 38px;
+            min-height: 38px;
+            padding: 0.35rem 0.45rem !important;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+            gap: 0.35rem;
+        }
+        .navbar-signin-btn {
+            min-width: auto;
+            padding-inline: 0.55rem !important;
+        }
+        .navbar-signin-label {
+            font-size: 0.8125rem;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+        .navbar-quick-btn.active {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.35);
+        }
+        @media (max-width: 991.98px) {
+            .navbar-toolbar {
+                flex-wrap: wrap;
+            }
+            .navbar-brand {
+                margin-inline-start: 0;
+                padding-inline-start: 0;
+                flex-shrink: 0;
+            }
+            .navbar-brand .navbar-logo {
+                height: 48px !important;
+            }
+            .navbar-quick-home {
+                flex-shrink: 0;
+                margin-left: 0.25rem;
+            }
+            .navbar-quick-actions {
+                margin-left: auto;
+                margin-right: 0.35rem;
+                flex-shrink: 0;
+            }
+            .navbar-toggler {
+                margin-left: 0;
+                padding: 0.35rem 0.5rem;
+                flex-shrink: 0;
+            }
+            .navbar-collapse {
+                flex-basis: 100%;
+                width: 100%;
+                margin-top: 0.5rem;
+                order: 10;
+            }
+        }
+        @media (max-width: 575.98px) {
+            .navbar-quick-actions {
+                gap: 0.25rem;
+            }
+            .navbar-quick-btn {
+                min-width: 34px;
+                min-height: 34px;
+                padding: 0.25rem 0.35rem !important;
+            }
+            .navbar-signin-btn {
+                padding-inline: 0.45rem !important;
+            }
+            .navbar-signin-label {
+                font-size: 0.75rem;
+            }
+        }
+        @media (min-width: 992px) {
+            .navbar-toolbar {
+                flex-wrap: nowrap;
+            }
+            .navbar-brand {
+                order: 1;
+                flex-shrink: 0;
+            }
+            .navbar-collapse {
+                order: 2;
+                flex: 1 1 auto;
+                display: flex !important;
+                flex-wrap: nowrap;
+                align-items: center;
+                justify-content: center;
+                gap: 0;
+            }
+            .navbar-search-wrap {
+                margin-right: 0 !important;
+                margin-left: 0.5rem;
+            }
+            .navbar-quick-actions-desktop {
+                flex-shrink: 0;
+            }
+            .navbar-quick-home {
+                display: none !important;
+            }
+        }
+
         /* Navbar search: icon toggles to input */
         .navbar-search-wrap {
             display: flex;
@@ -295,11 +460,66 @@
             color: #fff;
         }
 
-        /* WhatsApp floating button – fixed bottom-right, modern transitions & animations */
-        .whatsapp-fab {
+        /* Floating actions: language switcher + WhatsApp (bottom-right stack) */
+        .floating-actions-stack {
             position: fixed;
             bottom: 24px;
             right: 24px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 10px;
+        }
+        .lang-fab-switcher {
+            display: flex;
+            gap: 4px;
+            padding: 4px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.96);
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.12), 0 1px 4px rgba(0, 0, 0, 0.06);
+            border: 1px solid rgba(0, 0, 0, 0.06);
+        }
+        [data-bs-theme="dark"] .lang-fab-switcher {
+            background: rgba(33, 37, 41, 0.96);
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+        .lang-fab-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 2.25rem;
+            height: 2rem;
+            padding: 0 0.55rem;
+            border-radius: 999px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+            text-decoration: none;
+            color: #495057;
+            background: transparent;
+            transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+        }
+        [data-bs-theme="dark"] .lang-fab-btn {
+            color: rgba(255, 255, 255, 0.75);
+        }
+        .lang-fab-btn:hover {
+            color: #22c55e;
+            background: rgba(34, 197, 94, 0.12);
+        }
+        .lang-fab-btn.active {
+            background: #22c55e;
+            color: #fff;
+        }
+        .lang-fab-btn:active {
+            transform: scale(0.96);
+        }
+
+        /* WhatsApp floating button – inside .floating-actions-stack */
+        .whatsapp-fab {
+            position: relative;
+            bottom: auto;
+            right: auto;
             width: 56px;
             height: 56px;
             border-radius: 50%;
@@ -309,7 +529,7 @@
             align-items: center;
             justify-content: center;
             box-shadow: 0 4px 16px rgba(37, 211, 102, 0.4), 0 2px 6px rgba(0, 0, 0, 0.08);
-            z-index: 9999;
+            z-index: 1;
             text-decoration: none;
             border: none;
             outline: none;
@@ -362,11 +582,13 @@
             transform: scale(0.98);
         }
         @media (max-width: 575.98px) {
+            .floating-actions-stack {
+                bottom: max(16px, env(safe-area-inset-bottom));
+                right: max(16px, env(safe-area-inset-right));
+            }
             .whatsapp-fab {
                 width: 52px;
                 height: 52px;
-                bottom: max(16px, env(safe-area-inset-bottom));
-                right: max(16px, env(safe-area-inset-right));
             }
             .whatsapp-fab i {
                 font-size: 1.5rem;
@@ -955,6 +1177,31 @@
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(46, 125, 50, 0.1);
             border: 1px solid rgba(46, 125, 50, 0.15);
         }
+        .partner-community-pane {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            min-height: 100%;
+        }
+        .partner-community-footer {
+            margin-top: auto;
+            padding-top: 1rem;
+        }
+        @media (min-width: 992px) {
+            .partner-community-pane-chef {
+                border-right: 1px solid rgba(46, 125, 50, 0.15);
+                padding-right: 2rem;
+            }
+            .partner-community-pane-traveler {
+                padding-left: 2rem;
+            }
+        }
+        @media (max-width: 991.98px) {
+            .partner-community-divider {
+                margin: 0.5rem 0 1.5rem;
+                border-color: rgba(46, 125, 50, 0.15);
+            }
+        }
         @media (max-width: 575.98px) {
             .chef-community-card-inner {
                 padding: 2rem 1.25rem;
@@ -990,11 +1237,13 @@
         .footer-chef-cta-list .bi-check-circle-fill {
             color: #2e7d32 !important;
         }
-        .footer-chef-cta-actions .btn-success {
+        .footer-chef-cta-actions .btn-success,
+        .footer-traveler-cta-actions .btn-success {
             background-color: #2e7d32;
             border-color: #2e7d32;
         }
-        .footer-chef-cta-actions .btn-success:hover {
+        .footer-chef-cta-actions .btn-success:hover,
+        .footer-traveler-cta-actions .btn-success:hover {
             background-color: #1b5e20;
             border-color: #1b5e20;
         }
@@ -1015,6 +1264,46 @@
             font-weight: 500;
         }
         .footer-chef-cta-contact a:hover {
+            text-decoration: underline !important;
+        }
+        .footer-traveler-cta-title {
+            font-family: var(--font-headline);
+            font-size: 1.625rem;
+            font-weight: 600;
+            color: #1b5e20;
+            margin-bottom: 0.25rem;
+            letter-spacing: -0.02em;
+        }
+        .footer-traveler-cta-tagline {
+            font-size: 1.0625rem;
+            color: #2e7d32;
+            font-weight: 600;
+            letter-spacing: 0.01em;
+        }
+        .footer-traveler-cta-desc {
+            font-size: 0.9375rem;
+            line-height: 1.65;
+            color: #33691e;
+        }
+        .footer-traveler-cta-list {
+            font-size: 0.875rem;
+            color: #2e7d32;
+            line-height: 1.75;
+        }
+        .footer-traveler-cta-list li {
+            margin-bottom: 0.5rem;
+        }
+        .footer-traveler-cta-list .bi-check-circle-fill {
+            color: #2e7d32 !important;
+        }
+        .footer-traveler-cta-contact {
+            color: #33691e !important;
+        }
+        .footer-traveler-cta-contact a {
+            color: #1b5e20 !important;
+            font-weight: 500;
+        }
+        .footer-traveler-cta-contact a:hover {
             text-decoration: underline !important;
         }
         .stats-card {
@@ -1181,6 +1470,20 @@
         .cart-dropdown-toggle::after {
             display: none;
         }
+        .cart-dropdown--multi-chef {
+            min-width: min(94vw, 620px);
+            max-width: 720px;
+        }
+        .cart-dropdown-body--multi-chef {
+            max-height: none;
+            overflow: visible;
+        }
+        .cart-chef-column {
+            background: #fafafa;
+        }
+        .cart-chef-column-name {
+            line-height: 1.2;
+        }
         @media (max-width: 575.98px) {
             .cart-dropdown {
                 min-width: 280px;
@@ -1195,8 +1498,8 @@
     $cartCount = is_array($cart) ? array_sum($cart) : 0;
 @endphp
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
-    <div class="container">
-        <a class="navbar-brand navbar-brand-green d-flex align-items-center" href="{{ route('home') }}" aria-label="{{ $brand }} - Home">
+    <div class="container navbar-toolbar">
+        <a class="navbar-brand navbar-brand-green d-flex align-items-center" href="{{ route('home') }}" aria-label="{{ $brand }} - {{ __('nav.home') }}">
             @if(file_exists(public_path('images/logo 01.webp')))
                 <img src="{{ asset('images/logo 01.webp') }}" alt="{{ $brand }}" class="navbar-logo">
             @elseif(file_exists(public_path('images/logo 02.avif')))
@@ -1205,114 +1508,155 @@
                 <img src="{{ asset('images/one stop food logo 01.jpeg') }}" alt="{{ $brand }}" class="navbar-logo">
             @endif
         </a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+
+        <a class="btn btn-sm btn-outline-light navbar-quick-btn navbar-quick-home d-lg-none {{ request()->routeIs('home') ? 'active' : '' }}" href="{{ route('home') }}" title="{{ __('nav.home') }}" aria-label="{{ __('nav.home') }}">
+            <i class="bi bi-house-door-fill"></i>
+        </a>
+
+        <div class="navbar-quick-actions d-lg-none">
+            <button class="btn btn-sm btn-outline-secondary navbar-quick-btn" id="themeToggleMobile" type="button" title="{{ __('common.toggle_theme') }}" aria-label="{{ __('common.toggle_theme') }}">
+                <i class="bi bi-moon-stars" id="themeIconMobile"></i>
+            </button>
+            <div class="dropdown">
+                <button type="button" class="btn btn-sm btn-success text-white position-relative dropdown-toggle cart-dropdown-toggle navbar-quick-btn" title="{{ __('nav.cart') }}" data-bs-toggle="dropdown" aria-expanded="false" id="cartIconBtnMobile" aria-label="{{ __('nav.cart') }}">
+                    <i class="bi bi-cart-fill text-white"></i>
+                    @if($cartCount > 0)
+                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.65rem; padding: 0.2em 0.45em;">
+                            {{ $cartCount }}
+                        </span>
+                    @endif
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end cart-dropdown @if(!empty($cartItems) && collect($cartItems)->pluck('meal.chef_id')->unique()->filter()->count() > 1) cart-dropdown--multi-chef @endif" aria-labelledby="cartIconBtnMobile">
+                    <li class="cart-dropdown-header">
+                        <i class="bi bi-cart"></i> {{ __('nav.cart') }} ({{ $cartCount }})
+                    </li>
+                    @if(empty($cartItems))
+                        <li class="cart-dropdown-empty">
+                            <i class="bi bi-cart-x" style="font-size: 2rem; display: block; margin-bottom: 0.5rem;"></i>
+                            {{ __('nav.cart_empty') }}
+                        </li>
+                    @else
+                        <li>
+                            @include('cart.partials.dropdown-body')
+                        </li>
+                        <li class="cart-dropdown-footer">
+                            <div class="cart-subtotal">
+                                <span class="cart-subtotal-label">{{ __('nav.subtotal') }}</span>
+                                <span class="cart-subtotal-amount">TZS {{ number_format((float)$cartSubtotal, 2) }}</span>
+                            </div>
+                            <div class="cart-dropdown-actions">
+                                <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#cartModal">
+                                    <i class="bi bi-eye"></i> {{ __('nav.show_full_cart') }}
+                                </button>
+                                @auth
+                                    <a href="{{ route('orders.checkout') }}" class="btn btn-sm btn-success">{{ __('nav.checkout') }}</a>
+                                @else
+                                    <a href="{{ route('login') }}" class="btn btn-sm btn-success">{{ __('nav.place_order') }}</a>
+                                @endauth
+                            </div>
+                        </li>
+                    @endif
+                </ul>
+            </div>
+            @guest
+                <a class="btn btn-sm btn-signin-white navbar-quick-btn navbar-signin-btn" href="{{ route('login') }}" title="{{ __('nav.sign_in') }}">
+                    <i class="bi bi-box-arrow-in-right"></i>
+                    <span class="navbar-signin-label">{{ __('nav.sign_in') }}</span>
+                </a>
+            @else
+                <a class="btn btn-sm btn-outline-success navbar-quick-btn navbar-signin-btn" href="{{ route('dashboard') }}" title="{{ __('nav.dashboard') }}">
+                    <i class="bi bi-speedometer2"></i>
+                    <span class="navbar-signin-label">{{ __('nav.dashboard') }}</span>
+                </a>
+            @endguest
+        </div>
+
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="{{ __('common.toggle_navigation') }}">
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse justify-content-center" id="navbarNav">
             <ul class="navbar-nav align-items-center">
-                <li class="nav-item"><a class="nav-link {{ request()->routeIs('home') ? 'active' : '' }}" href="{{ route('home') }}">Home</a></li>
-                <li class="nav-item"><a class="nav-link {{ request()->routeIs('chefs.*') ? 'active' : '' }}" href="{{ route('chefs.index') }}">Our Chefs</a></li>
+                <li class="nav-item d-none d-lg-block"><a class="nav-link {{ request()->routeIs('home') ? 'active' : '' }}" href="{{ route('home') }}">{{ __('nav.home') }}</a></li>
+                <li class="nav-item"><a class="nav-link {{ request()->routeIs('chefs.*') ? 'active' : '' }}" href="{{ route('chefs.index') }}">{{ __('nav.our_chefs') }}</a></li>
                 <li class="nav-item dropdown dropdown-hover" id="menuMealsDropdown">
-                    <a class="nav-link dropdown-toggle {{ request()->routeIs('meals.index') ? 'active' : '' }}" href="{{ route('meals.index') }}" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true" title="Menu">Menu</a>
+                    <a class="nav-link dropdown-toggle {{ request()->routeIs('meals.index') ? 'active' : '' }}" href="{{ route('meals.index') }}" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true" title="{{ __('nav.menu') }}">{{ __('nav.menu') }}</a>
                     <ul class="dropdown-menu" aria-labelledby="menuMealsDropdown">
-                        <li><a class="dropdown-item" href="{{ route('meals.index') }}">All Meals</a></li>
+                        <li><a class="dropdown-item" href="{{ route('meals.index') }}">{{ __('nav.all_meals') }}</a></li>
                         <li><hr class="dropdown-divider"></li>
                         @foreach(\App\Models\Meal::getStandardCategories() as $catKey => $cat)
                             <li><a class="dropdown-item" href="{{ route('meals.index', ['category' => $catKey]) }}">{{ $catKey }}</a></li>
                         @endforeach
                     </ul>
                 </li>
-                <li class="nav-item"><a class="nav-link {{ request()->routeIs('register') ? 'active' : '' }}" href="{{ route('register') }}">Become a Chef</a></li>
-                <li class="nav-item"><a class="nav-link {{ request()->routeIs('stories.*') ? 'active' : '' }}" href="{{ route('stories.index') }}">Stories</a></li>
+                <li class="nav-item"><a class="nav-link {{ request()->routeIs('register') ? 'active' : '' }}" href="{{ route('register') }}">{{ __('nav.become_chef') }}</a></li>
+                <li class="nav-item"><a class="nav-link {{ request()->routeIs('stories.*') ? 'active' : '' }}" href="{{ route('stories.index') }}">{{ __('nav.stories') }}</a></li>
             </ul>
-            <div class="navbar-search-wrap me-3">
+            <div class="navbar-search-wrap">
                 <form method="GET" action="{{ route('meals.index') }}" class="navbar-search-form d-flex" id="navbarSearchForm">
                     <div class="input-group input-group-sm navbar-search-input-group">
-                        <input type="text" class="form-control form-control-sm navbar-search-input border-end-0" name="search" placeholder="Search dishes, chefs, origins, or stories..." value="{{ request('search') }}" aria-label="Search">
-                        <button type="submit" class="input-group-text navbar-search-icon-btn border-start-0 bg-white" title="Search" aria-label="Search">
+                        <input type="text" class="form-control form-control-sm navbar-search-input border-end-0" name="search" placeholder="{{ __('nav.search_placeholder') }}" value="{{ request('search') }}" aria-label="{{ __('nav.search_placeholder') }}">
+                        <button type="submit" class="input-group-text navbar-search-icon-btn border-start-0 bg-white" title="{{ __('nav.search_placeholder') }}" aria-label="{{ __('nav.search_placeholder') }}">
                             <i class="bi bi-search text-muted"></i>
                         </button>
                     </div>
                 </form>
             </div>
-            <div class="d-flex align-items-center gap-2">
-                <div class="dropdown navbar-deliver-to">
-                    <button class="btn btn-sm btn-outline-light border-0 d-flex align-items-center gap-1 dropdown-toggle navbar-deliver-to-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Delivery location" id="deliverToDropdown">
+            <div class="navbar-quick-actions navbar-quick-actions-desktop d-none d-lg-flex">
+                <div class="dropdown navbar-deliver-to d-flex align-items-center">
+                    <button class="btn btn-sm btn-outline-light border-0 d-flex align-items-center gap-1 dropdown-toggle navbar-deliver-to-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="{{ __('nav.deliver_to') }}" id="deliverToDropdown">
                         <i class="bi bi-geo-alt"></i>
-                        <span class="d-none d-md-inline text-start navbar-deliver-to-text">
-                            <span class="d-block navbar-deliver-label small lh-1">Deliver to</span>
-                            <span class="navbar-location-text">Your Location</span>
+                        <span class="text-start navbar-deliver-to-text">
+                            <span class="d-block navbar-deliver-label small lh-1">{{ __('nav.deliver_to') }}</span>
+                            <span class="navbar-location-text">{{ __('nav.your_location') }}</span>
                         </span>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="deliverToDropdown">
-                        <li class="px-3 py-2 small text-muted">Your Location</li>
+                        <li class="px-3 py-2 small text-muted">{{ __('nav.your_location') }}</li>
                         @auth
-                            <li><a class="dropdown-item" href="{{ route('locations.index') }}"><i class="bi bi-pencil me-2"></i>Set delivery address</a></li>
+                            <li><a class="dropdown-item" href="{{ route('locations.index') }}"><i class="bi bi-pencil me-2"></i>{{ __('nav.set_delivery_address') }}</a></li>
                         @else
-                            <li><a class="dropdown-item" href="{{ route('login') }}"><i class="bi bi-box-arrow-in-right me-2"></i>Sign in to set location</a></li>
+                            <li><a class="dropdown-item" href="{{ route('login') }}"><i class="bi bi-box-arrow-in-right me-2"></i>{{ __('nav.sign_in_to_set_location') }}</a></li>
                         @endauth
                     </ul>
                 </div>
-                <button class="btn btn-sm btn-outline-secondary" id="themeToggle" type="button" title="Toggle theme">
+                <button class="btn btn-sm btn-outline-secondary navbar-quick-btn" id="themeToggle" type="button" title="{{ __('common.toggle_theme') }}" aria-label="{{ __('common.toggle_theme') }}">
                     <i class="bi bi-moon-stars" id="themeIcon"></i>
                 </button>
-                <!-- Cart dropdown -->
                 <div class="dropdown">
-                    <button type="button" class="btn btn-sm btn-success text-white position-relative dropdown-toggle cart-dropdown-toggle" title="View cart" data-bs-toggle="dropdown" aria-expanded="false" id="cartIconBtn" style="min-width: 44px;">
-                        <i class="bi bi-cart-fill text-white" style="font-size: 1.1rem;"></i>
+                    <button type="button" class="btn btn-sm btn-success text-white position-relative dropdown-toggle cart-dropdown-toggle navbar-quick-btn" title="{{ __('nav.cart') }}" data-bs-toggle="dropdown" aria-expanded="false" id="cartIconBtn" aria-label="{{ __('nav.cart') }}">
+                        <i class="bi bi-cart-fill text-white"></i>
                         @if($cartCount > 0)
-                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.7rem; padding: 0.25em 0.5em;">
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.65rem; padding: 0.2em 0.45em;">
                                 {{ $cartCount }}
                             </span>
                         @endif
                     </button>
-                    <ul class="dropdown-menu dropdown-menu-end cart-dropdown" aria-labelledby="cartIconBtn">
+                    <ul class="dropdown-menu dropdown-menu-end cart-dropdown @if(!empty($cartItems) && collect($cartItems)->pluck('meal.chef_id')->unique()->filter()->count() > 1) cart-dropdown--multi-chef @endif" aria-labelledby="cartIconBtn">
                         <li class="cart-dropdown-header">
-                            <i class="bi bi-cart"></i> Cart ({{ $cartCount }})
+                            <i class="bi bi-cart"></i> {{ __('nav.cart') }} ({{ $cartCount }})
                         </li>
                         @if(empty($cartItems))
                             <li class="cart-dropdown-empty">
                                 <i class="bi bi-cart-x" style="font-size: 2rem; display: block; margin-bottom: 0.5rem;"></i>
-                                Your cart is empty
+                                {{ __('nav.cart_empty') }}
                             </li>
                         @else
                             <li>
-                                <div class="cart-dropdown-body">
-                                    @foreach($cartItems as $item)
-                                        <div class="cart-dropdown-item">
-                                            <div class="cart-item-info">
-                                                <div class="cart-item-name">{{ $item['meal']->name }}</div>
-                                                @if($item['meal']->chef)
-                                                    <div class="cart-item-chef">{{ $item['meal']->chef->name }}</div>
-                                                @endif
-                                            </div>
-                                            <div class="cart-item-details">
-                                                <div class="cart-item-qty">Qty: {{ $item['quantity'] }}</div>
-                                                <div class="cart-item-total">TZS {{ number_format((float)$item['line_total'], 2) }}</div>
-                                            </div>
-                                            <form method="POST" action="{{ route('cart.remove', $item['meal']) }}" class="d-inline" onsubmit="return confirm('Remove this item from cart?');">
-                                                @csrf
-                                                <button class="btn btn-sm btn-outline-danger cart-item-remove" type="submit" title="Remove">
-                                                    <i class="bi bi-x"></i>
-                                                </button>
-                                            </form>
-                                        </div>
-                                    @endforeach
-                                </div>
+                                @include('cart.partials.dropdown-body')
                             </li>
                             <li class="cart-dropdown-footer">
                                 <div class="cart-subtotal">
-                                    <span class="cart-subtotal-label">Subtotal</span>
+                                    <span class="cart-subtotal-label">{{ __('nav.subtotal') }}</span>
                                     <span class="cart-subtotal-amount">TZS {{ number_format((float)$cartSubtotal, 2) }}</span>
                                 </div>
                                 <div class="cart-dropdown-actions">
                                     <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#cartModal" id="viewFullCartBtn">
-                                        <i class="bi bi-eye"></i> Show Full Cart
+                                        <i class="bi bi-eye"></i> {{ __('nav.show_full_cart') }}
                                     </button>
                                     @auth
-                                        <a href="{{ route('orders.checkout') }}" class="btn btn-sm btn-success">Checkout</a>
+                                        <a href="{{ route('orders.checkout') }}" class="btn btn-sm btn-success">{{ __('nav.checkout') }}</a>
                                     @else
-                                        <a href="{{ route('login') }}" class="btn btn-sm btn-success">Place Order</a>
+                                        <a href="{{ route('login') }}" class="btn btn-sm btn-success">{{ __('nav.place_order') }}</a>
                                     @endauth
                                 </div>
                             </li>
@@ -1320,16 +1664,35 @@
                     </ul>
                 </div>
                 @guest
-                    <a class="btn btn-sm btn-signin-white d-flex align-items-center gap-1" href="{{ route('login') }}" title="Sign in">
+                    <a class="btn btn-sm btn-signin-white navbar-quick-btn navbar-signin-btn" href="{{ route('login') }}" title="{{ __('nav.sign_in') }}">
                         <i class="bi bi-box-arrow-in-right"></i>
-                        <span class="d-none d-sm-inline">Sign In</span>
+                        <span class="navbar-signin-label">{{ __('nav.sign_in') }}</span>
                     </a>
                 @else
-                    <a class="btn btn-sm btn-outline-success d-flex align-items-center gap-1" href="{{ route('dashboard') }}" title="Dashboard">
+                    <a class="btn btn-sm btn-outline-success navbar-quick-btn navbar-signin-btn" href="{{ route('dashboard') }}" title="{{ __('nav.dashboard') }}">
                         <i class="bi bi-speedometer2"></i>
-                        <span class="d-none d-sm-inline">Dashboard</span>
+                        <span class="navbar-signin-label">{{ __('nav.dashboard') }}</span>
                     </a>
                 @endguest
+            </div>
+            <div class="d-lg-none w-100 mt-2 pt-2 border-top border-secondary border-opacity-25">
+                <div class="dropdown navbar-deliver-to">
+                    <button class="btn btn-sm btn-outline-light border-0 d-flex align-items-center gap-2 dropdown-toggle navbar-deliver-to-btn w-100 justify-content-start" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="{{ __('nav.deliver_to') }}" id="deliverToDropdownMobile">
+                        <i class="bi bi-geo-alt"></i>
+                        <span class="text-start navbar-deliver-to-text">
+                            <span class="d-block navbar-deliver-label small lh-1">{{ __('nav.deliver_to') }}</span>
+                            <span class="navbar-location-text">{{ __('nav.your_location') }}</span>
+                        </span>
+                    </button>
+                    <ul class="dropdown-menu w-100" aria-labelledby="deliverToDropdownMobile">
+                        <li class="px-3 py-2 small text-muted">{{ __('nav.your_location') }}</li>
+                        @auth
+                            <li><a class="dropdown-item" href="{{ route('locations.index') }}"><i class="bi bi-pencil me-2"></i>{{ __('nav.set_delivery_address') }}</a></li>
+                        @else
+                            <li><a class="dropdown-item" href="{{ route('login') }}"><i class="bi bi-box-arrow-in-right me-2"></i>{{ __('nav.sign_in_to_set_location') }}</a></li>
+                        @endauth
+                    </ul>
+                </div>
             </div>
         </div>
     </div>
@@ -1342,10 +1705,10 @@
     </div>
 @endif
 
-@if ($errors->any())
+@if ($errors->getBag('default')->any() && !request()->routeIs('login', 'login.2fa.show', 'password.request', 'password.reset'))
     <div class="alert alert-danger alert-dismissible fade show m-0">
         <ul class="mb-0">
-            @foreach ($errors->all() as $error)
+            @foreach ($errors->getBag('default')->all() as $error)
                 <li>{{ $error }}</li>
             @endforeach
         </ul>
@@ -1362,22 +1725,22 @@
     <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title headline-font" id="cartModalLabel"><i class="bi bi-cart-check me-2"></i>Full Cart</h5>
+                <h5 class="modal-title headline-font" id="cartModalLabel"><i class="bi bi-cart-check me-2"></i>{{ __('common.full_cart') }}</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 @if(empty($cartItems))
-                    <p class="text-muted mb-0">Your cart is empty.</p>
+                    <p class="text-muted mb-0">{{ __('nav.cart_empty') }}</p>
                 @else
                     <div class="table-responsive">
                         <table class="table align-middle mb-0">
                             <thead>
                                 <tr>
-                                    <th>Meal</th>
-                                    <th>Chef</th>
-                                    <th class="text-end">Price</th>
-                                    <th class="text-end">Qty</th>
-                                    <th class="text-end">Total</th>
+                                    <th>{{ __('common.meal') }}</th>
+                                    <th>{{ __('common.chef') }}</th>
+                                    <th class="text-end">{{ __('common.price') }}</th>
+                                    <th class="text-end">{{ __('nav.qty') }}</th>
+                                    <th class="text-end">{{ __('common.total') }}</th>
                                     <th class="text-end"></th>
                                 </tr>
                             </thead>
@@ -1392,7 +1755,7 @@
                                         <td class="text-end">
                                             <form method="POST" action="{{ route('cart.remove', $item['meal']) }}" class="d-inline">
                                                 @csrf
-                                                <button class="btn btn-sm btn-outline-danger" type="submit">Remove</button>
+                                                <button class="btn btn-sm btn-outline-danger" type="submit">{{ __('common.remove') }}</button>
                                             </form>
                                         </td>
                                     </tr>
@@ -1402,23 +1765,23 @@
                     </div>
                     <div class="d-flex justify-content-end mt-3 pt-3 border-top">
                         <div class="text-end">
-                            <div class="text-muted small">Subtotal</div>
+                            <div class="text-muted small">{{ __('nav.subtotal') }}</div>
                             <div class="h5 mb-0">TZS {{ number_format((float)$cartSubtotal, 2) }}</div>
                         </div>
                     </div>
                 @endif
             </div>
             <div class="modal-footer flex-wrap gap-2">
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Continue shopping</button>
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">{{ __('common.continue_shopping') }}</button>
                 @if(!empty($cartItems))
                     @auth
-                        <a href="{{ route('orders.checkout') }}" class="btn btn-success">Place order</a>
+                        <a href="{{ route('orders.checkout') }}" class="btn btn-success">{{ __('nav.place_order') }}</a>
                     @endauth
                 @endif
                 @guest
-                    <a href="{{ route('login') }}" class="btn cart-signin-material ms-auto" title="{{ !empty($cartItems) ? 'Place order' : 'Sign in' }}">
+                    <a href="{{ route('login') }}" class="btn cart-signin-material ms-auto" title="{{ !empty($cartItems) ? __('nav.place_order') : __('nav.sign_in') }}">
                         <i class="bi bi-box-arrow-in-right"></i>
-                        {{ !empty($cartItems) ? 'Place Order' : 'Sign In' }}
+                        {{ !empty($cartItems) ? __('nav.place_order') : __('nav.sign_in') }}
                     </a>
                 @endguest
             </div>
@@ -1427,25 +1790,45 @@
 </div>
 
 @unless(request()->routeIs('login'))
-<!-- Join Our Chef Community - separate card above footer -->
+@php
+    $communityPhone = $supportPhone ?? '+255 651 490 677';
+    $communityPhoneTel = preg_replace('/\D+/', '', $communityPhone);
+    $communityEmail = $supportEmail ?? config('contacts.support_email', 'support@onestopfood.co.tz');
+@endphp
+<!-- Join Our Chef & Traveler Community - single card above footer -->
 <section class="chef-community-card">
     <div class="container">
         <div class="chef-community-card-inner">
-            <div class="row align-items-center">
-                <div class="col-lg-8 mb-4 mb-lg-0">
-                    <h2 class="footer-chef-cta-title mb-2">Join Our Chef Community</h2>
-                    <p class="footer-chef-cta-tagline mb-2">Share Your Passion. Grow Your Business.</p>
-                    <p class="footer-chef-cta-desc mb-0">Join {{ $brand }}'s family of talented chefs in Dar es Salaam. Showcase your culinary expertise, reach thousands of food lovers, and build your brand with our support.</p>
+            <div class="row g-4 g-lg-0 align-items-stretch">
+                <div class="col-lg-6 partner-community-pane partner-community-pane-chef">
+                    <h2 class="footer-chef-cta-title mb-2">{{ __('community.chef_title') }}</h2>
+                    <p class="footer-chef-cta-tagline mb-2">{{ __('community.chef_tagline') }}</p>
+                    <p class="footer-chef-cta-desc mb-0">{{ __('community.chef_desc', ['brand' => $brand]) }}</p>
                     <ul class="footer-chef-cta-list list-unstyled mt-3 mb-0">
-                        <li><i class="bi bi-check-circle-fill text-success me-2"></i><strong>Showcase Your Skills</strong> — Create your profile, share your story, and feature your signature dishes</li>
-                        <li><i class="bi bi-check-circle-fill text-success me-2"></i><strong>Increase Your Revenue</strong> — Reach new customers and grow your income with our delivery platform</li>
-                        <li><i class="bi bi-check-circle-fill text-success me-2"></i><strong>Join a Supportive Community</strong> — Connect with fellow chefs and receive ongoing support from our team</li>
+                        <li><i class="bi bi-check-circle-fill text-success me-2"></i><strong>{{ __('community.chef_skill_title') }}</strong> — {{ __('community.chef_skill_desc') }}</li>
+                        <li><i class="bi bi-check-circle-fill text-success me-2"></i><strong>{{ __('community.chef_revenue_title') }}</strong> — {{ __('community.chef_revenue_desc') }}</li>
+                        <li><i class="bi bi-check-circle-fill text-success me-2"></i><strong>{{ __('community.chef_community_title') }}</strong> — {{ __('community.chef_community_desc') }}</li>
                     </ul>
                     <div class="footer-chef-cta-actions mt-4">
-                        <a href="{{ route('register') }}" class="btn btn-success me-2 mb-2">Become a Chef</a>
-                        <a href="{{ route('chefs.index') }}" class="btn btn-outline-light mb-2">Meet Our Chefs</a>
+                        <a href="{{ route('register', ['role' => 'chef']) }}" class="btn btn-success me-2 mb-2">{{ __('community.become_chef_btn') }}</a>
+                        <a href="{{ route('chefs.index') }}" class="btn btn-outline-light mb-2">{{ __('community.meet_chefs_btn') }}</a>
                     </div>
-                    <p class="footer-chef-cta-contact small mt-3 mb-0">Questions about becoming a chef? Email us at <a href="mailto:chefs@onestop.co.tz" class="text-decoration-none">chefs@onestop.co.tz</a> or call <a href="tel:+255784295277" class="text-decoration-none">+255 784 295 277</a></p>
+                    <p class="footer-chef-cta-contact small mt-3 mb-0">{!! __('community.chef_contact', ['email' => '<a href="mailto:'.$communityEmail.'" class="text-decoration-none">'.$communityEmail.'</a>', 'phone' => '<a href="tel:'.$communityPhoneTel.'" class="text-decoration-none">'.$communityPhone.'</a>']) !!}</p>
+                </div>
+                <div class="col-lg-6 partner-community-pane partner-community-pane-traveler">
+                    <hr class="partner-community-divider d-lg-none">
+                    <h2 class="footer-traveler-cta-title mb-2">{{ __('community.traveler_title') }}</h2>
+                    <p class="footer-traveler-cta-tagline mb-2">{{ __('community.traveler_tagline') }}</p>
+                    <p class="footer-traveler-cta-desc mb-0">{{ __('community.traveler_desc', ['brand' => $brand]) }}</p>
+                    <ul class="footer-traveler-cta-list list-unstyled mt-3 mb-0">
+                        <li><i class="bi bi-check-circle-fill me-2"></i><strong>{{ __('community.traveler_earnings_title') }}</strong> — {{ __('community.traveler_earnings_desc') }}</li>
+                        <li><i class="bi bi-check-circle-fill me-2"></i><strong>{{ __('community.traveler_assign_title') }}</strong> — {{ __('community.traveler_assign_desc') }}</li>
+                        <li><i class="bi bi-check-circle-fill me-2"></i><strong>{{ __('community.traveler_trust_title') }}</strong> — {{ __('community.traveler_trust_desc') }}</li>
+                    </ul>
+                    <div class="footer-traveler-cta-actions mt-4">
+                        <a href="{{ route('register', ['role' => 'traveler']) }}" class="btn btn-success me-2 mb-2">{{ __('community.become_traveler_btn') }}</a>
+                    </div>
+                    <p class="footer-traveler-cta-contact small mt-3 mb-0">{!! __('community.traveler_contact', ['email' => '<a href="mailto:'.$communityEmail.'" class="text-decoration-none">'.$communityEmail.'</a>', 'phone' => '<a href="tel:'.$communityPhoneTel.'" class="text-decoration-none">'.$communityPhone.'</a>']) !!}</p>
                 </div>
             </div>
         </div>
@@ -1465,56 +1848,57 @@
                         <img src="{{ asset('images/one stop food logo 01.jpeg') }}" alt="{{ $brand }}" class="footer-logo">
                     @endif
                 </div>
-                <p class="small text-white-50 mb-1">Food order &amp; delivery</p>
-                <p class="mb-0">Direct chef-to-customer platform: order restaurant-quality meals from verified chefs, delivered to your doorstep. Professional packaging, every time.</p>
+                <p class="small text-white-50 mb-1">{{ __('common.food_order_delivery') }}</p>
+                <p class="mb-0">{{ __('common.footer_desc') }}</p>
             </div>
             <div class="col-md-2 mb-4">
-                <h6 class="mb-3">Quick Links</h6>
+                <h6 class="mb-3">{{ __('common.quick_links') }}</h6>
                 <ul class="list-unstyled">
-                    <li><a href="{{ route('home') }}" class="text-white-50 text-decoration-none">Home</a></li>
-                    <li><a href="{{ route('chefs.index') }}" class="text-white-50 text-decoration-none">Our Chefs</a></li>
-                    <li><a href="{{ route('meals.index') }}" class="text-white-50 text-decoration-none">Menu</a></li>
-                    <li><a href="{{ route('stories.index') }}" class="text-white-50 text-decoration-none">Stories</a></li>
+                    <li><a href="{{ route('home') }}" class="text-white-50 text-decoration-none">{{ __('nav.home') }}</a></li>
+                    <li><a href="{{ route('chefs.index') }}" class="text-white-50 text-decoration-none">{{ __('nav.our_chefs') }}</a></li>
+                    <li><a href="{{ route('meals.index') }}" class="text-white-50 text-decoration-none">{{ __('nav.menu') }}</a></li>
+                    <li><a href="{{ route('stories.index') }}" class="text-white-50 text-decoration-none">{{ __('nav.stories') }}</a></li>
                 </ul>
             </div>
             <div class="col-md-2 mb-4">
-                <h6 class="mb-3">About</h6>
+                <h6 class="mb-3">{{ __('common.about') }}</h6>
                 <ul class="list-unstyled">
-                    <li><a href="#" class="text-white-50 text-decoration-none">About Us</a></li>
-                    <li><a href="https://wa.me/255626725383" class="text-white-50 text-decoration-none" target="_blank" rel="noopener">Contact (WhatsApp)</a></li>
-                    <li><a href="{{ route('register') }}" class="text-white-50 text-decoration-none">Become a Chef</a></li>
+                    <li><a href="#" class="text-white-50 text-decoration-none">{{ __('common.about_us') }}</a></li>
+                    <li><a href="https://wa.me/{{ $communityPhoneTel }}" class="text-white-50 text-decoration-none" target="_blank" rel="noopener">{{ __('common.contact_whatsapp') }}</a></li>
+                    <li><a href="{{ route('register', ['role' => 'chef']) }}" class="text-white-50 text-decoration-none">{{ __('nav.become_chef') }}</a></li>
+                    <li><a href="{{ route('register', ['role' => 'traveler']) }}" class="text-white-50 text-decoration-none">{{ __('common.become_traveler') }}</a></li>
                 </ul>
             </div>
             <div class="col-md-4 mb-4">
-                <h6 class="mb-3">Contact Info</h6>
-                <p class="text-white-50 mb-1"><i class="bi bi-telephone"></i> +255 626 725 383</p>
-                <p class="text-white-50 mb-1"><i class="bi bi-envelope"></i> hello@onestop.com</p>
-                <p class="text-white-50 mb-2"><i class="bi bi-geo-alt"></i> Dar es Salaam, Tanzania</p>
+                <h6 class="mb-3">{{ __('common.contact_help') }}</h6>
+                <p class="text-white-50 mb-1"><i class="bi bi-telephone"></i> {{ $supportPhone ?? '+255 651 490 677' }}</p>
+                <p class="text-white-50 mb-1">
+                    <i class="bi bi-envelope"></i>
+                    <a href="mailto:{{ $supportEmail ?? config('contacts.support_email') }}" class="text-white-50 text-decoration-none">{{ $supportEmail ?? config('contacts.support_email') }}</a>
+                    <span class="d-block small opacity-75">{{ __('common.assistance_help') }}</span>
+                </p>
+                <p class="text-white-50 mb-2 small">
+                    <i class="bi bi-envelope-check"></i>
+                    {{ $noreplyEmail ?? config('contacts.noreply_email') }}
+                    <span class="d-block opacity-75">{{ __('common.noreply_note') }}</span>
+                </p>
+                <p class="text-white-50 mb-2"><i class="bi bi-geo-alt"></i> {{ __('common.dar_es_salaam') }}</p>
             </div>
         </div>
         <hr class="bg-white-50">
         <div class="d-flex justify-content-between align-items-center text-white-50">
-            <p class="mb-0">&copy; {{ date('Y') }} {{ $brand }}. All rights reserved.</p>
+            <p class="mb-0">&copy; {{ date('Y') }} {{ $brand }}. {{ __('common.rights_reserved') }}</p>
             <div class="d-flex gap-3">
-                <a href="#" class="text-white-50 text-decoration-none">Privacy Policy</a>
-                <a href="#" class="text-white-50 text-decoration-none">Terms of Service</a>
-                <a href="#" class="text-white-50 text-decoration-none">Cookie Policy</a>
+                <a href="#" class="text-white-50 text-decoration-none">{{ __('common.privacy_policy') }}</a>
+                <a href="#" class="text-white-50 text-decoration-none">{{ __('common.terms_of_service') }}</a>
+                <a href="#" class="text-white-50 text-decoration-none">{{ __('common.cookie_policy') }}</a>
             </div>
         </div>
     </div>
 </footer>
 @endunless
 
-<!-- WhatsApp floating button (fixed bottom-right) -->
-@php
-    $waPhone = preg_replace('/\D+/', '', $supportPhone ?? '255626725383');
-    if (str_starts_with($waPhone, '0')) {
-        $waPhone = '255' . substr($waPhone, 1);
-    }
-@endphp
-<a href="https://wa.me/{{ $waPhone }}?text={{ urlencode('Hi ' . $brand . ', I\'d like help with my order.') }}" target="_blank" rel="noopener" class="whatsapp-fab" title="Chat on WhatsApp" aria-label="Chat on WhatsApp">
-    <i class="bi bi-whatsapp"></i>
-</a>
+@include('partials.floating-actions', ['brand' => $brand, 'supportPhone' => $supportPhone ?? null])
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 @php
@@ -1621,68 +2005,69 @@
 </script>
 <script>
     // Theme toggle functionality
-    const themeToggle = document.getElementById('themeToggle');
-    const themeIcon = document.getElementById('themeIcon');
-    const html = document.documentElement;
-    
-    // Check for saved theme preference or default to light mode
-    const currentTheme = localStorage.getItem('theme') || 'light';
-    if (currentTheme === 'dark') {
-        html.setAttribute('data-bs-theme', 'dark');
-        themeIcon.classList.remove('bi-moon-stars');
-        themeIcon.classList.add('bi-sun');
-    }
-    
-    themeToggle.addEventListener('click', function() {
-        const currentTheme = html.getAttribute('data-bs-theme');
-        if (currentTheme === 'dark') {
-            html.setAttribute('data-bs-theme', 'light');
-            themeIcon.classList.remove('bi-sun');
-            themeIcon.classList.add('bi-moon-stars');
-            localStorage.setItem('theme', 'light');
-        } else {
-            html.setAttribute('data-bs-theme', 'dark');
-            themeIcon.classList.remove('bi-moon-stars');
-            themeIcon.classList.add('bi-sun');
-            localStorage.setItem('theme', 'dark');
+    (function () {
+        const html = document.documentElement;
+        const toggles = [
+            document.getElementById('themeToggle'),
+            document.getElementById('themeToggleMobile'),
+        ].filter(Boolean);
+
+        function syncThemeIcons(isDark) {
+            document.querySelectorAll('#themeIcon, #themeIconMobile').forEach(function (icon) {
+                icon.classList.toggle('bi-sun', isDark);
+                icon.classList.toggle('bi-moon-stars', ! isDark);
+            });
         }
-    });
+
+        function setTheme(theme) {
+            html.setAttribute('data-bs-theme', theme);
+            syncThemeIcons(theme === 'dark');
+            localStorage.setItem('theme', theme);
+        }
+
+        if (localStorage.getItem('theme') === 'dark') {
+            setTheme('dark');
+        }
+
+        toggles.forEach(function (toggle) {
+            toggle.addEventListener('click', function () {
+                setTheme(html.getAttribute('data-bs-theme') === 'dark' ? 'light' : 'dark');
+            });
+        });
+    })();
 </script>
 <script>
     // Cart dropdown functionality
     (function() {
-        const cartDropdown = document.querySelector('.cart-dropdown');
-        const cartToggle = document.getElementById('cartIconBtn');
         const cartModal = document.getElementById('cartModal');
-        
-        if (cartDropdown && cartToggle) {
-            const dropdown = new bootstrap.Dropdown(cartToggle);
-            
-            // Handle "Show Full Cart" button - opens modal popup
-            const viewFullCartBtn = document.getElementById('viewFullCartBtn');
+        const cartToggles = ['cartIconBtn', 'cartIconBtnMobile']
+            .map(function (id) { return document.getElementById(id); })
+            .filter(Boolean);
+
+        cartToggles.forEach(function (cartToggle) {
+            const dropdown = bootstrap.Dropdown.getOrCreateInstance(cartToggle);
+            const menu = cartToggle.nextElementSibling;
+
+            const viewFullCartBtn = menu ? menu.querySelector('[data-bs-target="#cartModal"]') : null;
             if (viewFullCartBtn && cartModal) {
                 viewFullCartBtn.addEventListener('click', function(e) {
                     e.preventDefault();
                     e.stopPropagation();
-                    // Close dropdown first
                     dropdown.hide();
-                    // Open modal after a small delay to ensure smooth transition
                     setTimeout(function() {
-                        const modal = new bootstrap.Modal(cartModal);
-                        modal.show();
+                        bootstrap.Modal.getOrCreateInstance(cartModal).show();
                     }, 150);
                 });
             }
-            
-            // Close dropdown when clicking checkout/sign in buttons
-            const actionButtons = cartDropdown.querySelectorAll('.cart-dropdown-actions a');
-            actionButtons.forEach(btn => {
-                btn.addEventListener('click', function() {
-                    dropdown.hide();
-                });
-            });
-        }
 
+            if (menu) {
+                menu.querySelectorAll('.cart-dropdown-actions a').forEach(function (btn) {
+                    btn.addEventListener('click', function () {
+                        dropdown.hide();
+                    });
+                });
+            }
+        });
     })();
 </script>
 @stack('scripts')

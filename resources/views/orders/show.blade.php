@@ -4,14 +4,21 @@
 <div class="page-header d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
     <div>
         <h2>Order #{{ $order->id }}</h2>
-        <p class="text-muted mb-0">Order details and status</p>
+        <p class="text-muted mb-0">
+            @if($order->chef)
+                Chef: {{ $order->chef->name }}
+            @endif
+            @if($order->checkout_batch_id && isset($batchOrders) && $batchOrders->count() > 1)
+                · Part of a {{ $batchOrders->count() }}-chef checkout
+            @endif
+        </p>
     </div>
     <div class="d-flex flex-wrap gap-2">
         @if($order->invoice)
             <a class="btn btn-success" href="{{ route('invoices.show', $order->invoice) }}">
                 <i class="bi bi-receipt"></i> View invoice
             </a>
-        @elseif($order->payment)
+        @elseif($order->effectivePayment())
             <a class="btn btn-success" href="{{ route('orders.invoice', $order) }}">
                 <i class="bi bi-receipt"></i> View invoice
             </a>
@@ -21,6 +28,16 @@
         </a>
     </div>
 </div>
+
+@if($order->checkout_batch_id && isset($batchOrders) && $batchOrders->count() > 1)
+    <div class="alert alert-info mb-4">
+        <i class="bi bi-diagram-3 me-2"></i>
+        This order is one of <strong>{{ $batchOrders->count() }} separate orders</strong> from the same checkout:
+        @foreach($batchOrders as $batchOrder)
+            <a href="{{ route('orders.show', $batchOrder) }}" class="badge {{ $batchOrder->id === $order->id ? 'bg-success' : 'bg-secondary' }} text-decoration-none me-1">#{{ $batchOrder->id }} ({{ $batchOrder->chef?->name }})</a>
+        @endforeach
+    </div>
+@endif
 
 <div class="row g-4">
     <div class="col-md-7">
@@ -94,16 +111,7 @@
                 <h5 class="card-title mb-0">Payment</h5>
             </div>
             <div class="card-body">
-                <div class="mb-2">
-                    <span class="text-muted">Method:</span>
-                    <strong class="ms-2">{{ ucfirst($order->payment?->method ?? 'N/A') }}</strong>
-                </div>
-                <div>
-                    <span class="text-muted">Status:</span>
-                    <span class="badge bg-{{ $order->payment?->status === 'paid' ? 'success' : ($order->payment?->status === 'pending' ? 'warning' : ($order->payment?->status === 'failed' ? 'danger' : 'secondary')) }} ms-2">
-                        {{ ucfirst($order->payment?->status ?? 'N/A') }}
-                    </span>
-                </div>
+                @include('orders.partials.payment-status', ['order' => $order])
                 @include('orders.partials.mobile-money-pay')
             </div>
         </div>

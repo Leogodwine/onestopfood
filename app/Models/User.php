@@ -26,6 +26,7 @@ class User extends Authenticatable
         'role',
         'is_super_admin',
         'status',
+        'locale',
         'approved_at',
         'failed_login_attempts',
         'last_login_at',
@@ -35,6 +36,9 @@ class User extends Authenticatable
         'two_factor_enabled',
         'two_factor_code',
         'two_factor_expires_at',
+        'signup_otp_code',
+        'signup_otp_expires_at',
+        'signup_otp_channel',
     ];
 
     /**
@@ -56,12 +60,14 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
+            'phone_verified_at' => 'datetime',
             'password' => 'hashed',
             'approved_at' => 'datetime',
             'is_super_admin' => 'boolean',
             'two_factor_enabled' => 'boolean',
             'last_login_at' => 'datetime',
             'two_factor_expires_at' => 'datetime',
+            'signup_otp_expires_at' => 'datetime',
         ];
     }
 
@@ -118,6 +124,16 @@ class User extends Authenticatable
     public function verificationDocuments()
     {
         return $this->hasMany(UserVerificationDocument::class);
+    }
+
+    public function socialAccounts()
+    {
+        return $this->hasMany(SocialAccount::class);
+    }
+
+    public function isSocialOnlyUser(): bool
+    {
+        return $this->socialAccounts()->exists() && empty($this->password);
     }
 
     public function reviewsReceived()

@@ -6,13 +6,6 @@
     <p class="text-muted">Please complete all required sections to verify your traveler (delivery) account.</p>
 </div>
 
-    @if(session('status'))
-        <div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
-            <i class="bi bi-check-circle-fill me-2"></i> {{ session('status') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    @endif
-
     <!-- Profile Completion Progress Bar -->
     <div class="card shadow-sm border-0 p-3 mb-4">
         <div class="d-flex justify-content-between align-items-center mb-2">
@@ -117,7 +110,7 @@
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Live Selfie Photo</label>
-                                <input type="file" name="selfie" class="form-control">
+                                @include('profile.partials.selfie-capture', ['profile' => $profile])
                             </div>
                             <hr class="my-4">
                             <h6 class="fw-bold mb-2">Emergency Contact</h6>
@@ -157,13 +150,7 @@
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
-                            <div class="col-md-6">
-                                <label class="form-label">City/District</label>
-                                <select name="city_district" class="form-select" required>
-                                    <option value="Dar es Salaam" @selected(old('city_district', $profile->city_district) === 'Dar es Salaam')>Dar es Salaam</option>
-                                    <option value="Arusha" @selected(old('city_district', $profile->city_district) === 'Arusha')>Arusha</option>
-                                </select>
-                            </div>
+                            @include('profile.partials.city-district-select', ['profile' => $profile])
                             <div class="col-md-6">
                                 <label class="form-label">Ward/Neighborhood</label>
                                 <input type="text" name="ward_neighborhood" class="form-control" value="{{ old('ward_neighborhood', $profile->ward_neighborhood) }}" required>

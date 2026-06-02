@@ -64,12 +64,12 @@ class MobileMoneyPaymentController extends Controller
             abort(403);
         }
 
-        $payment = $order->payment;
+        $payment = $order->effectivePayment();
         if (! $payment || ! $this->dispatcher->supports($payment->method)) {
             return back()->withErrors(['phone' => 'This order does not use a supported mobile money method.']);
         }
 
-        if ($payment->status === 'paid') {
+        if ($payment->isPaid()) {
             return back()->with('status', 'This order is already paid.');
         }
 

@@ -99,6 +99,37 @@
                 </table>
             </div>
         </div>
+
+        @if(!empty($invoice))
+            <div class="dashboard-card mt-4">
+                <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+                    <h5 class="card-title mb-0"><i class="bi bi-file-earmark-text"></i> Invoice</h5>
+                    <div class="d-flex flex-wrap gap-2">
+                        <a class="btn btn-sm btn-outline-primary" href="{{ route('invoices.show', $invoice) }}">
+                            <i class="bi bi-eye"></i> Full view
+                        </a>
+                        <a class="btn btn-sm btn-outline-primary" href="{{ route('invoices.print', $invoice) }}" target="_blank">
+                            <i class="bi bi-printer"></i> Print
+                        </a>
+                        <a class="btn btn-sm btn-outline-secondary" href="{{ route('invoices.download', $invoice) }}">
+                            <i class="bi bi-download"></i> Download PDF
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    @include('invoices.partials.admin-preview', ['invoice' => $invoice, 'order' => $order])
+                </div>
+            </div>
+        @else
+            <div class="dashboard-card mt-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0"><i class="bi bi-file-earmark-text"></i> Invoice</h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted mb-0">No invoice available for this order yet.</p>
+                </div>
+            </div>
+        @endif
     </div>
 
     <div class="col-md-4">
@@ -144,16 +175,49 @@
 
             <hr>
 
+            @if($nearbyTravelers->isNotEmpty())
+                <div class="mb-3">
+                    <label class="form-label small text-muted">Nearby online travelers (order qty: {{ $orderQuantity }})</label>
+                    <ul class="list-group list-group-flush small mb-2">
+                        @foreach($nearbyTravelers as $item)
+                            @php $t = $item->user; @endphp
+                            <li class="list-group-item px-0 d-flex justify-content-between align-items-start">
+                                <div>
+                                    <strong>{{ $t->name }}</strong>
+                                    @if($item->recommended)
+                                        <span class="badge bg-success ms-1">Best</span>
+                                    @endif
+                                    <div class="text-muted">
+                                        {{ ucfirst($item->vehicle_type ?? 'vehicle') }} · cap {{ $item->vehicle_capacity }}
+                                        · {{ $item->location_source === 'gps' ? 'GPS' : 'Address' }}
+                                    </div>
+                                    @if($item->combined_km !== null)
+                                        <div class="text-muted">{{ number_format($item->combined_km, 1) }} km total route</div>
+                                    @endif
+                                </div>
+                                <form method="POST" action="{{ route('admin.orders.reassign-traveler', $order) }}">
+                                    @csrf
+                                    <input type="hidden" name="traveler_id" value="{{ $t->id }}">
+                                    <button type="submit" class="btn btn-sm btn-outline-success">Assign</button>
+                                </form>
+                            </li>
+                        @endforeach
+                    </ul>
+                </div>
+            @else
+                <p class="small text-muted">No nearby online travelers match this order (distance, vehicle capacity, or availability).</p>
+            @endif
+
             <div>
                 <form method="POST" action="{{ route('admin.orders.reassign-traveler', $order) }}">
                     @csrf
                     <div class="mb-2">
-                        <label class="form-label small text-muted">Reassign Traveler</label>
+                        <label class="form-label small text-muted">Reassign Traveler (manual)</label>
                         <select name="traveler_id" class="form-select form-select-sm" required>
                             <option value="">Select traveler</option>
                             @foreach($availableTravelers as $traveler)
                                 <option value="{{ $traveler->id }}" @selected($order->delivery && $order->delivery->traveler_id === $traveler->id)>
-                                    {{ $traveler->name }} ({{ $traveler->email }})
+                                    {{ $traveler->name }}@if($traveler->travelerProfile?->vehicle_type) · {{ ucfirst($traveler->travelerProfile->vehicle_type) }}@endif
                                 </option>
                             @endforeach
                         </select>

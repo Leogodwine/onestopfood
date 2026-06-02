@@ -3,7 +3,7 @@
 @section('content')
 <div class="page-header">
     <h2>Chef & Traveler Verification</h2>
-    <p class="text-muted mb-0">Review and approve verification documents for partners</p>
+    <p class="text-muted mb-0">Review documents, certificates, and images submitted during partner verification</p>
 </div>
 
 <div class="row g-4 mb-4">
@@ -53,7 +53,7 @@
         </div>
         <div class="col-md-3">
             <label class="form-label small text-muted">Type</label>
-            <input type="text" name="type" value="{{ $type }}" class="form-control" placeholder="e.g. nida, license">
+            <input type="text" name="type" value="{{ $type }}" class="form-control" placeholder="e.g. selfie, license">
         </div>
         <div class="col-md-3 d-flex gap-2 align-items-end">
             <button type="submit" class="btn btn-primary flex-grow-1">
@@ -78,7 +78,8 @@
                 <tr>
                     <th>User</th>
                     <th>Role</th>
-                    <th>Type</th>
+                    <th>Document</th>
+                    <th>Preview</th>
                     <th>Document No</th>
                     <th>Status</th>
                     <th>Expires</th>
@@ -90,13 +91,30 @@
                 @forelse($documents as $doc)
                     <tr>
                         <td>
-                            <div class="fw-semibold">{{ $doc->user->name }}</div>
-                            <small class="text-muted">{{ $doc->user->email }}</small>
+                            <a href="{{ route('admin.users.show', $doc->user) }}" class="fw-semibold text-decoration-none">
+                                {{ $doc->user->name }}
+                            </a>
+                            <small class="text-muted d-block">{{ $doc->user->email }}</small>
                         </td>
                         <td>
                             <span class="badge badge-primary text-capitalize">{{ $doc->user->role }}</span>
                         </td>
-                        <td>{{ ucfirst(str_replace('_', ' ', $doc->type)) }}</td>
+                        <td>{{ \App\Services\VerificationDocumentSync::typeLabel($doc->type) }}</td>
+                        <td>
+                            @if($doc->file_path)
+                                @if($doc->isImage())
+                                    <a href="{{ $doc->publicUrl() }}" target="_blank" rel="noopener">
+                                        <img src="{{ $doc->publicUrl() }}" alt="{{ $doc->type }}" class="rounded border" style="width: 72px; height: 72px; object-fit: cover;">
+                                    </a>
+                                @else
+                                    <a href="{{ $doc->publicUrl() }}" target="_blank" rel="noopener" class="btn btn-sm btn-outline-info">
+                                        <i class="bi bi-file-earmark-arrow-down"></i> View file
+                                    </a>
+                                @endif
+                            @else
+                                <span class="text-muted small">No file</span>
+                            @endif
+                        </td>
                         <td>{{ $doc->document_no ?? 'N/A' }}</td>
                         <td>
                             <span class="badge badge-{{ $doc->status === 'approved' ? 'success' : ($doc->status === 'pending' ? 'warning' : 'danger') }}">
@@ -116,28 +134,32 @@
                                 <span class="text-muted small">N/A</span>
                             @endif
                         </td>
-                        <td>{{ $doc->created_at->format('M d, Y') }}</td>
+                        <td>{{ $doc->created_at->format('M d, Y H:i') }}</td>
                         <td>
-                            <div class="d-flex flex-column gap-1">
-                                <form method="POST" action="{{ route('admin.verifications.approve', $doc) }}">
-                                    @csrf
-                                    <button type="submit" class="btn btn-sm btn-success w-100">
-                                        <i class="bi bi-check-circle"></i> Approve
-                                    </button>
-                                </form>
-                                <form method="POST" action="{{ route('admin.verifications.reject', $doc) }}">
-                                    @csrf
-                                    <button type="submit" class="btn btn-sm btn-danger w-100">
-                                        <i class="bi bi-x-circle"></i> Reject
-                                    </button>
-                                </form>
-                            </div>
+                            @if($doc->status === 'pending')
+                                <div class="d-flex flex-column gap-1">
+                                    <form method="POST" action="{{ route('admin.verifications.approve', $doc) }}">
+                                        @csrf
+                                        <button type="submit" class="btn btn-sm btn-success w-100">
+                                            <i class="bi bi-check-circle"></i> Approve
+                                        </button>
+                                    </form>
+                                    <form method="POST" action="{{ route('admin.verifications.reject', $doc) }}">
+                                        @csrf
+                                        <button type="submit" class="btn btn-sm btn-danger w-100">
+                                            <i class="bi bi-x-circle"></i> Reject
+                                        </button>
+                                    </form>
+                                </div>
+                            @else
+                                <span class="text-muted small">Reviewed</span>
+                            @endif
                         </td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="8" class="text-center text-muted py-4">
-                            No verification documents found.
+                        <td colspan="9" class="text-center text-muted py-4">
+                            No verification documents found. Documents appear here after chefs or travelers complete the verification form.
                         </td>
                     </tr>
                 @endforelse
@@ -149,4 +171,3 @@
     </div>
 </div>
 @endsection
-

@@ -2,7 +2,7 @@
 
 @section('content')
 <!-- Page Header -->
-<div class="container-fluid bg-light py-4 mb-4">
+<div class="container-fluid bg-body-tertiary py-4 mb-4">
     <div class="container">
         <div class="text-center px-4">
             <h2 class="mb-1 headline-font">Meet Our Expert Chefs</h2>
@@ -207,7 +207,7 @@
                             @endif
                         </div>
                     </div>
-                    <div class="card-footer bg-light border-top pt-3 pb-3">
+                    <div class="card-footer bg-body-tertiary border-top pt-3 pb-3">
                         <a href="{{ route('chefs.show', $chef) }}" class="btn btn-success w-100 rounded-3">
                             <i class="bi bi-eye me-2"></i>View Kitchen
                         </a>

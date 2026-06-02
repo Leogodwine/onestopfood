@@ -6,6 +6,13 @@
     <p>Review and manage all users on the platform</p>
 </div>
 
+@if($errors->has('bulk_action'))
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <strong>Action blocked:</strong> {{ $errors->first('bulk_action') }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+@endif
+
 <!-- Filters & Search -->
 <div class="dashboard-card mb-4">
     <form method="GET" action="{{ route('admin.users.index') }}" class="row g-3 align-items-end">
@@ -290,20 +297,24 @@
         <div class="mt-3 d-flex flex-wrap gap-2 align-items-end">
             <div style="min-width: 220px;">
                 <label class="form-label small text-muted">Bulk action</label>
-                <select name="action" class="form-select form-select-sm" required>
+                <select name="action" id="bulk_action_select" class="form-select form-select-sm" required>
                     <option value="">Select action</option>
                     <option value="approve">Approve (chefs/travelers)</option>
-                    <option value="suspend">Suspend</option>
-                    <option value="activate">Activate</option>
-                    <option value="delete">Delete (non-admins only)</option>
+                    <option value="suspend">Suspend account</option>
+                    <option value="block">Block account (suspend)</option>
+                    <option value="activate">Activate account</option>
+                    <option value="delete">Delete permanently (no linked records only)</option>
                 </select>
+                <small class="text-muted d-block mt-1">
+                    Prefer <strong>Suspend/Block</strong> to keep orders, payments, and complaints. Delete only removes accounts with no linked data.
+                </small>
             </div>
             <div class="flex-grow-1">
                 <label class="form-label small text-muted">Reason (for audit trail)</label>
                 <input type="text" name="reason" class="form-control form-control-sm" placeholder="Optional reason for this action">
             </div>
             <div>
-                <button type="submit" class="btn btn-sm btn-success">
+                <button type="submit" class="btn btn-sm btn-success" id="bulk_apply_btn">
                     <i class="bi bi-check2-circle"></i> Apply to selected
                 </button>
             </div>
@@ -318,6 +329,35 @@ document.getElementById('select_all_users')?.addEventListener('change', function
     document.querySelectorAll('.user-checkbox').forEach(function (cb) {
         cb.checked = checked;
     });
+});
+
+document.querySelector('form[action="{{ route('admin.users.bulk') }}"]')?.addEventListener('submit', function (e) {
+    const action = document.getElementById('bulk_action_select')?.value;
+    const checked = document.querySelectorAll('.user-checkbox:checked').length;
+
+    if (!checked) {
+        e.preventDefault();
+        alert('Please select at least one user.');
+        return;
+    }
+
+    if (action === 'delete') {
+        const ok = confirm(
+            'Permanent delete is only allowed for accounts with NO orders, deliveries, reviews, disputes, or meals in orders.\n\n'
+            + 'Accounts with linked records will be skipped — use Suspend/Block instead.\n\n'
+            + 'Continue?'
+        );
+        if (!ok) {
+            e.preventDefault();
+        }
+    }
+
+    if (action === 'suspend' || action === 'block') {
+        const ok = confirm('Suspend/block the selected account(s)? They cannot sign in, but all records are kept.');
+        if (!ok) {
+            e.preventDefault();
+        }
+    }
 });
 </script>
 @endpush

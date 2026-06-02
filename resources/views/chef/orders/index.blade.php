@@ -40,6 +40,7 @@
                     <th>Items</th>
                     <th class="text-end">Total</th>
                     <th>Status</th>
+                    <th>Payment</th>
                     <th>Date</th>
                     <th>Action</th>
                 </tr>
@@ -48,12 +49,20 @@
                 @forelse($orders as $order)
                     @php
                         $portion = $order->orderChefs->firstWhere('chef_id', auth()->id());
-                        $myItems = $portion ? $order->items->filter(fn($i) => $i->meal && (int)$i->meal->chef_id === (int)auth()->id()) : $order->items;
-                        $rowSubtotal = $portion ? (float)$portion->subtotal : (float)$order->subtotal;
+                        $myItems = $portion
+                            ? $order->items->filter(fn ($i) => $i->meal && (int) $i->meal->chef_id === (int) auth()->id())
+                            : $order->items;
+                        $rowSubtotal = $portion ? (float) $portion->subtotal : (float) $order->subtotal;
                         $rowStatus = $portion ? $portion->status : $order->status;
+                        $orderPayment = $order->effectivePayment();
                     @endphp
                     <tr>
-                        <td><strong>#{{ $order->id }}</strong></td>
+                        <td>
+                            <strong>#{{ $order->id }}</strong>
+                            @if($order->checkout_batch_id)
+                                <span class="badge bg-light text-dark border ms-1" title="Separate order from multi-chef checkout">Split</span>
+                            @endif
+                        </td>
                         <td>{{ $order->customer->name }}</td>
                         <td>{{ $myItems->count() }} item(s) @if($portion)<span class="text-muted small">(your portion)</span>@endif</td>
                         <td class="text-end">TZS {{ number_format($rowSubtotal, 2) }}</td>
@@ -72,6 +81,15 @@
                                 {{ ucfirst(str_replace('_', ' ', $rowStatus)) }}
                             </span>
                         </td>
+                        <td>
+                            @if($orderPayment)
+                                <span class="badge bg-{{ $orderPayment->statusBadgeClass() }}" title="{{ $orderPayment->methodLabel() }}">
+                                    {{ $orderPayment->statusLabel() }}
+                                </span>
+                            @else
+                                <span class="text-muted small">—</span>
+                            @endif
+                        </td>
                         <td>{{ $order->created_at->format('M d, Y') }}</td>
                         <td>
                             <a class="btn btn-sm btn-outline-primary" href="{{ route('chef.orders.show', $order) }}">
@@ -81,7 +99,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="7" class="text-center text-muted">No orders yet</td>
+                        <td colspan="8" class="text-center text-muted">No orders yet</td>
                     </tr>
                 @endforelse
             </tbody>

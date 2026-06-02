@@ -1,0 +1,27 @@
+<?php
+
+return [
+    'sign_in' => 'Sign in',
+    'back_to_sign_in' => 'Back to sign in',
+    'sign_in_here' => 'Sign in here!',
+    'sign_in_page' => 'sign-in page',
+    'last_sign_in' => 'Last sign in',
+    'failed_sign_in_attempts' => 'Your account has been locked due to multiple failed sign-in attempts. Please contact a super admin.',
+    'social_only_password_reset' => 'This account uses Google or Facebook sign-in and does not have a password. Please use the social sign-in buttons on the sign-in page.',
+    'password_hint' => 'Use at least 8 characters with uppercase (A–Z), lowercase (a–z), numbers, and symbols (e.g. ! @ # $).',
+    'password_weak_help' => 'The password is too weak. Use at least 8 characters with uppercase and lowercase letters, numbers, and symbols (e.g. ! @ # $).',
+    'password_confirmed' => 'Passwords do not match.',
+    'name_required' => 'Please enter your name.',
+    'email_required' => 'Please enter your email address.',
+    'phone_required' => 'Please enter your phone number.',
+    'role_required' => 'Please select a role.',
+    'password_label' => 'Password',
+    'password_confirm_label' => 'Confirm password',
+    'password_placeholder' => 'Strong password',
+    'password_confirm_placeholder' => 'Repeat password',
+    'show_password' => 'Show password',
+    'hide_password' => 'Hide password',
+    'generate_password' => 'Generate strong password',
+    'password_own_or_generate' => 'Create your own password, or generate a strong one.',
+    'password_generated' => 'Strong password filled in — you can edit it if you like.',
+];

@@ -20,7 +20,7 @@
                     </div>
                     <div class="login-portal-links">
                         <a href="{{ route('login') }}" class="login-portal-link login-portal-back-home">
-                            <i class="bi bi-arrow-left"></i> Back to Login
+                            <i class="bi bi-arrow-left"></i> {{ __('auth.back_to_sign_in') }}
                         </a>
                     </div>
                 </div>
@@ -62,7 +62,7 @@
                     </form>
 
                     <p class="login-portal-register text-center mt-4 mb-0">
-                        Remembered your password? <a href="{{ route('login') }}" class="fw-semibold">Sign in here!</a>
+                        Remembered your password? <a href="{{ route('login') }}" class="fw-semibold">{{ __('auth.sign_in_here') }}</a>
                     </p>
                 </div>
             </div>

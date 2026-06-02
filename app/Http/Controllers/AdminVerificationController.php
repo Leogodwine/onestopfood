@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Models\UserVerificationDocument;
 use App\Models\AdminAction;
+use App\Services\VerificationDocumentSync;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -12,6 +13,8 @@ class AdminVerificationController extends Controller
 {
     public function index(Request $request)
     {
+        VerificationDocumentSync::backfillFromProfiles();
+
         $status = (string) $request->query('status', 'pending');
         $role = (string) $request->query('role', '');
         $type = (string) $request->query('type', '');
@@ -128,7 +131,7 @@ class AdminVerificationController extends Controller
                     'type' => $document->type,
                     'status' => $document->status,
                 ],
-                'ip_address' => $request->ip() ?? null,
+                'ip_address' => request()->ip(),
             ]);
         } catch (\Throwable $e) {
             // Do not break main flow if logging fails

@@ -1,0 +1,27 @@
+<?php
+
+return [
+    'chef_title' => 'Join the Chef Community',
+    'chef_tagline' => 'Share your passion. Grow your business.',
+    'chef_desc' => 'Join the :brand family of talented chefs in Dar es Salaam. Showcase your culinary skills, reach thousands of food enthusiasts, and build your brand with our help.',
+    'chef_skill_title' => 'Show Off Your Skills',
+    'chef_skill_desc' => 'Create your profile, share your story, and showcase your specialty foods',
+    'chef_revenue_title' => 'Increase Your Revenue',
+    'chef_revenue_desc' => 'Reach new customers and increase your revenue through our delivery platform',
+    'chef_community_title' => 'Join a Supportive Community',
+    'chef_community_desc' => 'Connect with fellow chefs and get continuous support from our team',
+    'become_chef_btn' => 'Become a Chef',
+    'meet_chefs_btn' => 'Meet Our Chefs',
+    'chef_contact' => 'Questions about being a chef? Email :email or call :phone',
+    'traveler_title' => 'Become a Traveler / Dropper',
+    'traveler_tagline' => 'Deliver Food. Earn Income on Your Schedule.',
+    'traveler_desc' => 'Join the :brand delivery team in Dar es Salaam. Take orders from certified chefs and deliver them to customers—flexible hours, fair income, and full platform support.',
+    'traveler_earnings_title' => 'Easy Revenue',
+    'traveler_earnings_desc' => 'Go online when you want and get a local delivery',
+    'traveler_assign_title' => 'Intelligent Assignment',
+    'traveler_assign_desc' => 'Sorted by distance, vehicle type, and order size in the best possible way',
+    'traveler_trust_title' => 'Reliable Platform',
+    'traveler_trust_desc' => 'Proven chefs, clear delivery steps, and support from our team',
+    'become_traveler_btn' => 'Become a Traveler / Dropper',
+    'traveler_contact' => 'Questions about becoming a traveler or dropper? Email :email or call :phone',
+];

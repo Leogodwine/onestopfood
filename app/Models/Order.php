@@ -11,6 +11,7 @@ class Order extends Model
     protected $fillable = [
         'customer_id',
         'chef_id',
+        'checkout_batch_id',
         'status',
         'special_instructions',
         'subtotal',
@@ -45,6 +46,31 @@ class Order extends Model
         return $this->hasOne(Payment::class);
     }
 
+    /** Shared payment when multiple orders were placed in one checkout. */
+    public function sharedPayment()
+    {
+        return $this->hasOne(Payment::class, 'checkout_batch_id', 'checkout_batch_id');
+    }
+
+    public function effectivePayment(): ?Payment
+    {
+        if ($this->checkout_batch_id) {
+            if ($this->relationLoaded('sharedPayment')) {
+                return $this->sharedPayment;
+            }
+
+            return Payment::query()
+                ->where('checkout_batch_id', $this->checkout_batch_id)
+                ->first();
+        }
+
+        if ($this->relationLoaded('payment')) {
+            return $this->payment;
+        }
+
+        return $this->payment()->first();
+    }
+
     public function invoice()
     {
         return $this->hasOne(Invoice::class);
@@ -63,6 +89,27 @@ class Order extends Model
     public function orderChefs()
     {
         return $this->hasMany(OrderChef::class);
+    }
+
+    /** Other orders placed in the same checkout (multi-chef). */
+    public function batchOrders()
+    {
+        if (! $this->checkout_batch_id) {
+            return collect([$this]);
+        }
+
+        return static::query()
+            ->where('checkout_batch_id', $this->checkout_batch_id)
+            ->orderBy('id')
+            ->get();
+    }
+
+    public function scopeForChef($query, int $chefId)
+    {
+        return $query->where(function ($q) use ($chefId) {
+            $q->where('chef_id', $chefId)
+                ->orWhereHas('orderChefs', fn ($oc) => $oc->where('chef_id', $chefId));
+        });
     }
 
     /** Order items that belong to a given chef (for multi-chef orders) */

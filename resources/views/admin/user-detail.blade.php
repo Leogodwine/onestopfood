@@ -63,7 +63,7 @@
                         </tr>
                         @if($user->last_login_at)
                             <tr>
-                                <td class="fw-semibold">Last Login:</td>
+                                <td class="fw-semibold">{{ __('auth.last_sign_in') }}:</td>
                                 <td>
                                     {{ $user->last_login_at->format('F d, Y h:i A') }}
                                     @if($user->last_login_ip)

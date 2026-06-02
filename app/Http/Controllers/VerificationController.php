@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 use App\Models\ChefProfile;
 use App\Models\TravelerProfile;
+use App\Services\VerificationDocumentSync;
 
 class VerificationController extends Controller
 {
@@ -52,18 +53,19 @@ class VerificationController extends Controller
             'selfie' => ['nullable', 'image', 'max:10240'],
             'emergency_contact_phone' => ['nullable', 'string', 'max:30'],
             'street_address' => ['nullable', 'string', 'max:500'],
-            'city_district' => ['nullable', 'string', 'max:255'],
+            'city' => ['nullable', 'string', 'max:255'],
+            'district' => ['nullable', 'string', 'max:255'],
             'bank_name' => ['nullable', 'string', 'max:255'],
             'account_number' => ['nullable', 'string', 'max:255'],
             'account_holder_name' => ['nullable', 'string', 'max:255'],
-            'proof_of_address' => ['nullable', 'file', 'max:10240'],
         ];
 
         if ($user->role === User::ROLE_CHEF) {
             $rules = array_merge($rules, [
                 'bio' => ['nullable', 'string', 'min:50'],
                 'years_experience' => ['nullable', 'string'],
-                'address_type' => ['nullable', 'string'],
+                'kitchen_type' => ['nullable', 'string'],
+                'proof_of_kitchen' => ['nullable', 'file', 'max:10240'],
                 'kitchen_photos.*' => ['nullable', 'image', 'max:10240'],
                 'professional_training' => ['nullable', 'file', 'max:10240'],
                 'food_safety_cert' => ['nullable', 'file', 'max:10240'],
@@ -73,6 +75,8 @@ class VerificationController extends Controller
             ]);
         } elseif ($user->role === User::ROLE_TRAVELER) {
             $rules = array_merge($rules, [
+                'address_type' => ['nullable', 'string'],
+                'proof_of_address' => ['nullable', 'file', 'max:10240'],
                 'vehicle_type' => ['nullable', 'string'],
                 'license_number' => ['nullable', 'string'],
                 'vehicle_photo' => ['nullable', 'image', 'max:10240'],
@@ -84,13 +88,13 @@ class VerificationController extends Controller
         if ($isFinalSubmission) {
             $requiredFields = [
                 'dob', 'nida_id', 'nationality', 'gender', 
-                'street_address', 'city_district', 
+                'street_address', 'city', 'district', 
                 'bank_name', 'account_number', 'account_holder_name',
                 'background_check_consent', 'tos_agreement', 'code_of_conduct_agreement', 'criminal_record_declaration'
             ];
             
             if ($user->role === User::ROLE_CHEF) {
-                $requiredFields = array_merge($requiredFields, ['bio', 'years_experience', 'address_type', 'ward_neighborhood']);
+                $requiredFields = array_merge($requiredFields, ['bio', 'years_experience', 'kitchen_type', 'ward_neighborhood']);
             } elseif ($user->role === User::ROLE_TRAVELER) {
                 $requiredFields = array_merge($requiredFields, ['license_number']);
             }
@@ -107,11 +111,18 @@ class VerificationController extends Controller
 
         $request->validate($rules);
 
+        $profile = null;
+        if ($user->role === User::ROLE_CHEF) {
+            $profile = $user->chefProfile ?? new ChefProfile(['user_id' => $user->id]);
+        } elseif ($user->role === User::ROLE_TRAVELER) {
+            $profile = $user->travelerProfile ?? new TravelerProfile(['user_id' => $user->id]);
+        }
+
         $input = $request->except(['_token', 'active_tab']);
         
         // We track all raw file input names in the form
         $fileInputNames = [
-            'selfie', 'proof_of_address', 'professional_training', 'food_safety_cert',
+            'selfie', 'proof_of_kitchen', 'proof_of_address', 'professional_training', 'food_safety_cert',
             'business_license', 'food_handling_permit', 'health_inspection_cert',
             'vehicle_photo', 'vehicle_proof_of_ownership', 'vehicle_insurance',
             'kitchen_photos' // used as array
@@ -119,6 +130,7 @@ class VerificationController extends Controller
 
         $fileFields = [
             'selfie' => 'selfie_path',
+            'proof_of_kitchen' => 'proof_of_kitchen_path',
             'proof_of_address' => 'proof_of_address_path',
             'professional_training' => 'professional_training_path',
             'food_safety_cert' => 'food_safety_cert_path',
@@ -137,19 +149,40 @@ class VerificationController extends Controller
 
         // Process files that were actually uploaded
         foreach ($request->allFiles() as $key => $file) {
+            if ($key === 'kitchen_photos' && is_array($file) && $profile instanceof ChefProfile) {
+                $input[$key] = $this->processKitchenPhotos($file, $profile);
+                continue;
+            }
+
             if (is_array($file)) {
                 $paths = [];
                 foreach ($file as $f) {
-                    $paths[] = $f->store('verifications', 'public');
+                    if ($f && $f->isValid()) {
+                        $paths[] = $f->store('verifications', 'public');
+                    }
                 }
-                $input[$key] = $paths; // Assign paths back to the JSON casting column
+                if ($paths !== []) {
+                    $input[$key] = $paths;
+                }
             } else {
                 $path = $file->store('verifications', 'public');
                 if (isset($fileFields[$key])) {
-                    $input[$fileFields[$key]] = $path; // Map to the `_path` column
+                    $input[$fileFields[$key]] = $path;
                 } else {
                     $input[$key] = $path;
                 }
+            }
+        }
+
+        if ($isFinalSubmission && $user->role === User::ROLE_CHEF && $profile instanceof ChefProfile) {
+            $kitchenType = $input['kitchen_type'] ?? $profile->kitchen_type;
+            $kitchenPhotos = $input['kitchen_photos'] ?? $profile->kitchen_photos ?? [];
+
+            if ($kitchenType === 'Home' && count(array_filter((array) $kitchenPhotos)) < 2) {
+                return back()
+                    ->withErrors(['kitchen_photos' => 'Please upload at least 2 kitchen photos for home kitchens.'])
+                    ->withInput()
+                    ->with('active_tab', $request->input('active_tab', '#tab-address'));
             }
         }
 
@@ -170,15 +203,21 @@ class VerificationController extends Controller
             }
         }
 
-        if ($user->role === User::ROLE_CHEF) {
-            $profile = $user->chefProfile ?? new ChefProfile(['user_id' => $user->id]);
+        if (! empty($input['city']) || ! empty($input['district'])) {
+            $input['city_district'] = trim(($input['city'] ?? '') . ($input['district'] ? ' - ' . $input['district'] : ''));
+        }
+
+        if ($user->role === User::ROLE_CHEF && $profile instanceof ChefProfile) {
             $profile->fill($input);
             $profile->save();
-        } elseif ($user->role === User::ROLE_TRAVELER) {
-            $profile = $user->travelerProfile ?? new TravelerProfile(['user_id' => $user->id]);
+        } elseif ($user->role === User::ROLE_TRAVELER && $profile instanceof TravelerProfile) {
             $profile->fill($input);
             $profile->save();
         }
+
+        $user->refresh();
+        $user->load(['chefProfile', 'travelerProfile']);
+        VerificationDocumentSync::syncUser($user);
 
         // If it's the final submission or user pressed Update and Final Submission
         // Assuming 'tos_agreement' and 'background_check_consent' is checked
@@ -192,5 +231,28 @@ class VerificationController extends Controller
         }
 
         return back()->with('success', 'Progress saved.')->with('active_tab', $request->input('active_tab', '#tab-identity'));
+    }
+
+    /**
+     * @param  array<int, \Illuminate\Http\UploadedFile|null>  $files
+     * @return array<int, string>
+     */
+    private function processKitchenPhotos(array $files, ChefProfile $profile): array
+    {
+        $existing = is_array($profile->kitchen_photos) ? $profile->kitchen_photos : [];
+        $slots = [
+            $existing[0] ?? null,
+            $existing[1] ?? null,
+        ];
+
+        foreach ($files as $index => $file) {
+            if ($index > 1 || ! $file || ! $file->isValid()) {
+                continue;
+            }
+
+            $slots[$index] = $file->store('verifications', 'public');
+        }
+
+        return array_values(array_filter($slots));
     }
 }

@@ -37,6 +37,19 @@ class Meal extends Model
         return $this->belongsTo(User::class, 'chef_id');
     }
 
+    /**
+     * Meals visible on the public menu (not suspended by the chef).
+     */
+    public function scopeVisibleToCustomers($query)
+    {
+        return $query->where('is_available', true);
+    }
+
+    public function isVisibleToCustomers(): bool
+    {
+        return (bool) $this->is_available;
+    }
+
     public function reviews()
     {
         return $this->hasManyThrough(Review::class, OrderItem::class, 'meal_id', 'order_id', 'id', 'order_id');

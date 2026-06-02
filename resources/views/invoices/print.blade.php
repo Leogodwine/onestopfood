@@ -22,6 +22,7 @@
 
     <div class="no-print mb-3 d-flex gap-2">
         <button onclick="window.print()" class="btn btn-primary btn-sm"><i class="bi bi-printer"></i> Print</button>
+        <a href="{{ route('invoices.download', $invoice) }}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-download"></i> Download PDF</a>
         <a href="{{ route('invoices.show', $invoice) }}" class="btn btn-outline-secondary btn-sm">Back to invoice</a>
     </div>
 

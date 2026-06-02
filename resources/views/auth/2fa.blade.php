@@ -19,11 +19,10 @@
                 </div>
             @endif
 
-            @if (session('two_factor_hint'))
+            @if (config('app.show_developer_hints') && session('two_factor_hint'))
                 <div class="alert alert-info small">
                     <strong>Development only:</strong> Your 2FA code is
                     <code>{{ session('two_factor_hint') }}</code>.
-                    In production this should be delivered via email or SMS.
                 </div>
             @endif
 
@@ -52,7 +51,7 @@
             </form>
 
             <p class="text-center mt-3 mb-0">
-                <a href="{{ route('login') }}" class="small">Back to login</a>
+                <a href="{{ route('login') }}" class="small">{{ __('auth.back_to_sign_in') }}</a>
             </p>
         </div>
     </div>

@@ -8,14 +8,19 @@ use Illuminate\Support\Facades\Hash;
 
 class AdminUserSeeder extends Seeder
 {
+    private const ADMIN_EMAIL = 'administrator@onestopfood.co.tz';
+
+    private const DEFAULT_ADMIN_PASSWORD = 'Admin@OneStopFood@2026';
+
     public function run(): void
     {
-        // Create admin user
-        User::firstOrCreate(
-            ['email' => 'admin@fooddelivery.com'],
+        $password = env('ADMIN_SEED_PASSWORD', self::DEFAULT_ADMIN_PASSWORD);
+
+        User::updateOrCreate(
+            ['email' => self::ADMIN_EMAIL],
             [
-                'name' => 'Admin User',
-                'password' => Hash::make('password'),
+                'name' => 'Administrator',
+                'password' => Hash::make($password),
                 'role' => User::ROLE_ADMIN,
                 'is_super_admin' => true,
                 'status' => User::STATUS_APPROVED,
@@ -23,6 +28,6 @@ class AdminUserSeeder extends Seeder
             ]
         );
 
-        $this->command->info('Admin user created: admin@fooddelivery.com / password');
+        $this->command->info('Admin user ready: '.self::ADMIN_EMAIL);
     }
 }

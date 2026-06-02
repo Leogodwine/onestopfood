@@ -43,7 +43,11 @@
                     <!-- Step 1: Order Summary -->
                     <div class="checkout-section">
                         <h3 class="section-title mb-4">ORDER SUMMARY</h3>
-                        <div class="order-items row g-3 mb-4">
+                        <div class="order-items mb-4">
+                            @if(!empty($isMultiChef) && isset($chefGroups))
+                                @include('orders.partials.chef-order-columns', ['chefGroups' => $chefGroups])
+                            @else
+                            <div class="row g-3">
                             @foreach($items as $item)
                                 <div class="col-6 col-sm-6 col-md-4 col-lg-2">
                                     <div class="order-item card h-100 border-0 shadow-sm">
@@ -76,6 +80,8 @@
                                     </div>
                                 </div>
                             @endforeach
+                            </div>
+                            @endif
                         </div>
                         <div class="text-end">
                             <a href="{{ route('orders.checkout', ['step' => 2]) }}" class="btn btn-success btn-lg">
@@ -143,7 +149,7 @@
                                         <i class="bi bi-gear"></i> Manage Addresses
                                     </a>
                                     @if($deliveryLocation)
-                                        <a href="https://wa.me/255626725383?text={{ urlencode('My delivery address: ' . $deliveryLocation->address_line . ($deliveryLocation->city ? ', ' . $deliveryLocation->city : '') . ($deliveryLocation->region ? ', ' . $deliveryLocation->region : '') . ($deliveryLocation->country ? ', ' . $deliveryLocation->country : '')) }}" 
+                                        <a href="https://wa.me/255651490677?text={{ urlencode('My delivery address: ' . $deliveryLocation->address_line . ($deliveryLocation->city ? ', ' . $deliveryLocation->city : '') . ($deliveryLocation->region ? ', ' . $deliveryLocation->region : '') . ($deliveryLocation->country ? ', ' . $deliveryLocation->country : '')) }}" 
                                            target="_blank" 
                                            rel="noopener"
                                            class="btn btn-outline-success btn-sm ms-2">
@@ -311,7 +317,12 @@
                         <h3 class="section-title mb-4">CONFIRM & PLACE ORDER</h3>
                         <div class="alert alert-info mb-4">
                             <i class="bi bi-info-circle me-2"></i>
-                            Please review your order details below. Once you confirm, you will receive an email and SMS confirmation.
+                            @if(!empty($isMultiChef))
+                                You will place <strong>{{ $chefCount }} separate orders</strong> (one per chef). Each chef prepares only their meals; delivery is scheduled per order.
+                            @else
+                                Please review your order details below. Once you confirm, you will receive an email and SMS confirmation.
+                            @endif
+                            <span class="d-block mt-2 small">{{ __('payments.order_placed_unpaid') }}</span>
                         </div>
                         <div class="card mb-4">
                             <div class="card-body">
@@ -350,16 +361,21 @@
                         <form method="POST" action="{{ route('orders.place') }}" id="placeOrderForm">
                             @csrf
                             <input type="hidden" name="delivery_location_id" value="{{ $deliveryLocationId ?? $deliveryLocation->id ?? '' }}">
-                            <input type="hidden" name="payment_method" id="confirm_payment_method" value="">
-                            <input type="hidden" name="special_instructions" id="confirm_special_instructions" value="">
-                            <input type="hidden" name="payment_phone" id="confirm_payment_phone" value="">
-                            <input type="hidden" name="payment_reference" id="confirm_payment_reference" value="">
+                            <input type="hidden" name="payment_method" id="confirm_payment_method" value="{{ old('payment_method', $paymentMethod ?? 'mpesa') }}">
+                            <input type="hidden" name="special_instructions" id="confirm_special_instructions" value="{{ old('special_instructions', $specialInstructions ?? '') }}">
+                            <input type="hidden" name="payment_phone" id="confirm_payment_phone" value="{{ old('payment_phone', $paymentPhone ?? '') }}">
+                            <input type="hidden" name="payment_reference" id="confirm_payment_reference" value="{{ old('payment_reference', $paymentReference ?? '') }}">
                             <div class="d-flex justify-content-between">
                                 <a href="{{ route('orders.checkout', ['step' => 4]) }}" class="btn btn-outline-secondary">
                                     <i class="bi bi-arrow-left"></i> Back
                                 </a>
                                 <button type="submit" class="btn btn-success btn-lg" id="placeOrderBtn">
-                                    <i class="bi bi-check-circle"></i> PLACE ORDER
+                                    <i class="bi bi-check-circle"></i>
+                                    @if(!empty($isMultiChef))
+                                        PLACE {{ $chefCount }} ORDERS
+                                    @else
+                                        PLACE ORDER
+                                    @endif
                                 </button>
                             </div>
                         </form>
@@ -401,7 +417,12 @@
                             <span class="price">TZS {{ number_format((float)$subtotal, 2) }}</span>
                         </div>
                         <div class="d-flex justify-content-between mb-2">
-                            <span class="text-muted">Delivery Fee</span>
+                            <span class="text-muted">
+                                Delivery Fee
+                                @if(!empty($isMultiChef))
+                                    ({{ $chefCount }} chefs)
+                                @endif
+                            </span>
                             <span class="price">
                                 @if($deliveryFee > 0)
                                     TZS {{ number_format((float)$deliveryFee, 2) }}
@@ -410,6 +431,9 @@
                                 @endif
                             </span>
                         </div>
+                        @if(!empty($isMultiChef))
+                            <div class="small text-muted mb-2">Separate delivery per chef (TZS {{ number_format((float)($deliveryFeePerChef ?? 0), 0) }} each)</div>
+                        @endif
                         <hr class="my-3">
                         <div class="d-flex justify-content-between align-items-center">
                             <span class="fw-bold fs-5">Total</span>
@@ -540,7 +564,20 @@
     font-weight: 700;
     color: #212529;
 }
-@media (max-width: 991.98px) {
+.chef-order-card .card-header h6 {
+    font-size: 0.9rem;
+}
+.chef-order-columns .chef-order-item:last-child {
+    margin-bottom: 0 !important;
+    padding-bottom: 0 !important;
+    border-bottom: none !important;
+}
+@media (max-width: 767.98px) {
+    .chef-order-columns .col-md-4,
+    .chef-order-columns .col-md-6 {
+        margin-bottom: 0.5rem;
+    }
+}
     .order-summary-card {
         position: relative;
         top: 0;
@@ -595,6 +632,13 @@ document.addEventListener('DOMContentLoaded', function() {
     
     if (placeOrderForm) {
         placeOrderForm.addEventListener('submit', function(e) {
+            const methodField = document.getElementById('confirm_payment_method');
+            if (methodField && !methodField.value) {
+                const checked = document.querySelector('input[name="payment_method"]:checked');
+                if (checked) {
+                    methodField.value = checked.value;
+                }
+            }
             const btn = document.getElementById('placeOrderBtn');
             btn.disabled = true;
             btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Placing Order...';

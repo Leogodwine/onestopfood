@@ -1,0 +1,27 @@
+<?php
+
+return [
+    'chef_title' => 'Jiunge na Jamii ya Wapishi',
+    'chef_tagline' => 'Shiriki shauku yako. Kua biashara yako.',
+    'chef_desc' => 'Jiunge na familia ya :brand ya wapishi wenye vipaji huko Dar es Salaam. Onyesha ujuzi wako wa upishi, fikia maelfu ya wapenda chakula, na jenga chapa yako kwa msaada wetu.',
+    'chef_skill_title' => 'Onyesha Ujuzi Wako',
+    'chef_skill_desc' => 'Unda wasifu wako, shiriki hadithi yako, na onyesha vyakula vyako maalum',
+    'chef_revenue_title' => 'Ongeza Mapato Yako',
+    'chef_revenue_desc' => 'Fikia wateja wapya na uongeze mapato yako kupitia jukwaa letu la uwasilishaji',
+    'chef_community_title' => 'Jiunge na Jamii Inayosaidiana',
+    'chef_community_desc' => 'Ungana na wapishi wenzako na upate msaada endelevu kutoka kwa timu yetu',
+    'become_chef_btn' => 'Kuwa Mpishi',
+    'meet_chefs_btn' => 'Kutana na Wapishi Wetu',
+    'chef_contact' => 'Maswali kuhusu kuwa mpishi? Barua pepe :email au piga :phone',
+    'traveler_title' => 'Kuwa Msafirishaji / Dropper',
+    'traveler_tagline' => 'Wasilisha Chakula. Pata Mapato kwa Ratiba Yako.',
+    'traveler_desc' => 'Jiunge na timu ya uwasilishaji ya :brand huko Dar es Salaam. Chukua maagizo kutoka kwa wapishi waliothibitishwa na uyawasilishe kwa wateja—masaa rahisi, mapato ya haki, na msaada kamili wa jukwaa.',
+    'traveler_earnings_title' => 'Mapato Rahisi',
+    'traveler_earnings_desc' => 'Nenda mtandaoni unapotaka na upate uwasilishaji wa eneo lako',
+    'traveler_assign_title' => 'Mgawo wa Akili',
+    'traveler_assign_desc' => 'Hupangwa kwa umbali, aina ya gari, na ukubwa wa agizo kwa njia bora zaidi',
+    'traveler_trust_title' => 'Jukwaa la Kuaminika',
+    'traveler_trust_desc' => 'Wapishi waliothibitishwa, hatua wazi za uwasilishaji, na msaada kutoka kwa timu yetu',
+    'become_traveler_btn' => 'Kuwa Msafirishaji / Dropper',
+    'traveler_contact' => 'Maswali kuhusu kuwa msafirishaji au dropper? Barua pepe :email au piga :phone',
+];

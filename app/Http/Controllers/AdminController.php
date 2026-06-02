@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Models\UserVerificationDocument;
 use App\Models\AdminAction;
+use App\Services\UserAccountGuardService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -107,15 +108,20 @@ class AdminController extends Controller
 
     public function showUser(User $user)
     {
-        $user->load(['chefProfile', 'travelerProfile', 'locations']);
+        $user->load(['chefProfile', 'travelerProfile', 'locations', 'socialAccounts']);
         $documents = UserVerificationDocument::query()
             ->where('user_id', $user->id)
             ->latest()
             ->get();
 
+        $guard = app(UserAccountGuardService::class);
+
         return view('admin.user-detail', [
             'user' => $user,
             'documents' => $documents,
+            'accountDependencies' => $guard->dependencies($user),
+            'canHardDelete' => $guard->canHardDelete($user),
+            'dependencyMessage' => $guard->dependencyMessage($user),
         ]);
     }
 
@@ -177,21 +183,25 @@ class AdminController extends Controller
         $data = $request->validate([
             'selected_users' => ['required', 'array'],
             'selected_users.*' => ['integer', 'exists:users,id'],
-            'action' => ['required', 'string', 'in:approve,suspend,activate,delete'],
+            'action' => ['required', 'string', 'in:approve,suspend,block,activate,delete'],
             'reason' => ['nullable', 'string', 'max:1000'],
         ]);
 
         $admin = $request->user();
+        $guard = app(UserAccountGuardService::class);
 
         $users = User::whereIn('id', $data['selected_users'])->get();
         $affected = 0;
+        $blockedDeletes = [];
 
         foreach ($users as $user) {
             if ($admin->id === $user->id) {
                 continue; // never modify self in bulk
             }
 
-            switch ($data['action']) {
+            $action = $data['action'] === 'block' ? 'suspend' : $data['action'];
+
+            switch ($action) {
                 case 'approve':
                     if (in_array($user->role, [User::ROLE_CHEF, User::ROLE_TRAVELER], true)) {
                         $user->update([
@@ -203,11 +213,13 @@ class AdminController extends Controller
                     }
                     break;
                 case 'suspend':
-                    $user->update([
-                        'status' => User::STATUS_SUSPENDED,
-                    ]);
+                    $guard->suspend($user);
                     $affected++;
-                    $this->logAdminAction('bulk_suspend_user', $user, $data['reason'] ?? null);
+                    $this->logAdminAction(
+                        $data['action'] === 'block' ? 'bulk_block_user' : 'bulk_suspend_user',
+                        $user,
+                        $data['reason'] ?? null
+                    );
                     break;
                 case 'activate':
                     $user->update([
@@ -217,16 +229,39 @@ class AdminController extends Controller
                     $this->logAdminAction('bulk_activate_user', $user, $data['reason'] ?? null);
                     break;
                 case 'delete':
-                    if ($user->role !== User::ROLE_ADMIN) {
+                    if ($user->role === User::ROLE_ADMIN) {
+                        break;
+                    }
+
+                    if (! $guard->canHardDelete($user)) {
+                        $blockedDeletes[] = "{$user->email} ({$guard->dependencyMessage($user)})";
+                        break;
+                    }
+
+                    try {
                         $this->logAdminAction('bulk_delete_user', $user, $data['reason'] ?? null, ['email' => $user->email]);
-                        $user->delete();
+                        $guard->deleteIfAllowed($user);
                         $affected++;
+                    } catch (\Throwable $e) {
+                        $blockedDeletes[] = $user->email;
+                        report($e);
                     }
                     break;
             }
         }
 
-        return back()->with('status', "Bulk action completed. {$affected} user(s) updated.");
+        $message = "Bulk action completed. {$affected} user(s) updated.";
+
+        if ($blockedDeletes !== []) {
+            return back()
+                ->with('status', $message)
+                ->withErrors([
+                    'bulk_action' => 'These accounts were not deleted because they have linked records. Use Suspend/Block instead: '
+                        . implode('; ', $blockedDeletes),
+                ]);
+        }
+
+        return back()->with('status', $message);
     }
 
     public function export(Request $request)
@@ -289,6 +324,10 @@ class AdminController extends Controller
 
             $query->chunk(500, function ($chunk) use ($handle) {
                 foreach ($chunk as $user) {
+                    $registeredAt = $user->created_at
+                        ? $user->created_at->format('Y-m-d H:i:s')
+                        : '';
+
                     fputcsv($handle, [
                         $user->id,
                         $user->name,
@@ -296,7 +335,7 @@ class AdminController extends Controller
                         $user->phone,
                         $user->role,
                         $user->status,
-                        optional($user->created_at)->toDateTimeString(),
+                        $registeredAt !== '' ? "\t{$registeredAt}" : '',
                     ]);
                 }
             });

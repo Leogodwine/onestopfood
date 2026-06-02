@@ -118,14 +118,14 @@ class TravelerController extends Controller
             ->whereIn('status', ['assigned', 'picked_up'])
             ->exists();
 
-        if (!$hasActiveDelivery) {
-            return response()->json(['ok' => true, 'stored' => false]);
-        }
-
         $profile = TravelerProfile::firstOrCreate(
             ['user_id' => $request->user()->id],
             ['is_online' => false]
         );
+
+        if (! $profile->is_online && ! $hasActiveDelivery) {
+            return response()->json(['ok' => true, 'stored' => false]);
+        }
 
         $profile->update([
             'last_latitude' => $data['latitude'],

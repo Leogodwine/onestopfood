@@ -1,0 +1,27 @@
+<?php
+
+return [
+    'home' => 'Home',
+    'our_chefs' => 'Our Chefs',
+    'menu' => 'Menu',
+    'all_meals' => 'All Meals',
+    'become_chef' => 'Become a Chef',
+    'stories' => 'Stories',
+    'search_placeholder' => 'Search dishes, chefs, origins, or stories...',
+    'deliver_to' => 'Deliver to',
+    'your_location' => 'Your Location',
+    'set_delivery_address' => 'Set delivery address',
+    'sign_in_to_set_location' => 'Sign in to set location',
+    'sign_in' => 'Sign In',
+    'dashboard' => 'Dashboard',
+    'cart' => 'Cart',
+    'cart_empty' => 'Your cart is empty',
+    'subtotal' => 'Subtotal',
+    'show_full_cart' => 'Show Full Cart',
+    'checkout' => 'Checkout',
+    'place_order' => 'Place Order',
+    'qty' => 'Qty',
+    'english' => 'English',
+    'swahili' => 'Swahili',
+    'language' => 'Language',
+];

@@ -3,16 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Mail\OrderConfirmation;
-use App\Models\Delivery;
 use App\Models\Location;
 use App\Models\Meal;
 use App\Models\Order;
-use App\Models\OrderChef;
-use App\Models\OrderItem;
-use App\Models\Payment;
 use App\Models\SystemSetting;
 use App\Models\User;
 use App\Services\InvoiceService;
+use App\Services\MultiChefCheckoutService;
 use App\Services\OrderPricingService;
 use App\Services\Payments\MobileMoneyDispatcher;
 use Illuminate\Http\Request;
@@ -26,7 +23,8 @@ class OrderController extends Controller
     public function __construct(
         private readonly OrderPricingService $pricing,
         private readonly MobileMoneyDispatcher $mobileMoney,
-        private readonly InvoiceService $invoices
+        private readonly InvoiceService $invoices,
+        private readonly MultiChefCheckoutService $multiChefCheckout
     ) {}
 
     public function checkout(Request $request)
@@ -37,10 +35,15 @@ class OrderController extends Controller
         }
 
         $step = max(1, min(5, (int) $request->query('step', 1)));
-        $meals = Meal::query()
-            ->whereIn('id', array_keys($cart))
-            ->with('chef')
-            ->get();
+        [$cart, $meals] = app(CartController::class)->availableCartMeals($request);
+
+        if ($cart === []) {
+            return redirect()->route('meals.index')->with('status', 'Your cart is empty or contains unavailable items.');
+        }
+
+        $chefGroups = $this->multiChefCheckout->groupCartByChef($cart, $meals);
+        $chefCount = $chefGroups->count();
+        $isMultiChef = $chefCount > 1;
 
         $items = [];
         $subtotal = 0;
@@ -57,13 +60,14 @@ class OrderController extends Controller
                 'line_total' => $lineTotal,
             ];
         }
+
         $userLocations = $request->user()->locations()->orderByDesc('is_primary')->get();
         $deliveryLocationId = $request->session()->get('checkout_delivery_location_id');
         $deliveryLocation = $deliveryLocationId
             ? Location::find($deliveryLocationId)
             : $userLocations->where('is_primary', true)->first() ?? $userLocations->first();
 
-        $deliveryFee = $this->pricing->calculateDeliveryFee($deliveryLocation);
+        $deliveryFee = $this->multiChefCheckout->calculateTotalDeliveryFee($chefCount, $deliveryLocation);
         $total = $subtotal + $deliveryFee;
         $paymentMethod = $request->session()->get('checkout_payment_method');
         $paymentPhone = $request->session()->get('checkout_payment_phone');
@@ -75,8 +79,12 @@ class OrderController extends Controller
             'meals' => $meals,
             'cart' => $cart,
             'items' => $items,
+            'chefGroups' => $chefGroups,
+            'chefCount' => $chefCount,
+            'isMultiChef' => $isMultiChef,
             'subtotal' => $subtotal,
             'deliveryFee' => $deliveryFee,
+            'deliveryFeePerChef' => $chefCount > 0 ? $deliveryFee / $chefCount : 0,
             'total' => $total,
             'userLocations' => $userLocations,
             'deliveryLocation' => $deliveryLocation,
@@ -97,6 +105,7 @@ class OrderController extends Controller
             ->where('user_id', $request->user()->id)
             ->firstOrFail();
         $request->session()->put('checkout_delivery_location_id', $location->id);
+
         return redirect()->route('orders.checkout', ['step' => 3]);
     }
 
@@ -117,11 +126,25 @@ class OrderController extends Controller
         $request->session()->put('checkout_payment_phone', $request->payment_phone);
         $request->session()->put('checkout_payment_reference', $request->payment_reference);
         $request->session()->put('checkout_special_instructions', $request->special_instructions);
+
         return redirect()->route('orders.checkout', ['step' => 5]);
     }
 
     public function place(Request $request)
     {
+        $request->merge([
+            'payment_method' => $request->input('payment_method') ?: $request->session()->get('checkout_payment_method'),
+            'payment_phone' => $request->input('payment_phone') ?: $request->session()->get('checkout_payment_phone'),
+            'payment_reference' => $request->input('payment_reference') ?: $request->session()->get('checkout_payment_reference'),
+            'special_instructions' => $request->input('special_instructions') ?: $request->session()->get('checkout_special_instructions'),
+            'delivery_location_id' => $request->input('delivery_location_id') ?: $request->session()->get('checkout_delivery_location_id'),
+        ]);
+
+        if (! $request->filled('payment_method')) {
+            return redirect()->route('orders.checkout', ['step' => 4])
+                ->withErrors(['payment_method' => 'Please select a payment method before placing your order.']);
+        }
+
         $data = $request->validate([
             'payment_method' => ['required', Rule::in(['mpesa', 'tigo', 'airtel', 'card', 'cod'])],
             'special_instructions' => ['nullable', 'string', 'max:2000'],
@@ -136,13 +159,14 @@ class OrderController extends Controller
         ]);
 
         $cart = $request->session()->get('cart', []);
-        if (!$cart) {
+        if (! $cart) {
             return redirect()->route('meals.index')->with('status', 'Your cart is empty');
         }
 
         $meals = Meal::query()
             ->whereIn('id', array_keys($cart))
-            ->where('is_available', true)
+            ->visibleToCustomers()
+            ->with('chef')
             ->get()
             ->keyBy('id');
 
@@ -150,24 +174,11 @@ class OrderController extends Controller
             return redirect()->route('meals.index')->with('status', 'No available items in cart');
         }
 
-        $chefIds = $meals->pluck('chef_id')->unique()->values();
-        $customerId = (int) $request->user()->id;
-        $isMultiChef = $chefIds->count() > 1;
-
-        return DB::transaction(function () use ($request, $data, $cart, $meals, $chefIds, $customerId, $isMultiChef) {
-            $subtotal = 0;
-            foreach ($cart as $mealId => $qty) {
-                $meal = $meals->get((int) $mealId);
-                if (!$meal) {
-                    continue;
-                }
-                $subtotal += $meal->price * (int) $qty;
-            }
-
+        return DB::transaction(function () use ($request, $data, $cart, $meals) {
             $deliveryLocationId = $data['delivery_location_id']
                 ?? $request->session()->get('checkout_delivery_location_id')
                 ?? $request->user()->location?->id;
-            if (!$deliveryLocationId) {
+            if (! $deliveryLocationId) {
                 return redirect()->route('orders.checkout', ['step' => 2])
                     ->withErrors(['delivery_location_id' => 'Please select a delivery address.']);
             }
@@ -176,118 +187,49 @@ class OrderController extends Controller
                 ->where('user_id', $request->user()->id)
                 ->firstOrFail();
 
-            $deliveryFee = $this->pricing->calculateDeliveryFee($deliveryLocation);
-            $total = $subtotal + $deliveryFee;
-
-            $order = Order::create([
-                'customer_id' => $customerId,
-                'chef_id' => $isMultiChef ? null : $chefIds->first(),
-                'status' => 'pending',
-                'special_instructions' => $data['special_instructions'] ?? null,
-                'subtotal' => $subtotal,
-                'delivery_fee' => $deliveryFee,
-                'total' => $total,
-                'delivery_location_id' => $deliveryLocationId,
-            ]);
-
-            foreach ($cart as $mealId => $qty) {
-                $meal = $meals->get((int) $mealId);
-                if (!$meal) {
-                    continue;
-                }
-                $qty = max(1, (int) $qty);
-
-                OrderItem::create([
-                    'order_id' => $order->id,
-                    'meal_id' => $meal->id,
-                    'quantity' => $qty,
-                    'unit_price' => $meal->price,
-                    'line_total' => $meal->price * $qty,
-                ]);
-            }
-
-            if ($isMultiChef) {
-                foreach ($chefIds as $chefId) {
-                    $chefSubtotal = 0;
-                    foreach ($cart as $mealId => $qty) {
-                        $meal = $meals->get((int) $mealId);
-                        if (!$meal || (int) $meal->chef_id !== (int) $chefId) {
-                            continue;
-                        }
-                        $chefSubtotal += $meal->price * max(1, (int) $qty);
-                    }
-                    if ($chefSubtotal > 0) {
-                        OrderChef::create([
-                            'order_id' => $order->id,
-                            'chef_id' => $chefId,
-                            'subtotal' => $chefSubtotal,
-                            'status' => 'pending',
-                        ]);
-                    }
-                }
-            }
-
-            $paymentStatus = $this->pricing->initialPaymentStatus($data['payment_method']);
-            if (config('food_delivery.auto_confirm_payments') && $data['payment_method'] !== 'cod') {
-                $paymentStatus = 'paid';
-            }
-
             $paymentPhone = $data['payment_phone']
                 ?? $request->session()->get('checkout_payment_phone');
             $paymentReference = $data['payment_reference']
                 ?? $request->session()->get('checkout_payment_reference');
+            $specialInstructions = $data['special_instructions']
+                ?? $request->session()->get('checkout_special_instructions');
 
             $providerRef = in_array($data['payment_method'], ['mpesa', 'tigo', 'airtel'], true)
                 ? (trim((string) $paymentPhone) ?: null)
                 : (trim(implode(' ', array_filter([$paymentPhone, $paymentReference]))) ?: null);
 
-            $payment = Payment::create([
-                'order_id' => $order->id,
-                'method' => $data['payment_method'],
-                'status' => $paymentStatus,
-                'amount' => $order->total,
-                'provider_reference' => $providerRef,
-            ]);
+            $result = $this->multiChefCheckout->createOrdersFromCart(
+                $request->user(),
+                $cart,
+                $meals,
+                $deliveryLocation,
+                $specialInstructions,
+                $data['payment_method'],
+                $providerRef
+            );
+
+            $orders = $result['orders'];
+            $payment = $result['payment'];
+            $isMultiChef = $result['is_multi_chef'];
 
             $pushMessage = null;
+            $paymentStatus = $payment->status;
             if (
                 $paymentStatus === 'pending'
                 && $this->mobileMoney->supports($data['payment_method'])
             ) {
                 $gateway = $this->mobileMoney->gatewayFor($data['payment_method']);
                 if ($gateway?->isConfigured()) {
-                    $phone = $data['payment_phone']
-                        ?? $request->session()->get('checkout_payment_phone')
+                    $phone = $paymentPhone
                         ?? $request->user()->phone
                         ?? '';
                     $push = $this->mobileMoney->initiate($payment, $phone);
                     $label = $gateway->label();
                     $pushMessage = $push['success']
                         ? $push['message']
-                        : "Order placed. {$label} prompt could not be sent: " . $push['message'];
+                        : "Order placed. {$label} prompt could not be sent: ".$push['message'];
                 }
             }
-
-            $autoAssign = (bool) SystemSetting::getValue('auto_assign_traveler', true);
-            $traveler = null;
-            if ($autoAssign) {
-                $traveler = User::query()
-                    ->where('role', User::ROLE_TRAVELER)
-                    ->where('status', User::STATUS_APPROVED)
-                    ->whereHas('travelerProfile', fn ($q) => $q->where('is_online', true))
-                    ->inRandomOrder()
-                    ->first();
-            }
-
-            Delivery::create([
-                'order_id' => $order->id,
-                'traveler_id' => $traveler?->id,
-                'status' => $traveler ? 'assigned' : 'unassigned',
-                'traveler_earning' => $this->pricing->travelerEarningFromDeliveryFee($deliveryFee),
-            ]);
-
-            $payment->refresh();
-            $invoice = $this->invoices->createForOrder($order, $payment);
 
             $request->session()->forget('cart');
             $request->session()->forget('checkout_delivery_location_id');
@@ -296,37 +238,32 @@ class OrderController extends Controller
             $request->session()->forget('checkout_payment_reference');
             $request->session()->forget('checkout_special_instructions');
 
-            try {
-                Mail::to($order->customer->email)->send(new OrderConfirmation($order));
-            } catch (\Throwable $e) {
-                report($e);
-            }
-            try {
-                $order->customer->notify(new \App\Notifications\OrderPlacedNotification($order));
-            } catch (\Throwable $e) {
-                report($e);
-            }
-            if ($isMultiChef) {
-                foreach ($order->orderChefs as $orderChef) {
-                    try {
-                        $orderChef->chef->notify(new \App\Notifications\OrderPortionPlacedNotification($order, $orderChef));
-                    } catch (\Throwable $e) {
-                        report($e);
-                    }
+            foreach ($orders as $order) {
+                try {
+                    Mail::to($order->customer->email)->send(new OrderConfirmation($order));
+                } catch (\Throwable $e) {
+                    report($e);
                 }
-            } else {
+                try {
+                    $order->customer->notify(new \App\Notifications\OrderPlacedNotification($order));
+                } catch (\Throwable $e) {
+                    report($e);
+                }
                 try {
                     $order->chef?->notify(new \App\Notifications\OrderPlacedNotification($order));
                 } catch (\Throwable $e) {
                     report($e);
                 }
             }
+
             $brand = SystemSetting::getValue('site_name', config('app.name'));
-            if ($order->customer->phone) {
-                $smsMessage = $brand . ': Order #' . $order->id . ' placed. Total TZS ' . number_format((float) $order->total, 2) . '. Confirmation sent to your email.';
+            if ($request->user()->phone) {
+                $orderIds = $orders->pluck('id')->join(', #');
+                $smsMessage = $brand.': '.($isMultiChef ? 'Orders' : 'Order').' #'.$orderIds
+                    .' placed. Total TZS '.number_format((float) $result['grand_total'], 2).'.';
                 Log::info('Order confirmation SMS', [
-                    'order_id' => $order->id,
-                    'phone' => $order->customer->phone,
+                    'order_ids' => $orders->pluck('id')->all(),
+                    'phone' => $request->user()->phone,
                     'message' => $smsMessage,
                 ]);
             }
@@ -334,11 +271,22 @@ class OrderController extends Controller
             $paymentNote = match (true) {
                 $pushMessage !== null => $pushMessage,
                 $paymentStatus === 'paid' => 'Payment recorded.',
-                default => 'Complete payment on your order page.',
+                default => __('payments.order_placed_unpaid'),
             };
 
-            return redirect()->route('invoices.show', $invoice)
-                ->with('status', 'Order confirmed. Invoice ' . $invoice->invoice_number . ' generated. ' . $paymentNote);
+            $orderList = $orders->map(fn ($o) => '#'.$o->id)->join(', ');
+            $statusMessage = $isMultiChef
+                ? "Checkout complete. Separate orders created for each chef: {$orderList}. Each chef prepares and ships their items independently. {$paymentNote}"
+                : 'Order confirmed. Invoice '.$result['invoices']->first()->invoice_number.' generated. '.$paymentNote;
+
+            $firstInvoice = $result['invoices']->first();
+            $primaryOrder = $orders->first();
+
+            return redirect()
+                ->route('orders.invoice', $primaryOrder)
+                ->with('status', $statusMessage)
+                ->with('placed_invoice_id', $firstInvoice?->id)
+                ->with('placed_batch_order_ids', $isMultiChef ? $orders->pluck('id')->all() : []);
         });
     }
 
@@ -349,12 +297,15 @@ class OrderController extends Controller
         $isChef = (int) $order->chef_id === (int) $user->id
             || $order->orderChefs()->where('chef_id', $user->id)->exists();
         $isTraveler = $order->delivery && (int) $order->delivery->traveler_id === (int) $user->id;
-        if ($user->role !== User::ROLE_ADMIN && !$isCustomer && !$isChef && !$isTraveler) {
+        if ($user->role !== User::ROLE_ADMIN && ! $isCustomer && ! $isChef && ! $isTraveler) {
             abort(403, 'You do not have permission to view this order.');
         }
-        $order->load(['items.meal.chef', 'chef', 'customer', 'payment', 'invoice', 'delivery.traveler', 'orderChefs.chef', 'deliveryLocation']);
+        $order->load(['items.meal.chef', 'chef', 'customer', 'payment', 'sharedPayment', 'invoice', 'delivery.traveler', 'orderChefs.chef', 'deliveryLocation']);
 
-        return view('orders.show', compact('order'));
+        $batchOrders = $order->checkout_batch_id
+            ? Order::query()->where('checkout_batch_id', $order->checkout_batch_id)->with('chef')->orderBy('id')->get()
+            : collect();
+
+        return view('orders.show', compact('order', 'batchOrders'));
     }
 }
-

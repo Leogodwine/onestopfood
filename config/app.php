@@ -123,4 +123,14 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Developer hints (OTP / 2FA on screen — never enable in production)
+    |--------------------------------------------------------------------------
+    */
+    'show_developer_hints' => (bool) env(
+        'APP_SHOW_DEV_HINTS',
+        env('APP_ENV', 'production') === 'local' && filter_var(env('APP_DEBUG', false), FILTER_VALIDATE_BOOLEAN)
+    ),
+
 ];

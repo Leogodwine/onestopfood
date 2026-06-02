@@ -21,12 +21,12 @@
 </div>
 
 @include('auth._register_modal')
+@include('auth._social_auth_intent_script')
 
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    // If someone directly visits /register, open the modal immediately
-    window.openRegisterModal?.();
+    window.openRegisterModal?.(@json(in_array(request('role'), ['chef', 'traveler', 'customer'], true) ? request('role') : null));
 });
 </script>
 @endpush

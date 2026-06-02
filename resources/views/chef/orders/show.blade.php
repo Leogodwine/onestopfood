@@ -114,13 +114,21 @@
             </div>
         </div>
 
+        <div class="dashboard-card mb-4">
+            <div class="card-header">
+                <h5 class="card-title"><i class="bi bi-credit-card"></i> Payment</h5>
+            </div>
+            <div class="card-body">
+                @include('orders.partials.payment-status', ['order' => $order])
+            </div>
+        </div>
+
         <div class="dashboard-card">
             <div class="card-header">
-                <h5 class="card-title"><i class="bi bi-person"></i> Customer & Order</h5>
+                <h5 class="card-title"><i class="bi bi-person"></i> Customer & Delivery</h5>
             </div>
             <div class="card-body">
                 <div class="mb-2"><strong>Customer:</strong> {{ $order->customer->name }}</div>
-                <div class="mb-2"><strong>Payment:</strong> {{ ucfirst($order->payment?->method ?? 'N/A') }} – {{ ucfirst($order->payment?->status ?? 'N/A') }} (order total TZS {{ number_format((float)$order->total, 2) }})</div>
                 @if($order->delivery)
                     <div class="mb-2"><strong>Delivery:</strong> {{ ucfirst($order->delivery->status) }}</div>
                     @if($order->delivery->traveler)
@@ -130,46 +138,56 @@
             </div>
         </div>
 
-        @if(!empty($needsAssignment) && $availableTravelers->isNotEmpty())
+        @if((!empty($needsAssignment) || !empty($canReassign)) && $nearbyTravelers->isNotEmpty())
             <div class="dashboard-card mt-4">
                 <div class="card-header">
-                    <h5 class="card-title"><i class="bi bi-truck"></i> Assign Traveler (online &amp; near customer/chef)</h5>
+                    <h5 class="card-title"><i class="bi bi-truck"></i> Nearby Travelers (online)</h5>
                 </div>
                 <div class="card-body">
-                    <p class="text-muted small mb-3">Choose an online traveler. Listed by proximity to customer and your kitchen.</p>
+                    <p class="text-muted small mb-3">
+                        Order quantity: <strong>{{ $orderQuantity }}</strong> item(s).
+                        Ranked by distance to your kitchen and customer, vehicle capacity, and live GPS when available.
+                    </p>
                     <ul class="list-group list-group-flush">
-                        @foreach($availableTravelers as $item)
+                        @foreach($nearbyTravelers as $item)
                             @php $t = $item->user; @endphp
                             <li class="list-group-item d-flex justify-content-between align-items-center px-0">
                                 <div>
                                     <strong>{{ $t->name }}</strong>
-                                    @if($t->travelerProfile?->vehicle_type)
-                                        <span class="text-muted small"> · {{ ucfirst($t->travelerProfile->vehicle_type) }}</span>
+                                    @if($item->recommended)
+                                        <span class="badge bg-success ms-1">Best match</span>
                                     @endif
-                                    @if($item->distance_km_to_customer !== null || $item->distance_km_to_chef !== null)
-                                        <div class="small text-muted mt-1">
-                                            @if($item->distance_km_to_customer !== null) {{ number_format($item->distance_km_to_customer, 1) }} km to customer @endif
-                                            @if($item->distance_km_to_chef !== null) · {{ number_format($item->distance_km_to_chef, 1) }} km to your kitchen @endif
+                                    <div class="small text-muted mt-1">
+                                        {{ ucfirst($item->vehicle_type ?? 'vehicle') }}
+                                        · cap {{ $item->vehicle_capacity }}
+                                        @if($item->max_load_capacity) (max {{ $item->max_load_capacity }}) @endif
+                                        · {{ $item->location_source === 'gps' ? 'Live GPS' : 'Registered address' }}
+                                    </div>
+                                    @if($item->distance_km_to_chef !== null || $item->distance_km_to_customer !== null)
+                                        <div class="small text-muted">
+                                            @if($item->distance_km_to_chef !== null) {{ number_format($item->distance_km_to_chef, 1) }} km to kitchen @endif
+                                            @if($item->distance_km_to_customer !== null) · {{ number_format($item->distance_km_to_customer, 1) }} km to customer @endif
+                                            @if($item->combined_km !== null) · <strong>{{ number_format($item->combined_km, 1) }} km total</strong> @endif
                                         </div>
                                     @endif
                                 </div>
                                 <form method="POST" action="{{ route('chef.orders.assign-traveler', $order) }}" class="d-inline">
                                     @csrf
                                     <input type="hidden" name="traveler_id" value="{{ $t->id }}">
-                                    <button type="submit" class="btn btn-sm btn-success">Assign</button>
+                                    <button type="submit" class="btn btn-sm btn-success">{{ !empty($canReassign) ? 'Reassign' : 'Assign' }}</button>
                                 </form>
                             </li>
                         @endforeach
                     </ul>
                 </div>
             </div>
-        @elseif(!empty($needsAssignment) && $availableTravelers->isEmpty())
+        @elseif((!empty($needsAssignment) || !empty($canReassign)) && $nearbyTravelers->isEmpty())
             <div class="dashboard-card mt-4">
                 <div class="card-header">
-                    <h5 class="card-title"><i class="bi bi-truck"></i> Assign Traveler</h5>
+                    <h5 class="card-title"><i class="bi bi-truck"></i> Nearby Travelers</h5>
                 </div>
                 <div class="card-body">
-                    <p class="text-muted mb-0">No online travelers available. Ask travelers to go online, or try again later.</p>
+                    <p class="text-muted mb-0">No suitable online travelers nearby. They must be online, within delivery radius, have GPS/location, and vehicle capacity for {{ $orderQuantity }} item(s).</p>
                 </div>
             </div>
         @endif

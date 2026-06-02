@@ -18,7 +18,7 @@
 <!-- Statistics Cards - Row 1 -->
 <div class="row g-4 mb-4">
     <div class="col-md-3 col-sm-6">
-        <div class="stat-card stat-green">
+        <a class="stat-card stat-green d-block text-decoration-none" href="{{ route('admin.users.index') }}#all-users">
             <div class="stat-icon">
                 <i class="bi bi-people"></i>
             </div>
@@ -27,10 +27,10 @@
             <div class="stat-change text-success small mt-2">
                 <i class="bi bi-arrow-up"></i> All registered users
             </div>
-        </div>
+        </a>
     </div>
     <div class="col-md-3 col-sm-6">
-        <div class="stat-card stat-blue">
+        <a class="stat-card stat-blue d-block text-decoration-none" href="{{ route('admin.users.index', ['role' => 'chef', 'status' => 'approved']) }}#all-users">
             <div class="stat-icon">
                 <i class="bi bi-egg-fried"></i>
             </div>
@@ -39,10 +39,10 @@
             <div class="stat-change text-primary small mt-2">
                 <i class="bi bi-check-circle"></i> Active chefs
             </div>
-        </div>
+        </a>
     </div>
     <div class="col-md-3 col-sm-6">
-        <div class="stat-card stat-green">
+        <a class="stat-card stat-green d-block text-decoration-none" href="{{ route('admin.orders.index') }}">
             <div class="stat-icon">
                 <i class="bi bi-cart-check"></i>
             </div>
@@ -51,10 +51,10 @@
             <div class="stat-change text-success small mt-2">
                 <i class="bi bi-graph-up"></i> All time orders
             </div>
-        </div>
+        </a>
     </div>
     <div class="col-md-3 col-sm-6">
-        <div class="stat-card stat-blue">
+        <a class="stat-card stat-blue d-block text-decoration-none" href="{{ route('admin.meals.index', ['availability' => 'available']) }}">
             <div class="stat-icon">
                 <i class="bi bi-utensils"></i>
             </div>
@@ -63,14 +63,14 @@
             <div class="stat-change text-primary small mt-2">
                 <i class="bi bi-menu-button"></i> Available meals
             </div>
-        </div>
+        </a>
     </div>
 </div>
 
 <!-- Statistics Cards - Row 2 -->
 <div class="row g-4 mb-4">
     <div class="col-md-3 col-sm-6">
-        <div class="stat-card stat-green">
+        <a class="stat-card stat-green d-block text-decoration-none" href="{{ route('admin.users.index', ['role' => 'customer', 'status' => 'approved']) }}#all-users">
             <div class="stat-icon">
                 <i class="bi bi-person-check"></i>
             </div>
@@ -79,10 +79,10 @@
             <div class="stat-change text-success small mt-2">
                 <i class="bi bi-people-fill"></i> Active customers
             </div>
-        </div>
+        </a>
     </div>
     <div class="col-md-3 col-sm-6">
-        <div class="stat-card stat-blue">
+        <a class="stat-card stat-blue d-block text-decoration-none" href="{{ route('admin.users.index', ['role' => 'traveler', 'status' => 'approved']) }}#all-users">
             <div class="stat-icon">
                 <i class="bi bi-truck"></i>
             </div>
@@ -91,7 +91,7 @@
             <div class="stat-change text-primary small mt-2">
                 <i class="bi bi-truck-flatbed"></i> Delivery partners
             </div>
-        </div>
+        </a>
     </div>
     <div class="col-md-3 col-sm-6">
         <a class="stat-card stat-green d-block text-decoration-none" href="{{ route('admin.users.index', ['filter' => 'pending_approvals']) }}#pending-approvals">

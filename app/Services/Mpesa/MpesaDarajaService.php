@@ -53,7 +53,7 @@ class MpesaDarajaService implements MobileMoneyGateway
         );
 
         $amount = (int) ceil((float) $payment->amount);
-        $accountRef = 'ORDER' . $payment->order_id;
+        $accountRef = $payment->paymentReferenceLabel();
 
         $payload = [
             'BusinessShortCode' => config('mpesa.shortcode'),
@@ -66,7 +66,7 @@ class MpesaDarajaService implements MobileMoneyGateway
             'PhoneNumber' => $phone,
             'CallBackURL' => config('mpesa.callback_url'),
             'AccountReference' => Str::limit($accountRef, 12, ''),
-            'TransactionDesc' => Str::limit('Food order #' . $payment->order_id, 20, ''),
+            'TransactionDesc' => Str::limit('Food order '.$payment->paymentReferenceLabel(), 20, ''),
         ];
 
         $response = Http::withToken($token)

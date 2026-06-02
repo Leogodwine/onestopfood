@@ -11,6 +11,12 @@
     </a>
 </div>
 
+@if(!empty($removedUnavailableCount))
+    <div class="alert alert-warning">
+        {{ $removedUnavailableCount === 1 ? 'One meal was removed' : $removedUnavailableCount . ' meals were removed' }} from your cart because {{ $removedUnavailableCount === 1 ? 'it is' : 'they are' }} no longer available.
+    </div>
+@endif
+
 @if(empty($items))
     <div class="dashboard-card">
         <div class="card-body text-center py-5">
@@ -20,6 +26,13 @@
         </div>
     </div>
 @else
+    @if(!empty($isMultiChef))
+        <div class="alert alert-info mb-3">
+            <i class="bi bi-shop me-2"></i>
+            Your cart includes meals from <strong>{{ $chefCount }} chefs</strong>.
+            At checkout we create <strong>separate orders</strong> — one per chef — each with its own delivery.
+        </div>
+    @endif
     <div class="dashboard-card">
         <div class="card-body">
             <div class="table-responsive">
@@ -35,6 +48,30 @@
                         </tr>
                     </thead>
                     <tbody>
+                        @if(!empty($isMultiChef) && isset($chefGroups))
+                            @foreach($chefGroups as $group)
+                                <tr class="table-light">
+                                    <td colspan="6" class="fw-semibold py-2">
+                                        <i class="bi bi-person-badge me-1"></i> Chef: {{ $group['chef']->name }}
+                                    </td>
+                                </tr>
+                                @foreach($group['items'] as $item)
+                                    <tr>
+                                        <td>{{ $item['meal']->name }}</td>
+                                        <td class="text-muted">{{ $group['chef']->name }}</td>
+                                        <td class="text-end">TZS {{ number_format((float)$item['meal']->price, 2) }}</td>
+                                        <td class="text-end">{{ $item['quantity'] }}</td>
+                                        <td class="text-end fw-bold">TZS {{ number_format((float)$item['line_total'], 2) }}</td>
+                                        <td class="text-end">
+                                            <form method="POST" action="{{ route('cart.remove', $item['meal']) }}" class="d-inline">
+                                                @csrf
+                                                <button class="btn btn-sm btn-outline-danger" type="submit">Remove</button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            @endforeach
+                        @else
                         @foreach($items as $item)
                             <tr>
                                 <td>{{ $item['meal']->name }}</td>
@@ -50,6 +87,7 @@
                                 </td>
                             </tr>
                         @endforeach
+                        @endif
                     </tbody>
                 </table>
             </div>

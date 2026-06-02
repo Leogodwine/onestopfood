@@ -48,27 +48,54 @@
                             @enderror
                         </div>
 
+                        <div class="mb-2">
+                            <p class="small text-muted mb-2 password-generate-row">
+                                <span>{{ __('auth.password_own_or_generate') }}</span>
+                                <button type="button"
+                                        class="btn btn-outline-success btn-sm js-generate-password"
+                                        data-password="#reset_password"
+                                        data-confirm="#reset_password_confirmation">
+                                    <i class="bi bi-stars"></i> {{ __('auth.generate_password') }}
+                                </button>
+                            </p>
+                            <span class="small text-success d-none js-generate-status">{{ __('auth.password_generated') }}</span>
+                        </div>
+
                         <div class="mb-3">
-                            <label for="password" class="form-label">New Password</label>
-                            <input type="password" 
-                                   name="password" 
-                                   id="password" 
-                                   class="form-control form-control-lg @error('password') is-invalid @enderror" 
-                                   placeholder="Min 8 characters" 
-                                   required>
-                            @error('password')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
+                            @include('auth.partials.password-input', [
+                                'inputId' => 'reset_password',
+                                'name' => 'password',
+                                'label' => __('auth.password_label'),
+                                'labelIcon' => null,
+                                'size' => 'lg',
+                                'withHint' => true,
+                                'invalid' => $errors->has('password'),
+                                'errorMessage' => $errors->has('password') ? $errors->first('password') : null,
+                            ])
                         </div>
 
                         <div class="mb-4">
-                            <label for="password_confirmation" class="form-label">Confirm New Password</label>
-                            <input type="password" 
-                                   name="password_confirmation" 
-                                   id="password_confirmation" 
-                                   class="form-control form-control-lg" 
-                                   placeholder="Repeat new password" 
-                                   required>
+                            <label class="form-label" for="reset_password_confirmation">{{ __('auth.password_confirm_label') }}</label>
+                            <div class="input-group password-input-group input-group-lg">
+                                <input type="password"
+                                       name="password_confirmation"
+                                       id="reset_password_confirmation"
+                                       class="form-control form-control-lg"
+                                       placeholder="{{ __('auth.password_confirm_placeholder') }}"
+                                       minlength="8"
+                                       autocomplete="new-password"
+                                       required>
+                                <button
+                                    type="button"
+                                    class="btn btn-outline-secondary btn-toggle-password js-toggle-password"
+                                    data-target="reset_password_confirmation"
+                                    data-show-label="{{ __('auth.show_password') }}"
+                                    data-hide-label="{{ __('auth.hide_password') }}"
+                                    aria-label="{{ __('auth.show_password') }}"
+                                >
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </div>
                         </div>
 
                         <button type="submit" class="btn btn-success btn-lg w-100 login-portal-btn">

@@ -109,10 +109,7 @@
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Live Selfie Photo</label>
-                                <input type="file" name="selfie" class="form-control">
-                                @if($profile->selfie_path)
-                                    <small class="text-success mt-1 d-block"><i class="bi bi-check-circle"></i> Selfie uploaded</small>
-                                @endif
+                                @include('profile.partials.selfie-capture', ['profile' => $profile])
                             </div>
                             <hr class="my-4">
                             <h6 class="fw-bold mb-2">Emergency Contact</h6>
@@ -152,15 +149,7 @@
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
-                            <div class="col-md-6">
-                                <label class="form-label">City/District</label>
-                                <select name="city_district" class="form-select" required>
-                                    <option value="Dar es Salaam" @selected(old('city_district', $profile->city_district) === 'Dar es Salaam')>Dar es Salaam</option>
-                                    <option value="Arusha" @selected(old('city_district', $profile->city_district) === 'Arusha')>Arusha</option>
-                                    <option value="Dodoma" @selected(old('city_district', $profile->city_district) === 'Dodoma')>Dodoma</option>
-                                    <option value="Mwanza" @selected(old('city_district', $profile->city_district) === 'Mwanza')>Mwanza</option>
-                                </select>
-                            </div>
+                            @include('profile.partials.city-district-select', ['profile' => $profile])
                             <div class="col-md-6">
                                 <label class="form-label">Ward/Neighborhood</label>
                                 <input type="text" name="ward_neighborhood" class="form-control" value="{{ old('ward_neighborhood', $profile->ward_neighborhood) }}" required placeholder="e.g. Masaki">
@@ -170,23 +159,24 @@
                                 <textarea name="landmark_directions" class="form-control" rows="2" required placeholder="e.g. Near the big Baobab tree">{{ old('landmark_directions', $profile->landmark_directions) }}</textarea>
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label">Address Type</label>
-                                <select name="address_type" class="form-select" required>
+                                <label class="form-label">Kitchen Type</label>
+                                <select name="kitchen_type" class="form-select" required>
                                     <option value="">Select...</option>
-                                    <option value="Home" @selected(old('address_type', $profile->address_type) === 'Home')>Home Kitchen</option>
-                                    <option value="Commercial" @selected(old('address_type', $profile->address_type) === 'Commercial')>Commercial Kitchen</option>
-                                    <option value="Shared" @selected(old('address_type', $profile->address_type) === 'Shared')>Shared Kitchen</option>
-                                    <option value="Restaurant" @selected(old('address_type', $profile->address_type) === 'Restaurant')>Restaurant</option>
+                                    <option value="Home" @selected(old('kitchen_type', $profile->kitchen_type) === 'Home')>Home Kitchen</option>
+                                    <option value="Commercial" @selected(old('kitchen_type', $profile->kitchen_type) === 'Commercial')>Commercial Kitchen</option>
+                                    <option value="Shared" @selected(old('kitchen_type', $profile->kitchen_type) === 'Shared')>Shared Kitchen</option>
+                                    <option value="Restaurant" @selected(old('kitchen_type', $profile->kitchen_type) === 'Restaurant')>Restaurant</option>
                                 </select>
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label">Proof of Address (Utility bill, lease, license)</label>
-                                <input type="file" name="proof_of_address" class="form-control">
+                                <label class="form-label">Proof of Kitchen (license, lease, or registration)</label>
+                                <input type="file" name="proof_of_kitchen" class="form-control">
+                                @if($profile->proof_of_kitchen_path)
+                                    <small class="text-success mt-1 d-block"><i class="bi bi-check-circle"></i> Proof of kitchen uploaded</small>
+                                @endif
                             </div>
                             <div class="col-12">
-                                <label class="form-label">Kitchen Photos (Required for home kitchens)</label>
-                                <input type="file" name="kitchen_photos[]" class="form-control" multiple>
-                                <small class="text-muted">Upload at least 2 clear photos of your cooking area.</small>
+                                @include('profile.partials.kitchen-photos-upload', ['profile' => $profile])
                             </div>
                         </div>
                         <div class="mt-4 d-flex justify-content-end gap-2">

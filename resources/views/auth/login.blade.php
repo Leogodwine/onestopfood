@@ -19,14 +19,23 @@
                             <span class="login-portal-logo-text">{{ $siteName ?? config('app.name', 'One Stop') }}</span>
                         @endif
                     </div>
+                    <div class="login-portal-partner-links">
+                        <a href="javascript:void(0)" class="login-portal-link login-portal-link-highlight" onclick="openRegisterModal('chef')">
+                            <i class="bi bi-egg-fried"></i> Become a Chef
+                        </a>
+                        <a href="javascript:void(0)" class="login-portal-link login-portal-link-highlight" onclick="openRegisterModal('traveler')">
+                            <i class="bi bi-truck"></i> Become a Traveler / Dropper
+                        </a>
+                    </div>
                     <div class="login-portal-links">
-                        <!-- <a href="#" class="login-portal-link">User Manual</a>
-                        <a href="#" class="login-portal-link login-portal-link-highlight">Guidelines!</a> -->
+                        <a href="{{ route('docs.user-manual') }}" class="login-portal-link" target="_blank" rel="noopener">
+                            <i class="bi bi-book"></i> User Manual
+                        </a>
+                        <a href="{{ route('docs.guidelines') }}" class="login-portal-link login-portal-link-highlight" target="_blank" rel="noopener">
+                            <i class="bi bi-journal-text"></i> Guidelines!
+                        </a>
                         <a href="{{ route('home') }}" class="login-portal-link login-portal-back-home">
-                            <span class="login-portal-icon material-icon" aria-hidden="true">
-                                <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24" fill="currentColor"><path d="M240-200h120v-240h240v240h120v-360L480-740 240-560v360Zm-80 80v-480l320-240 320 240v480H520v-240h-80v240H160Zm320-350Z"/></svg>
-                            </span>
-                            Back home
+                            <i class="bi bi-house"></i> Back home
                         </a>
                     </div>
                 </div>
@@ -34,23 +43,28 @@
                 <!-- Right: Sign in form -->
                 <div class="login-portal-right">
                     <div class="login-portal-title">
-                        <h1 class="login-portal-org">WELCOME ONE STOP</h1>
-                        <p class="login-portal-sub">Food Order Delivery Portal</p>
+                        <h1 class="login-portal-org">Welcome to OneStop</h1>
+                        <p class="login-portal-sub">Food Order &amp; Delivery System</p>
                     </div>
 
-                    <p class="login-portal-signin-with text-muted small mb-2">Sign in with your account</p>
-                    <div class="login-portal-social d-flex gap-2 justify-content-center mb-4">
-                        <a href="#" class="btn login-portal-social-btn" title="Sign in with Google" aria-label="Sign in with Google">
-                            <svg class="login-portal-social-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
-                            <span>Google</span>
-                        </a>
-                        <a href="#" class="btn login-portal-social-btn" title="Sign in with Facebook" aria-label="Sign in with Facebook">
-                            <svg class="login-portal-social-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#1877F2" d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
-                            <span>Facebook</span>
-                        </a>
-                    </div>
+                    @php
+                        $socialProviderNames = array_values(array_filter([
+                            ($googleSignInEnabled ?? false) ? 'Google' : null,
+                            ($facebookSignInEnabled ?? false) ? 'Facebook' : null,
+                        ]));
+                        $socialSignInHint = count($socialProviderNames) === 0
+                            ? null
+                            : (count($socialProviderNames) === 1
+                                ? 'Sign in with your '.$socialProviderNames[0].' account'
+                                : 'Sign in with your '.implode(' or ', $socialProviderNames).' account');
+                    @endphp
 
-                    <div class="login-portal-divider mb-3"><span>or</span></div>
+                    @if ($socialSignInHint)
+                        <p class="login-portal-signin-with text-muted small mb-2">{{ $socialSignInHint }}</p>
+                        @include('auth._social_auth_buttons', ['class' => 'login-portal-social mb-4'])
+
+                        <div class="login-portal-divider mb-3"><span>or</span></div>
+                    @endif
 
                     @if(request()->boolean('session_expired'))
                         <div class="alert alert-warning small mb-3">
@@ -85,7 +99,11 @@
                                        class="form-control form-control-lg @error('password') is-invalid @enderror"
                                        placeholder="Enter your password"
                                        required>
-                                <button class="btn btn-outline-secondary" type="button" id="togglePassword" aria-label="Show password">
+                                <button class="btn btn-outline-secondary js-toggle-password" type="button" id="togglePassword"
+                                        data-target="password"
+                                        data-show-label="{{ __('auth.show_password') }}"
+                                        data-hide-label="{{ __('auth.hide_password') }}"
+                                        aria-label="{{ __('auth.show_password') }}">
                                     <i class="bi bi-eye" id="eyeIcon"></i>
                                 </button>
                             </div>
@@ -105,7 +123,7 @@
                         </div>
 
                         <button type="submit" class="btn btn-success btn-lg w-100 login-portal-btn">
-                            Sign in
+                            {{ __('auth.sign_in') }}
                         </button>
                     </form>
 
@@ -188,11 +206,33 @@
     letter-spacing: 0.02em;
 }
 
+.login-portal-partner-links {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+    width: 100%;
+    align-self: stretch;
+    padding-inline-start: 2.5rem;
+}
+
+.login-portal-partner-links .login-portal-link,
+.login-portal-links .login-portal-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.95rem;
+}
+
 .login-portal-links {
     display: flex;
     flex-direction: column;
-    align-items: center;
-    gap: 0.75rem;
+    align-items: flex-start;
+    gap: 0.5rem;
+    width: 100%;
+    align-self: stretch;
+    padding-inline-start: 2.5rem;
 }
 
 .login-portal-link {
@@ -212,13 +252,6 @@
     text-decoration: underline;
 }
 
-.login-portal-back-home {
-    margin-top: 1rem;
-    font-size: 0.95rem;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.35rem;
-}
 .login-portal-back-home:hover {
     text-decoration: underline;
 }
@@ -373,21 +406,9 @@
 }
 </style>
 
-<script>
-document.getElementById('togglePassword')?.addEventListener('click', function() {
-    var el = document.getElementById('password');
-    var icon = document.getElementById('eyeIcon');
-    if (el.type === 'password') {
-        el.type = 'text';
-        icon.classList.remove('bi-eye');
-        icon.classList.add('bi-eye-slash');
-    } else {
-        el.type = 'password';
-        icon.classList.remove('bi-eye-slash');
-        icon.classList.add('bi-eye');
-    }
-});
+@include('auth.partials.password-tools')
 
+<script>
 window.addEventListener('load', function () {
     try {
         var parts = [
@@ -408,5 +429,9 @@ window.addEventListener('load', function () {
 });
 </script>
 
+@include('auth._social_auth_intent_script')
 @include('auth._register_modal')
+@if(!empty($socialSignupState))
+    @include('auth._social_signup_modal')
+@endif
 @endsection

@@ -42,8 +42,13 @@
                     <tbody>
                         @foreach($orders as $order)
                             <tr>
-                                <td><strong>#{{ $order->id }}</strong></td>
-                                <td>{{ $order->chef?->name ?? ($order->orderChefs?->map(fn($oc) => $oc->chef->name)->join(', ') ?? '—') }}</td>
+                                <td>
+                                    <strong>#{{ $order->id }}</strong>
+                                    @if($order->checkout_batch_id)
+                                        <span class="badge bg-info text-dark ms-1" title="Part of multi-chef checkout">Multi-chef</span>
+                                    @endif
+                                </td>
+                                <td>{{ $order->chef?->name ?? '—' }}</td>
                                 <td>{{ $order->items->count() }} item(s)</td>
                                 <td>TZS {{ number_format((float)$order->total, 2) }}</td>
                                 <td>
@@ -61,16 +66,23 @@
                                     </span>
                                 </td>
                                 <td>
-                                    @php $payStatus = $order->payment?->status ?? '—'; @endphp
-                                    <span class="badge bg-{{ $payStatus === 'paid' ? 'success' : ($payStatus === 'pending' ? 'warning' : 'secondary') }}">
-                                        {{ ucfirst($payStatus) }}
-                                    </span>
+                                    @php $orderPayment = $order->effectivePayment(); @endphp
+                                    @if($orderPayment)
+                                        <span class="badge bg-{{ $orderPayment->statusBadgeClass() }}">
+                                            {{ $orderPayment->statusLabel() }}
+                                        </span>
+                                    @else
+                                        <span class="text-muted">—</span>
+                                    @endif
                                 </td>
                                 <td>{{ $order->created_at->format('M d, Y') }}</td>
                                 <td class="text-nowrap">
                                     @if($order->invoice)
                                         <a class="btn btn-sm btn-outline-success" href="{{ route('invoices.show', $order->invoice) }}" title="Invoice">
                                             <i class="bi bi-receipt"></i>
+                                        </a>
+                                        <a class="btn btn-sm btn-outline-secondary" href="{{ route('invoices.download', $order->invoice) }}" title="Download PDF">
+                                            <i class="bi bi-download"></i>
                                         </a>
                                     @endif
                                     <a class="btn btn-sm btn-outline-primary" href="{{ route('orders.show', $order) }}">

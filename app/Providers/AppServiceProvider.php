@@ -2,16 +2,19 @@
 
 namespace App\Providers;
 
+use App\Support\PasswordRules;
 use App\Models\Meal;
 use App\Models\Payment;
 use App\Models\SystemSetting;
 use App\Observers\PaymentObserver;
+use App\Services\SocialAuthService;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Validation\Rules\Password;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -28,6 +31,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Password::defaults(fn () => PasswordRules::defaults());
+
         if ($this->app->environment('production')) {
             URL::forceScheme('https');
         }
@@ -35,6 +40,10 @@ class AppServiceProvider extends ServiceProvider
         Paginator::defaultView('vendor.pagination.bootstrap-5-compact');
 
         Payment::observe(PaymentObserver::class);
+
+        $socialAuth = app(SocialAuthService::class);
+        View::share('googleSignInEnabled', $socialAuth->isConfigured('google'));
+        View::share('facebookSignInEnabled', $socialAuth->isConfigured('facebook'));
 
         if (Schema::hasTable('system_settings')) {
             View::share('siteName', Cache::remember(
@@ -50,8 +59,22 @@ class AppServiceProvider extends ServiceProvider
             View::share('supportPhone', Cache::remember(
                 'settings.support_phone',
                 3600,
-                fn () => SystemSetting::getValue('support_phone', '+255626725383')
+                fn () => SystemSetting::getValue('support_phone', config('contacts.support_phone', '+255 651 490 677'))
             ));
+            View::share('supportEmail', Cache::remember(
+                'settings.support_email',
+                3600,
+                fn () => SystemSetting::getValue('support_email', config('contacts.support_email'))
+            ));
+            View::share('noreplyEmail', Cache::remember(
+                'settings.noreply_email',
+                3600,
+                fn () => SystemSetting::getValue('noreply_email', config('contacts.noreply_email'))
+            ));
+        } else {
+            View::share('supportPhone', config('contacts.support_phone', '+255 651 490 677'));
+            View::share('supportEmail', config('contacts.support_email'));
+            View::share('noreplyEmail', config('contacts.noreply_email'));
         }
 
         View::composer(['layout', 'layouts.dashboard'], function ($view) {

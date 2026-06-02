@@ -1,0 +1,27 @@
+<?php
+
+return [
+    'home' => 'Nyumbani',
+    'our_chefs' => 'Wapishi Wetu',
+    'menu' => 'Menyu',
+    'all_meals' => 'Vyakula Vyote',
+    'become_chef' => 'Kuwa Mpishi',
+    'stories' => 'Hadithi',
+    'search_placeholder' => 'Tafuta vyakula, wapishi, asili, au hadithi...',
+    'deliver_to' => 'Peana kwa',
+    'your_location' => 'Eneo Lako',
+    'set_delivery_address' => 'Weka anwani ya uwasilishaji',
+    'sign_in_to_set_location' => 'Ingia ili kuweka eneo',
+    'sign_in' => 'Ingia',
+    'dashboard' => 'Dashibodi',
+    'cart' => 'Kikapu',
+    'cart_empty' => 'Kikapu chako ni tupu',
+    'subtotal' => 'Jumla ndogo',
+    'show_full_cart' => 'Onyesha Kikapu Kizima',
+    'checkout' => 'Maliza Ununuzi',
+    'place_order' => 'Weka Agizo',
+    'qty' => 'Idadi',
+    'english' => 'Kiingereza',
+    'swahili' => 'Kiswahili',
+    'language' => 'Lugha',
+];

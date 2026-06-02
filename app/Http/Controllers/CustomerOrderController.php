@@ -10,7 +10,7 @@ class CustomerOrderController extends Controller
     {
         $orders = $request->user()
             ->ordersAsCustomer()
-            ->with(['chef', 'orderChefs.chef', 'items.meal', 'payment', 'invoice', 'delivery'])
+            ->with(['chef', 'orderChefs.chef', 'items.meal', 'payment', 'sharedPayment', 'invoice', 'delivery'])
             ->latest()
             ->paginate(10);
 

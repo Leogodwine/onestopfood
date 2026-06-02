@@ -437,6 +437,80 @@
             gap: 16px;
         }
 
+        /* Floating actions: language switcher above WhatsApp */
+        .floating-actions-stack {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 10px;
+        }
+        .lang-fab-switcher {
+            display: flex;
+            gap: 4px;
+            padding: 4px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.96);
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.12);
+            border: 1px solid rgba(0, 0, 0, 0.06);
+        }
+        .lang-fab-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 2.25rem;
+            height: 2rem;
+            padding: 0 0.55rem;
+            border-radius: 999px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-decoration: none;
+            color: #495057;
+            transition: background 0.2s ease, color 0.2s ease;
+        }
+        .lang-fab-btn:hover {
+            color: var(--primary-green, #22c55e);
+            background: rgba(34, 197, 94, 0.12);
+        }
+        .lang-fab-btn.active {
+            background: var(--primary-green, #22c55e);
+            color: #fff;
+        }
+        .whatsapp-fab {
+            position: relative;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: linear-gradient(145deg, #2ee66a 0%, #25d366 50%, #20bd5a 100%);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 16px rgba(37, 211, 102, 0.4);
+            text-decoration: none;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .whatsapp-fab:hover {
+            color: #fff;
+            transform: scale(1.08);
+        }
+        .whatsapp-fab i {
+            font-size: 1.75rem;
+        }
+        @media (max-width: 575.98px) {
+            .floating-actions-stack {
+                bottom: max(16px, env(safe-area-inset-bottom));
+                right: max(16px, env(safe-area-inset-right));
+            }
+            .whatsapp-fab {
+                width: 52px;
+                height: 52px;
+            }
+        }
+
         /* Admin: top bar uses Bootstrap primary blue (falls back to --primary-blue in :root) */
         .top-navbar--admin-blue {
             background: var(--bs-primary, var(--primary-blue));
@@ -1135,7 +1209,7 @@
                     <li class="nav-item">
                         <a class="nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}" href="{{ route('dashboard') }}" title="Dashboard">
                             <i class="bi bi-speedometer2"></i>
-                            <span class="sidebar-label">Dashboard</span>
+                            <span class="sidebar-label">{{ __('dashboard.dashboard') }}</span>
                         </a>
                     </li>
                 @endif
@@ -1144,7 +1218,7 @@
                         <li class="nav-item">
                             <a class="nav-link {{ request()->routeIs('chefs.*') ? 'active' : '' }}" href="{{ route('chefs.index') }}" title="Our Chefs">
                                 <i class="bi bi-person-badge"></i>
-                                <span class="sidebar-label">Chefs</span>
+                                <span class="sidebar-label">{{ __('dashboard.chefs') }}</span>
                             </a>
                         </li>
                     @endif
@@ -1152,61 +1226,67 @@
                         <li class="nav-item">
                             <a class="nav-link {{ request()->routeIs('admin.users.*') ? 'active' : '' }}" href="{{ route('admin.users.index') }}" title="Manage Users">
                                 <i class="bi bi-people"></i>
-                                <span class="sidebar-label">Users</span>
+                                <span class="sidebar-label">{{ __('dashboard.users') }}</span>
                             </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link {{ request()->routeIs('admin.verifications.*') ? 'active' : '' }}" href="{{ route('admin.verifications.index') }}" title="Verifications">
                                 <i class="bi bi-patch-check"></i>
-                                <span class="sidebar-label">Verifications</span>
+                                <span class="sidebar-label">{{ __('dashboard.verifications') }}</span>
                             </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link {{ request()->routeIs('admin.orders.*') ? 'active' : '' }}" href="{{ route('admin.orders.index') }}" title="Orders">
                                 <i class="bi bi-list-check"></i>
-                                <span class="sidebar-label">Orders</span>
+                                <span class="sidebar-label">{{ __('dashboard.orders') }}</span>
                             </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link {{ request()->routeIs('admin.finance.*') ? 'active' : '' }}" href="{{ route('admin.finance.index') }}" title="Finance">
                                 <i class="bi bi-cash-stack"></i>
-                                <span class="sidebar-label">Finance</span>
+                                <span class="sidebar-label">{{ __('dashboard.finance') }}</span>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link {{ request()->routeIs('admin.logistics.*') ? 'active' : '' }}" href="{{ route('admin.logistics.index') }}" title="Logistics">
+                            <a class="nav-link {{ (request()->routeIs('admin.billing.*') || request()->routeIs('admin.invoices.*') || request()->routeIs('invoices.*')) ? 'active' : '' }}" href="{{ route('admin.invoices.index') }}" title="Billing && Invoice">
+                                <i class="bi bi-receipt"></i>
+                                <span class="sidebar-label">{{ __('dashboard.billing_invoice') }}</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {{ request()->routeIs('admin.logistics.*') ? 'active' : '' }}" href="{{ route('admin.logistics.index') }}" title="{{ __('dashboard.logistics') }}">
                                 <i class="bi bi-truck"></i>
-                                <span class="sidebar-label">Logistics</span>
+                                <span class="sidebar-label">{{ __('dashboard.logistics') }}</span>
                             </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link {{ request()->routeIs('admin.disputes.*') ? 'active' : '' }}" href="{{ route('admin.disputes.index') }}" title="Disputes">
                                 <i class="bi bi-exclamation-octagon"></i>
-                                <span class="sidebar-label">Disputes</span>
+                                <span class="sidebar-label">{{ __('dashboard.disputes') }}</span>
                             </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link {{ request()->routeIs('admin.notifications.*') ? 'active' : '' }}" href="{{ route('admin.notifications.index') }}" title="Notifications">
                                 <i class="bi bi-megaphone"></i>
-                                <span class="sidebar-label">Notifications</span>
+                                <span class="sidebar-label">{{ __('dashboard.notifications') }}</span>
                             </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link {{ request()->routeIs('admin.analytics.*') ? 'active' : '' }}" href="{{ route('admin.analytics.index') }}" title="Analytics">
                                 <i class="bi bi-graph-up"></i>
-                                <span class="sidebar-label">Analytics</span>
+                                <span class="sidebar-label">{{ __('dashboard.analytics') }}</span>
                             </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link {{ request()->routeIs('admin.config.*') ? 'active' : '' }}" href="{{ route('admin.config.index') }}" title="Configuration">
                                 <i class="bi bi-gear"></i>
-                                <span class="sidebar-label">Config</span>
+                                <span class="sidebar-label">{{ __('dashboard.config') }}</span>
                             </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link {{ request()->routeIs('admin.zones.*') ? 'active' : '' }}" href="{{ route('admin.zones.index') }}" title="Zones">
                                 <i class="bi bi-geo-alt"></i>
-                                <span class="sidebar-label">Zones</span>
+                                <span class="sidebar-label">{{ __('dashboard.zones') }}</span>
                             </a>
                         </li>
                     @endif
@@ -1215,19 +1295,31 @@
                         <li class="nav-item">
                             <a class="nav-link {{ request()->routeIs('chef.meals.*') ? 'active' : '' }}" href="{{ route('chef.meals.index') }}" title="My Meals">
                                 <i class="bi bi-egg-fried"></i>
-                                <span class="sidebar-label">My Meals</span>
+                                <span class="sidebar-label">{{ __('dashboard.my_meals') }}</span>
                             </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link {{ request()->routeIs('chef.orders.*') ? 'active' : '' }}" href="{{ route('chef.orders.index') }}" title="Orders">
                                 <i class="bi bi-cart-check"></i>
-                                <span class="sidebar-label">Orders</span>
+                                <span class="sidebar-label">{{ __('dashboard.orders') }}</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {{ request()->routeIs('chef.logistics.*') ? 'active' : '' }}" href="{{ route('chef.logistics.index') }}" title="{{ __('dashboard.logistics_travelers') }}">
+                                <i class="bi bi-truck"></i>
+                                <span class="sidebar-label">{{ __('dashboard.logistics_travelers') }}</span>
                             </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link {{ request()->routeIs('chef.earnings') ? 'active' : '' }}" href="{{ route('chef.earnings') }}" title="Earnings">
                                 <i class="bi bi-cash-coin"></i>
-                                <span class="sidebar-label">Earnings</span>
+                                <span class="sidebar-label">{{ __('dashboard.earnings') }}</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {{ (request()->routeIs('billing.index') || request()->routeIs('invoices.*')) ? 'active' : '' }}" href="{{ route('invoices.index') }}" title="Billing && Invoice">
+                                <i class="bi bi-receipt"></i>
+                                <span class="sidebar-label">{{ __('dashboard.billing_invoice') }}</span>
                             </a>
                         </li>
                     @endif
@@ -1236,13 +1328,19 @@
                         <li class="nav-item">
                             <a class="nav-link {{ request()->routeIs('traveler.deliveries') ? 'active' : '' }}" href="{{ route('traveler.deliveries') }}" title="Deliveries">
                                 <i class="bi bi-truck"></i>
-                                <span class="sidebar-label">Deliveries</span>
+                                <span class="sidebar-label">{{ __('dashboard.deliveries') }}</span>
                             </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link {{ request()->routeIs('traveler.earnings') ? 'active' : '' }}" href="{{ route('traveler.earnings') }}" title="Earnings">
                                 <i class="bi bi-cash-coin"></i>
-                                <span class="sidebar-label">Earnings</span>
+                                <span class="sidebar-label">{{ __('dashboard.earnings') }}</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {{ (request()->routeIs('billing.index') || request()->routeIs('invoices.*')) ? 'active' : '' }}" href="{{ route('invoices.index') }}" title="Billing && Invoice">
+                                <i class="bi bi-receipt"></i>
+                                <span class="sidebar-label">{{ __('dashboard.billing_invoice') }}</span>
                             </a>
                         </li>
                     @endif
@@ -1251,12 +1349,12 @@
                         <li class="nav-item sidebar-has-submenu">
                             <button type="button" class="nav-link sidebar-menu-toggle w-100 text-start border-0 bg-transparent d-flex align-items-center {{ request()->routeIs('meals.index') ? 'active' : '' }}" data-bs-toggle="collapse" data-bs-target="#sidebarMenuSubmenu" aria-expanded="{{ request()->routeIs('meals.index') ? 'true' : 'false' }}" id="sidebarMenuSubmenuToggle" aria-controls="sidebarMenuSubmenu" title="Menu / Meals">
                                 <i class="bi bi-menu-button-wide"></i>
-                                <span class="sidebar-label">Menu / Meals</span>
+                                <span class="sidebar-label">{{ __('dashboard.menu_meals') }}</span>
                                 <i class="bi bi-chevron-down sidebar-submenu-chevron ms-auto transition-transform"></i>
                             </button>
                             <ul class="collapse sidebar-submenu list-unstyled mb-0 {{ request()->routeIs('meals.index') ? 'show' : '' }}" id="sidebarMenuSubmenu">
                                 <li class="sidebar-submenu-item">
-                                    <a class="nav-link sidebar-submenu-link" href="{{ route('meals.index') }}"><i class="bi bi-grid-3x3-gap me-2"></i>All Meals</a>
+                                    <a class="nav-link sidebar-submenu-link" href="{{ route('meals.index') }}"><i class="bi bi-grid-3x3-gap me-2"></i>{{ __('dashboard.all_meals') }}</a>
                                 </li>
                                 @foreach(\App\Models\Meal::getStandardCategories() as $catKey => $cat)
                                     <li class="sidebar-submenu-item">
@@ -1268,7 +1366,7 @@
                         <li class="nav-item">
                             <a class="nav-link {{ request()->routeIs('cart.index') ? 'active' : '' }}" href="{{ route('cart.index') }}" title="Cart">
                                 <i class="bi bi-cart"></i>
-                                <span class="sidebar-label">Cart</span>
+                                <span class="sidebar-label">{{ __('dashboard.cart') }}</span>
                                 @php $cartCount = array_sum(session('cart', [])); @endphp
                                 @if($cartCount > 0)
                                     <span class="badge bg-success ms-auto">{{ $cartCount }}</span>
@@ -1278,13 +1376,19 @@
                         <li class="nav-item">
                             <a class="nav-link {{ request()->routeIs('customer.orders') ? 'active' : '' }}" href="{{ route('customer.orders') }}" title="My Orders">
                                 <i class="bi bi-bag-check"></i>
-                                <span class="sidebar-label">My Orders</span>
+                                <span class="sidebar-label">{{ __('dashboard.my_orders') }}</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {{ (request()->routeIs('billing.index') || request()->routeIs('invoices.*')) ? 'active' : '' }}" href="{{ route('invoices.index') }}" title="Billing && Invoice">
+                                <i class="bi bi-receipt"></i>
+                                <span class="sidebar-label">{{ __('dashboard.billing_invoice') }}</span>
                             </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link {{ request()->routeIs('locations.*') ? 'active' : '' }}" href="{{ route('locations.index') }}" title="My Addresses">
                                 <i class="bi bi-geo-alt"></i>
-                                <span class="sidebar-label">My Addresses</span>
+                                <span class="sidebar-label">{{ __('dashboard.my_addresses') }}</span>
                             </a>
                         </li>
                     @endif
@@ -1293,7 +1397,7 @@
                         <li class="nav-item">
                             <a class="nav-link" href="{{ route('home') }}" title="Back to Home">
                                 <i class="bi bi-house"></i>
-                                <span class="sidebar-label">Back to Home</span>
+                                <span class="sidebar-label">{{ __('dashboard.back_to_home') }}</span>
                             </a>
                         </li>
                     @endif
@@ -1322,16 +1426,16 @@
                     <span class="dashboard-title fw-bold" style="color: var(--dark-gray);">
                         @auth
                             @if(auth()->user()->role === 'chef')
-                                {{ $isApproved ? 'Chef Dashboard' : 'Chef Verification' }}
+                                {{ $isApproved ? __('dashboard.chef_dashboard') : __('dashboard.chef_verification') }}
                             @elseif(auth()->user()->role === 'admin')
-                                Admin Dashboard
+                                {{ __('dashboard.admin_dashboard') }}
                             @elseif(auth()->user()->role === 'traveler')
-                                {{ $isApproved ? 'Traveler Dashboard' : 'Traveler Verification' }}
+                                {{ $isApproved ? __('dashboard.traveler_dashboard') : __('dashboard.traveler_verification') }}
                             @else
-                                Customer Dashboard
+                                {{ __('dashboard.customer_dashboard') }}
                             @endif
                         @else
-                            Dashboard
+                            {{ __('dashboard.dashboard') }}
                         @endauth
                     </span>
                 </a>
@@ -1340,7 +1444,7 @@
                 @auth
                     @if(auth()->user()->role === 'customer')
                         @php $dashboardCartCount = array_sum(session('cart', [])); @endphp
-                        <button type="button" class="dashboard-cart-icon position-relative border-0 bg-transparent p-2 rounded-circle d-flex align-items-center justify-content-center" data-bs-toggle="modal" data-bs-target="#cartModal" title="Cart" aria-label="Open cart">
+                        <button type="button" class="dashboard-cart-icon position-relative border-0 bg-transparent p-2 rounded-circle d-flex align-items-center justify-content-center" data-bs-toggle="modal" data-bs-target="#cartModal" title="{{ __('nav.cart') }}" aria-label="{{ __('nav.cart') }}">
                             <i class="bi bi-cart3" style="font-size: 1.35rem; color: var(--text-secondary, #6c757d);"></i>
                             @if($dashboardCartCount > 0)
                                 <span class="position-absolute top-0 end-0 translate-middle badge rounded-pill bg-danger" style="font-size: 0.65rem; min-width: 1.1rem;">{{ $dashboardCartCount }}</span>
@@ -1364,7 +1468,7 @@
                         <ul class="dropdown-menu dropdown-menu-end shadow border-0 py-2" aria-labelledby="profileDropdown">
                             <li>
                                 <a class="dropdown-item d-flex align-items-center gap-2 py-2" href="{{ route('profile.show') }}">
-                                    <i class="bi bi-person-circle"></i> Profile
+                                    <i class="bi bi-person-circle"></i> {{ __('dashboard.profile') }}
                                 </a>
                             </li>
                             <li><hr class="dropdown-divider my-1"></li>
@@ -1372,7 +1476,7 @@
                                 <form method="POST" action="{{ route('logout') }}" class="m-0">
                                     @csrf
                                     <button type="submit" class="dropdown-item d-flex align-items-center gap-2 py-2 text-danger w-100 border-0 bg-transparent text-start">
-                                        <i class="bi bi-box-arrow-right"></i> Logout
+                                        <i class="bi bi-box-arrow-right"></i> {{ __('dashboard.logout') }}
                                     </button>
                                 </form>
                             </li>
@@ -1387,13 +1491,13 @@
             @if(session()->has('impersonator_id') && session()->has('impersonated_user_id'))
                 <div class="alert alert-warning d-flex justify-content-between align-items-center mb-3">
                     <div>
-                        <strong>Impersonation mode:</strong>
-                        You are currently viewing the platform as another user.
+                        <strong>{{ __('dashboard.impersonation_mode') }}</strong>
+                        {{ __('dashboard.impersonation_message') }}
                     </div>
                     <form method="POST" action="{{ route('impersonation.stop') }}" class="ms-3">
                         @csrf
                         <button type="submit" class="btn btn-sm btn-outline-dark">
-                            <i class="bi bi-person-x"></i> Stop Impersonating
+                            <i class="bi bi-person-x"></i> {{ __('dashboard.stop_impersonating') }}
                         </button>
                     </form>
                 </div>
@@ -1417,22 +1521,22 @@
         <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="cartModalLabel"><i class="bi bi-cart-check me-2"></i>Full Cart</h5>
+                    <h5 class="modal-title" id="cartModalLabel"><i class="bi bi-cart-check me-2"></i>{{ __('dashboard.full_cart') }}</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     @if(empty($cartItems))
-                        <p class="text-muted mb-0">Your cart is empty.</p>
+                        <p class="text-muted mb-0">{{ __('nav.cart_empty') }}</p>
                     @else
                         <div class="table-responsive">
                             <table class="table align-middle mb-0">
                                 <thead>
                                     <tr>
-                                        <th>Meal</th>
-                                        <th>Chef</th>
-                                        <th class="text-end">Price</th>
-                                        <th class="text-end">Qty</th>
-                                        <th class="text-end">Total</th>
+                                        <th>{{ __('common.meal') }}</th>
+                                        <th>{{ __('common.chef') }}</th>
+                                        <th class="text-end">{{ __('common.price') }}</th>
+                                        <th class="text-end">{{ __('nav.qty') }}</th>
+                                        <th class="text-end">{{ __('common.total') }}</th>
                                         <th class="text-end"></th>
                                     </tr>
                                 </thead>
@@ -1447,7 +1551,7 @@
                                             <td class="text-end">
                                                 <form method="POST" action="{{ route('cart.remove', $item['meal']) }}" class="d-inline">
                                                     @csrf
-                                                    <button class="btn btn-sm btn-outline-danger" type="submit">Remove</button>
+                                                    <button class="btn btn-sm btn-outline-danger" type="submit">{{ __('common.remove') }}</button>
                                                 </form>
                                             </td>
                                         </tr>
@@ -1457,16 +1561,16 @@
                         </div>
                         <div class="d-flex justify-content-end mt-3 pt-3 border-top">
                             <div class="text-end">
-                                <div class="text-muted small">Subtotal</div>
+                                <div class="text-muted small">{{ __('nav.subtotal') }}</div>
                                 <div class="h5 mb-0">TZS {{ number_format((float)$cartSubtotal, 2) }}</div>
                             </div>
                         </div>
                     @endif
                 </div>
                 <div class="modal-footer flex-wrap gap-2">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Continue shopping</button>
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">{{ __('common.continue_shopping') }}</button>
                     @if(!empty($cartItems))
-                        <a href="{{ route('orders.checkout') }}" class="btn btn-success">Place order</a>
+                        <a href="{{ route('orders.checkout') }}" class="btn btn-success">{{ __('nav.place_order') }}</a>
                     @endif
                 </div>
             </div>
@@ -1504,6 +1608,8 @@
         });
     </script>
     @endif
+
+    @include('partials.floating-actions', ['brand' => $brand])
 
     <!-- Bootstrap 5 JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>

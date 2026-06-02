@@ -4,7 +4,7 @@
 @php
     $profile = auth()->user()->travelerProfile;
     $isOnline = $profile && $profile->is_online;
-    $trackGpsForAdminMap = $assignedDeliveries->contains(fn ($d) => in_array($d->status, ['assigned', 'picked_up'], true));
+    $trackGpsForAdminMap = $isOnline || $assignedDeliveries->contains(fn ($d) => in_array($d->status, ['assigned', 'picked_up'], true));
 @endphp
 
 <div class="page-header">
@@ -24,7 +24,7 @@
 
 @if(!$isOnline)
     <div class="alert alert-warning mb-4">
-        <i class="bi bi-exclamation-triangle"></i> You are currently offline. Toggle online to receive delivery assignments.
+        <i class="bi bi-exclamation-triangle"></i> You are currently offline. Toggle online to receive delivery assignments and share your location for nearby matching.
     </div>
 @endif
 
@@ -109,7 +109,7 @@
 
 @if($trackGpsForAdminMap)
 <div class="alert alert-info small mb-0 mt-3">
-    <i class="bi bi-geo-alt"></i> Location is sent about once per minute while this page is open (synced, not continuous). Allow the browser prompt if asked.
+    <i class="bi bi-geo-alt"></i> Your live location is sent about once per minute while you are online (or on an active delivery) and this page is open. Allow the browser prompt if asked.
 </div>
 @endif
 

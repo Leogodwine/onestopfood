@@ -1,0 +1,27 @@
+<?php
+
+return [
+    'sign_in' => 'Ingia',
+    'back_to_sign_in' => 'Rudi kuingia',
+    'sign_in_here' => 'Ingia hapa!',
+    'sign_in_page' => 'ukurasa wa kuingia',
+    'last_sign_in' => 'Mara ya mwisho kuingia',
+    'failed_sign_in_attempts' => 'Akaunti yako imefungwa kwa sababu ya majaribio mengi yasiyofanikiwa. Tafadhali wasiliana na msimamizi.',
+    'social_only_password_reset' => 'Akaunti hii inatumia Google au Facebook na haina nenosiri. Tumia vitufe vya kuingia kwa mitandao kwenye ukurasa wa kuingia.',
+    'password_hint' => 'Tumia angalau herufi 8 zenye herufi kubwa (A–Z), ndogo (a–z), nambari, na alama (mf. ! @ # $).',
+    'password_weak_help' => 'Nenosiri ni dhaifu sana. Tumia angalau herufi 8 zenye herufi kubwa na ndogo, nambari, na alama (mf. ! @ # $).',
+    'password_confirmed' => 'Manenosiri hayalingani.',
+    'name_required' => 'Tafadhali weka jina lako.',
+    'email_required' => 'Tafadhali weka barua pepe yako.',
+    'phone_required' => 'Tafadhali weka nambari ya simu.',
+    'role_required' => 'Tafadhali chagua jukumu.',
+    'password_label' => 'Nenosiri',
+    'password_confirm_label' => 'Thibitisha nenosiri',
+    'password_placeholder' => 'Nenosiri imara',
+    'password_confirm_placeholder' => 'Rudia nenosiri',
+    'show_password' => 'Onyesha nenosiri',
+    'hide_password' => 'Ficha nenosiri',
+    'generate_password' => 'Tengeneza nenosiri imara',
+    'password_own_or_generate' => 'Unda nenosiri lako, au tengeneza nenosiri imara.',
+    'password_generated' => 'Nenosiri imara limejazwa — unaweza kulibadilisha.',
+];

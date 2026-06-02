@@ -26,6 +26,8 @@ class TravelerProfile extends Model
         'emergency_contact_phone',
         'emergency_contact_relationship',
         'street_address',
+        'city',
+        'district',
         'city_district',
         'ward_neighborhood',
         'address_type',

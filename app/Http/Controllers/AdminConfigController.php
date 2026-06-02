@@ -35,6 +35,8 @@ class AdminConfigController extends Controller
         Cache::forget('settings.site_name');
         Cache::forget('settings.currency');
         Cache::forget('settings.support_phone');
+        Cache::forget('settings.support_email');
+        Cache::forget('settings.noreply_email');
 
         return back()->with('status', 'Configuration updated.');
     }

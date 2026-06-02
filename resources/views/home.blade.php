@@ -143,7 +143,17 @@
     .hero-search-input-group .hero-search-icon-btn { border-radius: 0 50px 50px 0; padding: 0.375rem 1rem; cursor: pointer; }
     .hero-search-input-group .hero-search-icon-btn:hover { background-color: #f8f9fa !important; }
     .hero-stat-item { background: transparent; display: flex; flex-direction: row; align-items: center; justify-content: center; text-align: center; padding: 0.35rem 0.5rem; gap: 0.5rem; transition: color 0.35s ease; }
-    .hero-stat-item .material-icons { font-size: 1.5rem; color: #212529; flex-shrink: 0; transition: color 0.35s ease; }
+    .hero-stat-item .material-icons {
+        font-family: 'Material Icons';
+        font-size: 1.75rem;
+        color: #212529;
+        flex-shrink: 0;
+        transition: color 0.35s ease;
+        line-height: 1;
+    }
+    .hero-stat-item .material-icons.text-warning {
+        color: #f59e0b !important;
+    }
     .hero-stat-item .hero-stat-content { display: flex; flex-direction: column; align-items: center; text-align: center; }
     .hero-stat-value, .hero-stat-label { transition: color 0.35s ease; }
     .hero-stat-value { font-weight: 700; font-size: 1rem; color: #212529; display: block; }
@@ -275,7 +285,7 @@
                 <div class="row g-3 justify-content-center hero-stats-row">
                     <div class="col-6 col-md-4">
                         <div class="hero-stat-item">
-                            <span class="material-icons">schedule</span>
+                            <i class="material-icons" aria-hidden="true">schedule</i>
                             <div class="hero-stat-content">
                                 <span class="hero-stat-value">30 min</span>
                                 <span class="hero-stat-label">Average delivery time</span>
@@ -284,7 +294,7 @@
                     </div>
                     <div class="col-6 col-md-4">
                         <div class="hero-stat-item">
-                            <span class="material-icons text-warning">star</span>
+                            <i class="material-icons text-warning" aria-hidden="true">star</i>
                             <div class="hero-stat-content">
                                 <span class="hero-stat-value">4.8</span>
                                 <span class="hero-stat-label">From 2000+ reviews</span>
@@ -293,7 +303,7 @@
                     </div>
                     <div class="col-6 col-md-4">
                         <div class="hero-stat-item">
-                            <span class="material-icons">local_shipping</span>
+                            <i class="material-icons" aria-hidden="true">local_shipping</i>
                             <div class="hero-stat-content">
                                 <span class="hero-stat-value">Free delivery</span>
                                 <span class="hero-stat-label">On orders over $30</span>
@@ -351,8 +361,8 @@
                     <span class="badge-top">24/7</span>
                     <span class="badge-sub">Fresh Delivery</span>
                 </div>
-                @if(file_exists(public_path('images/one stop food container 01.jpeg')))
-                    <img src="{{ asset('images/one stop food container 01.jpeg') }}" 
+                @if(file_exists(public_path('images/one-stop-food-container.jpeg')))
+                    <img src="{{ asset('images/one-stop-food-container.jpeg') }}" 
                          alt="One Stop Professional Food Container" 
                          class="img-fluid rounded shadow-sm packaging-image">
                 @elseif(file_exists(public_path('images/one stop food 01.jpeg')))

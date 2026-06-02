@@ -2,11 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\AdminTwoFactorMail;
+use App\Support\PasswordRules;
 use App\Models\User;
 use App\Models\LoginActivity;
+use App\Services\PartnerApplicationService;
+use App\Services\SocialSignupService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
@@ -23,19 +28,34 @@ class AuthController extends Controller
 
     public function register(Request $request)
     {
+        $existingUser = User::query()
+            ->where('email', $request->input('email'))
+            ->first();
+
+        if ($existingUser && $existingUser->socialAccounts()->exists()) {
+            $role = $request->input('role', User::ROLE_CUSTOMER);
+            $intentHint = in_array($role, [User::ROLE_CHEF, User::ROLE_TRAVELER], true)
+                ? ' Use Google or Facebook sign-in with the same email — choose “Become a Chef” or “Become a Traveler” first.'
+                : ' Use Google or Facebook sign-in with the same email instead.';
+
+            return back()
+                ->withInput($request->except('password', 'password_confirmation'))
+                ->withErrors(['email' => 'This email is already linked to a social account.'.$intentHint], 'register');
+        }
+
         $data = $request->validateWithBag('register', [
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255', 'unique:users,email'],
-            'phone' => ['nullable', 'string', 'max:30', 'unique:users,phone'],
+            'phone' => ['required', 'string', 'max:30', 'unique:users,phone'],
             'role' => ['required', Rule::in([User::ROLE_CUSTOMER, User::ROLE_CHEF, User::ROLE_TRAVELER])],
-            'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'password' => PasswordRules::forRegistration(),
             // Chef-specific fields
             'cuisine_type' => ['nullable', 'string', 'max:255'],
             'years_experience' => ['nullable', 'string', 'max:255'],
             'specialties' => ['nullable', 'string', 'max:500'],
             'heritage_story' => ['nullable', 'string'],
             'bio' => ['nullable', 'string'],
-        ]);
+        ], PasswordRules::registerMessages());
 
         $status = in_array($data['role'], [User::ROLE_CHEF, User::ROLE_TRAVELER], true)
             ? User::STATUS_PENDING
@@ -44,9 +64,10 @@ class AuthController extends Controller
         $user = User::create([
             'name' => $data['name'],
             'email' => $data['email'],
-            'phone' => $data['phone'] ?? null,
+            'phone' => $data['phone'],
             'role' => $data['role'],
             'status' => $status,
+            'locale' => in_array(session('locale'), ['en', 'sw'], true) ? session('locale') : 'en',
             'password' => Hash::make($data['password']),
         ]);
 
@@ -70,6 +91,7 @@ class AuthController extends Controller
         }
 
         Auth::login($user);
+        $this->syncUserLocale($user);
 
         if (in_array($data['role'], [User::ROLE_CHEF, User::ROLE_TRAVELER])) {
             return redirect()->route('verification.show');
@@ -78,12 +100,58 @@ class AuthController extends Controller
         return redirect()->route('dashboard');
     }
 
-    public function showLogin(Request $request)
+    public function showLogin(Request $request, SocialSignupService $socialSignup)
     {
         if ($request->user()) {
             return redirect()->route('dashboard');
         }
-        return view('auth.login');
+
+        if ($request->boolean('restart_social_signup')) {
+            $request->session()->forget([
+                'social_signup_otp_sent',
+                'social_signup_otp_hint',
+                'social_signup_intended_role',
+                'social_signup_otp_sent_at',
+            ]);
+        }
+
+        $socialSignupState = null;
+        $userId = $request->session()->get('social_signup_user_id');
+
+        if ($userId) {
+            $user = User::query()->find($userId);
+
+            if ($user && $socialSignup->needsCompletion($user)) {
+                $defaultRole = $request->session()->get('social_signup_intended_role', User::ROLE_CUSTOMER);
+                if (! in_array($defaultRole, PartnerApplicationService::SIGNUP_ROLES, true)) {
+                    $defaultRole = User::ROLE_CUSTOMER;
+                }
+
+                $selectedRole = old('role', $defaultRole);
+
+                $socialSignupState = [
+                    'user' => $user,
+                    'otpSent' => (bool) $request->session()->get('social_signup_otp_sent'),
+                    'otpHint' => $socialSignup->otpHintForRequest($request, $user),
+                    'showModal' => (bool) $request->session()->get('open_social_signup_modal', true),
+                    'selectedRole' => $selectedRole,
+                    'resendCooldown' => $socialSignup->resendCooldownRemaining(
+                        $request->session()->get('social_signup_otp_sent_at')
+                    ),
+                ];
+            }
+        }
+
+        $sessionErrors = $request->session()->get('errors');
+        if (
+            $socialSignupState
+            && $sessionErrors instanceof \Illuminate\Support\ViewErrorBag
+            && $sessionErrors->getBag('social_signup')->isNotEmpty()
+        ) {
+            $socialSignupState['showModal'] = true;
+        }
+
+        return view('auth.login', compact('socialSignupState'));
     }
 
     public function login(Request $request)
@@ -103,7 +171,19 @@ class AuthController extends Controller
         $user = User::where('email', $data['email'])->first();
 
         // Handle invalid user or password (and track failed attempts)
-        if (!$user || !Hash::check($data['password'], $user->password)) {
+        if (! $user || empty($user->password) || ! Hash::check($data['password'], $user->password)) {
+            if ($user && empty($user->password)) {
+                $providers = $user->socialAccounts()
+                    ->pluck('provider')
+                    ->map(fn (string $p) => ucfirst($p))
+                    ->unique()
+                    ->implode(' or ');
+
+                return back()
+                    ->withErrors(['email' => 'This account uses '.($providers ?: 'social').' sign-in. Please use the button above.'])
+                    ->onlyInput('email');
+            }
+
             if ($user) {
                 $user->failed_login_attempts = ($user->failed_login_attempts ?? 0) + 1;
 
@@ -186,7 +266,17 @@ class AuthController extends Controller
             $request->session()->put('two_factor_admin_id', $user->id);
             $request->session()->put('two_factor_remember', $remember);
 
-            if (app()->environment('local')) {
+            try {
+                Mail::to($user->email)->send(new AdminTwoFactorMail($user, $code));
+            } catch (\Throwable $e) {
+                report($e);
+                logger()->warning('Admin 2FA email failed', [
+                    'user_id' => $user->id,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+
+            if (config('app.show_developer_hints')) {
                 $request->session()->flash('two_factor_hint', $code);
             }
 
@@ -196,6 +286,7 @@ class AuthController extends Controller
         // Standard login flow (no 2FA)
         Auth::login($user, $remember);
         $request->session()->regenerate();
+        $this->syncUserLocale($user);
 
         LoginActivity::create([
             'user_id' => $user->id,
@@ -258,6 +349,7 @@ class AuthController extends Controller
 
         Auth::login($user, $remember);
         $request->session()->regenerate();
+        $this->syncUserLocale($user);
 
         // Redirect to intended URL (set by auth middleware) or dashboard
         return redirect()->intended(route('dashboard'));
@@ -281,6 +373,14 @@ class AuthController extends Controller
     {
         $request->validate(['email' => 'required|email']);
 
+        $user = User::where('email', $request->email)->first();
+
+        if ($user && $user->isSocialOnlyUser()) {
+            return back()->withErrors([
+                'email' => 'This account uses Google or Facebook sign-in and does not have a password. Please use the social sign-in buttons on the login page.',
+            ]);
+        }
+
         $status = Password::sendResetLink(
             $request->only('email')
         );
@@ -300,8 +400,15 @@ class AuthController extends Controller
         $request->validate([
             'token' => 'required',
             'email' => 'required|email',
-            'password' => 'required|confirmed|min:8',
-        ]);
+            'password' => PasswordRules::forReset(),
+        ], PasswordRules::validationMessages());
+
+        $existing = User::where('email', $request->email)->first();
+        if ($existing && $existing->isSocialOnlyUser()) {
+            return back()->withErrors([
+                'email' => 'This account uses Google or Facebook sign-in and cannot set a password here.',
+            ]);
+        }
 
         $status = Password::reset(
             $request->only('email', 'password', 'password_confirmation', 'token'),
@@ -317,6 +424,21 @@ class AuthController extends Controller
         return $status === Password::PASSWORD_RESET
             ? redirect()->route('login')->with('status', __($status))
             : back()->withErrors(['email' => [__($status)]]);
+    }
+
+    private function syncUserLocale(User $user): void
+    {
+        $sessionLocale = session('locale');
+
+        if (in_array($sessionLocale, ['en', 'sw'], true) && $user->locale !== $sessionLocale) {
+            $user->forceFill(['locale' => $sessionLocale])->save();
+
+            return;
+        }
+
+        if (in_array($user->locale, ['en', 'sw'], true)) {
+            session(['locale' => $user->locale]);
+        }
     }
 }
 

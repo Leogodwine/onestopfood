@@ -6,6 +6,14 @@
     $currency = $invoice->currency ?? $currencyCode ?? 'TZS';
 @endphp
 
+@if(session('placed_batch_order_ids') && count(session('placed_batch_order_ids')) > 1)
+    <div class="alert alert-info mb-4">
+        <i class="bi bi-receipt me-2"></i>
+        Your checkout created <strong>{{ count(session('placed_batch_order_ids')) }} invoices</strong> (one per chef).
+        <a href="{{ route('billing.index') }}" class="alert-link">View all billing &amp; invoices</a>
+    </div>
+@endif
+
 <div class="page-header d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
     <div>
         <h2>Invoice {{ $invoice->invoice_number }}</h2>
@@ -15,21 +23,34 @@
         <a class="btn btn-outline-secondary" href="{{ route('orders.show', $order) }}">
             <i class="bi bi-box-seam"></i> Order details
         </a>
+        <a class="btn btn-outline-primary" href="{{ route('billing.index') }}">
+            <i class="bi bi-wallet2"></i> Billing &amp; invoices
+        </a>
         <a class="btn btn-outline-primary" href="{{ route('invoices.print', $invoice) }}" target="_blank">
             <i class="bi bi-printer"></i> Print
         </a>
-        <a class="btn btn-outline-primary" href="{{ route('customer.orders') }}">
-            <i class="bi bi-arrow-left"></i> My orders
+        <a class="btn btn-outline-secondary" href="{{ route('invoices.download', $invoice) }}">
+            <i class="bi bi-download"></i> Download PDF
+        </a>
+        @php
+            $backRoute = match(auth()->user()->role) {
+                'admin' => route('admin.invoices.index'),
+                'chef' => route('chef.orders.index'),
+                'traveler' => route('traveler.deliveries'),
+                default => route('billing.index'),
+            };
+            $backLabel = match(auth()->user()->role) {
+                'admin' => 'All invoices',
+                'chef' => 'My orders',
+                'traveler' => 'My deliveries',
+                default => 'Billing & invoices',
+            };
+        @endphp
+        <a class="btn btn-outline-primary" href="{{ $backRoute }}">
+            <i class="bi bi-arrow-left"></i> {{ $backLabel }}
         </a>
     </div>
 </div>
-
-@if(session('status'))
-    <div class="alert alert-success alert-dismissible fade show">
-        {{ session('status') }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
-@endif
 
 <div class="row g-4">
     <div class="col-lg-8">
@@ -117,16 +138,17 @@
     </div>
 
     <div class="col-lg-4">
+        @php $invoicePayment = $order->effectivePayment(); @endphp
         <div class="dashboard-card mb-3">
             <div class="card-header">
                 <h5 class="card-title mb-0">Payment status</h5>
             </div>
             <div class="card-body">
-                @include('invoices.partials.payment-progress', ['invoice' => $invoice, 'order' => $order])
+                @include('invoices.partials.payment-progress', ['invoice' => $invoice, 'order' => $order, 'payment' => $invoicePayment])
 
-                <dl class="small mb-0">
+                <dl class="small mb-0 mt-3">
                     <dt class="text-muted">Method</dt>
-                    <dd>{{ ucfirst($order->payment?->method ?? '—') }}</dd>
+                    <dd>{{ $invoicePayment?->methodLabel() ?? '—' }}</dd>
                     <dt class="text-muted">Amount</dt>
                     <dd>{{ $currency }} {{ number_format((float) $invoice->amount, 2) }}</dd>
                     <dt class="text-muted">Order status</dt>
@@ -135,7 +157,7 @@
             </div>
         </div>
 
-        @if(auth()->id() === $order->customer_id && $order->payment?->status === 'pending')
+        @if(auth()->id() === $order->customer_id && $invoicePayment?->isPending())
             <div class="dashboard-card">
                 <div class="card-header">
                     <h5 class="card-title mb-0">Pay now</h5>

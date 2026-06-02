@@ -11,18 +11,22 @@ use App\Models\OrderItem;
 use App\Models\Review;
 use App\Models\Delivery;
 use App\Models\Payment;
+use Database\Seeders\Concerns\UsesSeedPassword;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Hash;
 
 class OneStopSeeder extends Seeder
 {
+    use UsesSeedPassword;
+
     public function run(): void
     {
+        $seedPassword = $this->seedPasswordHash();
+
         // Create Admin
         $admin = User::create([
             'name' => 'Admin User',
             'email' => 'admin@onestop.com',
-            'password' => Hash::make('password'),
+            'password' => $seedPassword,
             'role' => 'admin',
             'status' => 'approved',
         ]);
@@ -112,7 +116,7 @@ class OneStopSeeder extends Seeder
             $chef = User::create([
                 'name' => $chefData['name'],
                 'email' => $chefData['email'],
-                'password' => Hash::make('password'),
+                'password' => $seedPassword,
                 'role' => 'chef',
                 'status' => 'approved',
                 'phone' => '+255 626 ' . rand(100000, 999999),

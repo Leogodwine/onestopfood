@@ -8,17 +8,20 @@ class PaymentObserver
 {
     public function created(Payment $payment): void
     {
-        $this->syncInvoice($payment);
+        $this->syncInvoices($payment);
     }
 
     public function updated(Payment $payment): void
     {
-        $this->syncInvoice($payment);
+        $this->syncInvoices($payment);
     }
 
-    private function syncInvoice(Payment $payment): void
+    private function syncInvoices(Payment $payment): void
     {
-        $invoice = $payment->order?->invoice;
-        $invoice?->syncFromPayment($payment);
+        $orders = $payment->batchOrders()->with('invoice')->get();
+
+        foreach ($orders as $order) {
+            $order->invoice?->syncFromPayment($payment);
+        }
     }
 }

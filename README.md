@@ -151,9 +151,13 @@ Key tables:
 ## Documentation
 
 See the `docs/` folder for:
+- **[User Manual](docs/USER-MANUAL.md)** — Step-by-step guide for customers, chefs, travelers, and admins
+- **[System Guidelines](docs/SYSTEM-GUIDELINES.md)** — Platform policies, standards, and compliance rules
 - Project proposal and requirements
 - Database ERD
 - SDLC documentation
+
+Online versions: `/docs/user-manual` and `/docs/guidelines`
 
 ## License
 

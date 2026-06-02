@@ -32,7 +32,7 @@ class Invoice extends Model
 
     public function syncFromPayment(?Payment $payment = null): void
     {
-        $payment ??= $this->order?->payment;
+        $payment ??= $this->order?->effectivePayment();
         if (! $payment) {
             return;
         }
@@ -41,7 +41,6 @@ class Invoice extends Model
         $this->update([
             'payment_status' => $status,
             'paid_at' => $status === 'paid' ? ($payment->paid_at ?? now()) : null,
-            'amount' => $payment->amount,
         ]);
     }
 
@@ -71,7 +70,7 @@ class Invoice extends Model
     {
         return match ($this->payment_status) {
             'paid' => 'Paid',
-            'pending' => 'Unpaid',
+            'pending' => 'Unpaid — waiting for payment',
             'failed' => 'Payment failed',
             'refunded' => 'Refunded',
             default => ucfirst($this->payment_status),

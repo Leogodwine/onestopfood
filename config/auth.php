@@ -112,4 +112,20 @@ return [
 
     'password_timeout' => env('AUTH_PASSWORD_TIMEOUT', 10800),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Strong passwords (production defaults when APP_ENV=production)
+    |--------------------------------------------------------------------------
+    |
+    | password_min_length: minimum characters (default 8)
+    | password_uncompromised: reject passwords found in data breaches (HIBP API)
+    |
+    */
+    'password_min_length' => (int) env('PASSWORD_MIN_LENGTH', 8),
+
+    'password_uncompromised' => filter_var(
+        env('PASSWORD_UNCOMPROMISED', env('APP_ENV') === 'production'),
+        FILTER_VALIDATE_BOOLEAN
+    ),
+
 ];

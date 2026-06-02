@@ -7,10 +7,12 @@ use App\Http\Controllers\CartController;
 use App\Http\Controllers\CustomerOrderController;
 use App\Http\Controllers\ChefController;
 use App\Http\Controllers\ChefOrderController;
+use App\Http\Controllers\ChefLogisticsController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EarningsController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\InvoiceController;
+use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\LocationController;
 use App\Http\Controllers\MealController;
 use App\Http\Controllers\MobileMoneyPaymentController;
@@ -27,7 +29,13 @@ use App\Http\Controllers\AdminNotificationController;
 use App\Http\Controllers\AdminAnalyticsController;
 use App\Http\Controllers\AdminConfigController;
 use App\Http\Controllers\AdminZoneController;
+use App\Http\Controllers\AdminMealController;
+use App\Http\Controllers\AdminInvoiceController;
+use App\Http\Controllers\SocialAuthController;
+use App\Http\Controllers\PartnerApplicationController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\SocialSignupController;
+use App\Http\Controllers\DocumentationController;
 use App\Http\Controllers\VerificationController;
 
 Route::post('/payments/mpesa/callback', [MobileMoneyPaymentController::class, 'mpesaCallback'])
@@ -39,10 +47,15 @@ Route::post('/payments/airtel/callback', [MobileMoneyPaymentController::class, '
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
+Route::get('/locale/{locale}', [LocaleController::class, 'switch'])->name('locale.switch');
+
 Route::get('/meals', [MealController::class, 'index'])->name('meals.index');
 Route::get('/chefs', [ChefController::class, 'index'])->name('chefs.index');
 Route::get('/chefs/{chef}', [ChefController::class, 'show'])->name('chefs.show');
 Route::get('/stories', [StoryController::class, 'index'])->name('stories.index');
+
+Route::get('/docs/user-manual', [DocumentationController::class, 'userManual'])->name('docs.user-manual');
+Route::get('/docs/guidelines', [DocumentationController::class, 'guidelines'])->name('docs.guidelines');
 
 Route::middleware('throttle:10,1')->group(function () {
     Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
@@ -57,6 +70,18 @@ Route::middleware('throttle:10,1')->group(function () {
 
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
+Route::middleware('throttle:20,1')->group(function () {
+    Route::get('/auth/google', [SocialAuthController::class, 'redirectGoogle'])->name('auth.google.redirect');
+    Route::get('/auth/google/callback', [SocialAuthController::class, 'callbackGoogle'])->name('auth.google.callback');
+    Route::get('/auth/facebook', [SocialAuthController::class, 'redirectFacebook'])->name('auth.facebook.redirect');
+    Route::get('/auth/facebook/callback', [SocialAuthController::class, 'callbackFacebook'])->name('auth.facebook.callback');
+
+    Route::get('/auth/complete-signup', [SocialSignupController::class, 'showComplete'])->name('social.signup.complete');
+    Route::post('/auth/complete-signup/send-otp', [SocialSignupController::class, 'sendOtp'])->name('social.signup.send-otp');
+    Route::post('/auth/complete-signup/verify-otp', [SocialSignupController::class, 'verifyOtp'])->name('social.signup.verify-otp');
+    Route::post('/auth/complete-signup/resend-otp', [SocialSignupController::class, 'resendOtp'])->name('social.signup.resend-otp');
+});
+
 // Password Reset (token step — separate limit)
 Route::get('/reset-password/{token}', [AuthController::class, 'showResetPassword'])->name('password.reset');
 Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('password.update');
@@ -66,13 +91,15 @@ Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
 Route::post('/cart/add/{meal}', [CartController::class, 'add'])->name('cart.add');
 Route::post('/cart/remove/{meal}', [CartController::class, 'remove'])->name('cart.remove');
 
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', 'social.signup.complete'])->group(function () {
     Route::get('/dashboard', DashboardController::class)->name('dashboard');
 
     Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
     Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::post('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::get('/profile/avatar', [ProfileController::class, 'avatar'])->name('profile.avatar');
+
+    Route::post('/partner/apply', [PartnerApplicationController::class, 'apply'])->name('partner.apply');
 
 
     // Impersonation: admin can stop impersonating
@@ -89,8 +116,12 @@ Route::middleware('auth')->group(function () {
     Route::post('/orders', [OrderController::class, 'place'])->name('orders.place');
     Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
     Route::get('/orders/{order}/invoice', [InvoiceController::class, 'showByOrder'])->name('orders.invoice');
+    Route::get('/invoices', [InvoiceController::class, 'index'])->name('invoices.index');
     Route::get('/invoices/{invoice}', [InvoiceController::class, 'show'])->name('invoices.show');
     Route::get('/invoices/{invoice}/print', [InvoiceController::class, 'print'])->name('invoices.print');
+    Route::get('/invoices/{invoice}/download', [InvoiceController::class, 'download'])->name('invoices.download');
+
+    Route::get('/billing', fn () => redirect()->route('invoices.index'))->name('billing.index');
     Route::post('/orders/{order}/pay/mobile', [MobileMoneyPaymentController::class, 'initiate'])
         ->middleware('throttle:5,1')
         ->name('orders.pay.mobile');
@@ -117,14 +148,21 @@ Route::middleware('auth')->group(function () {
 
     Route::middleware('role:admin')->prefix('/admin')->name('admin.')->group(function () {
         Route::get('/users', [AdminController::class, 'index'])->name('users.index');
+        Route::get('/users/export', [AdminController::class, 'export'])->name('users.export');
+        Route::post('/users/bulk', [AdminController::class, 'bulkUpdate'])->name('users.bulk');
         Route::get('/users/{user}', [AdminController::class, 'showUser'])->name('users.show');
         Route::post('/users/{user}/approve', [AdminController::class, 'approve'])->name('users.approve');
         Route::post('/users/{user}/reject', [AdminController::class, 'reject'])->name('users.reject');
         Route::post('/users/{user}/suspend', [AdminController::class, 'suspend'])->name('users.suspend');
         Route::post('/users/{user}/unsuspend', [AdminController::class, 'unsuspend'])->name('users.unsuspend');
-        Route::post('/users/bulk', [AdminController::class, 'bulkUpdate'])->name('users.bulk');
-        Route::get('/users/export', [AdminController::class, 'export'])->name('users.export');
         Route::post('/users/{user}/impersonate', [AdminController::class, 'impersonate'])->name('users.impersonate');
+
+        // Admin meals
+        Route::get('/meals', [AdminMealController::class, 'index'])->name('meals.index');
+
+        // Admin billing & invoices
+        Route::get('/invoices', [AdminInvoiceController::class, 'index'])->name('invoices.index');
+        Route::get('/billing', fn () => redirect()->route('admin.invoices.index'))->name('billing.index');
 
         // FR-ADMIN-03: Verification workflow
         Route::get('/verifications', [AdminVerificationController::class, 'index'])->name('verifications.index');
@@ -171,6 +209,11 @@ Route::middleware('auth')->group(function () {
         Route::get('/meals', [MealController::class, 'chefIndex'])->name('meals.index');
         Route::get('/meals/create', [MealController::class, 'create'])->name('meals.create');
         Route::post('/meals', [MealController::class, 'store'])->name('meals.store');
+        Route::get('/meals/{meal}', [MealController::class, 'chefShow'])->name('meals.show');
+        Route::get('/meals/{meal}/edit', [MealController::class, 'edit'])->name('meals.edit');
+        Route::put('/meals/{meal}', [MealController::class, 'update'])->name('meals.update');
+        Route::post('/meals/{meal}/toggle-availability', [MealController::class, 'toggleAvailability'])->name('meals.toggle-availability');
+        Route::delete('/meals/{meal}', [MealController::class, 'destroy'])->name('meals.destroy');
 
         Route::get('/orders', [ChefOrderController::class, 'index'])->name('orders.index');
         Route::get('/orders/{order}', [ChefOrderController::class, 'show'])->name('orders.show');
@@ -179,7 +222,10 @@ Route::middleware('auth')->group(function () {
         Route::post('/orders/{order}/status', [ChefOrderController::class, 'updateStatus'])->name('orders.update-status');
         Route::post('/orders/{order}/assign-traveler', [ChefOrderController::class, 'assignTraveler'])->name('orders.assign-traveler');
 
+        Route::get('/logistics', [ChefLogisticsController::class, 'index'])->name('logistics.index');
+
         Route::get('/earnings', [EarningsController::class, 'chefEarnings'])->name('earnings');
+        Route::get('/invoices', [InvoiceController::class, 'index'])->name('invoices.index');
     });
 
     Route::middleware('role:traveler')->prefix('/traveler')->name('traveler.')->group(function () {

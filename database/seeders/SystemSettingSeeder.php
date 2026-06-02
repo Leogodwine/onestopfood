@@ -32,7 +32,7 @@ class SystemSettingSeeder extends Seeder
             [
                 'key' => 'support_phone',
                 'label' => 'Support Phone',
-                'value' => '+255 123 456 789',
+                'value' => '+255 651 490 677',
                 'type' => 'string',
                 'group' => 'General',
                 'description' => 'Contact phone for support',

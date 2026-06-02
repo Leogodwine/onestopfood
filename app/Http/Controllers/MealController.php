@@ -6,13 +6,14 @@ use App\Models\Meal;
 use App\Models\OrderItem;
 use App\Models\Review;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class MealController extends Controller
 {
     public function index(Request $request)
     {
         $query = Meal::query()
-            ->where('is_available', true)
+            ->visibleToCustomers()
             ->with('chef');
 
         // Search functionality - includes heritage stories and origins
@@ -62,7 +63,7 @@ class MealController extends Controller
         $meals = $query->paginate(12)->withQueryString();
 
         // Get unique categories for filter: standard first, then any from DB
-        $dbCategories = Meal::where('is_available', true)
+        $dbCategories = Meal::visibleToCustomers()
             ->whereNotNull('category')
             ->distinct()
             ->pluck('category')
@@ -76,7 +77,7 @@ class MealController extends Controller
 
         // Heritage Stories block (same dataset as home: flagged or with story)
         $heritageMeals = Meal::query()
-            ->where('is_available', true)
+            ->visibleToCustomers()
             ->where(function ($query) {
                 $query->where('is_heritage', true)
                     ->orWhereNotNull('heritage_story');
@@ -117,11 +118,11 @@ class MealController extends Controller
     {
         $query = Meal::query()->where('chef_id', $request->user()->id);
 
-        if ($request->filled('available')) {
-            $query->where('is_available', (bool) $request->input('available'));
+        if ($request->has('available') && $request->input('available') !== '') {
+            $query->where('is_available', $request->input('available') === '1' || $request->input('available') === 1);
         }
 
-        $meals = $query->latest()->paginate(12)->withQueryString();
+        $meals = $query->withCount('orderItems')->latest()->paginate(12)->withQueryString();
         $availableFilter = $request->input('available');
 
         return view('chef.meals.index', compact('meals', 'availableFilter'));
@@ -134,20 +135,7 @@ class MealController extends Controller
 
     public function store(Request $request)
     {
-        $data = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'description' => ['nullable', 'string'],
-            'heritage_story' => ['nullable', 'string'],
-            'origin' => ['nullable', 'string', 'max:255'],
-            'prep_time_minutes' => ['nullable', 'integer', 'min:1', 'max:10000'],
-            'price' => ['required', 'numeric', 'min:0'],
-            'category' => ['nullable', 'string', 'max:255'],
-            'dietary_tags' => ['nullable', 'string', 'max:255'],
-            'image' => ['nullable', 'image', 'mimes:jpeg,jpg,png,gif', 'max:2048'], // 2MB max
-            'is_available' => ['nullable', 'boolean'],
-            'is_heritage' => ['nullable', 'boolean'],
-            'is_popular' => ['nullable', 'boolean'],
-        ], [
+        $data = $request->validate($this->mealValidationRules(true), [
             'image.required' => 'Please select an image for the meal.',
             'image.image' => 'The uploaded file must be an image.',
             'image.mimes' => 'The image must be a file of type: jpeg, jpg, png, gif.',
@@ -171,12 +159,118 @@ class MealController extends Controller
             'dietary_tags' => $data['dietary_tags'] ?? null,
             'image_path' => $data['image_path'] ?? null,
             'chef_id' => $request->user()->id,
-            'is_available' => (bool) ($data['is_available'] ?? true),
-            'is_heritage' => (bool) ($data['is_heritage'] ?? false),
-            'is_popular' => (bool) ($data['is_popular'] ?? false),
+            'is_available' => $request->boolean('is_available'),
+            'is_heritage' => $request->boolean('is_heritage'),
+            'is_popular' => $request->boolean('is_popular'),
         ]);
 
-        return redirect()->route('chef.meals.index')->with('status', 'Meal created successfully!');
+        return redirect()->route('chef.meals.index')->with('status', __('common.meal_created'));
+    }
+
+    public function chefShow(Request $request, Meal $meal)
+    {
+        $this->authorizeChefMeal($request, $meal);
+        $meal->loadCount('orderItems');
+
+        return view('chef.meals.show', compact('meal'));
+    }
+
+    public function edit(Request $request, Meal $meal)
+    {
+        $this->authorizeChefMeal($request, $meal);
+
+        return view('chef.meals.edit', compact('meal'));
+    }
+
+    public function update(Request $request, Meal $meal)
+    {
+        $this->authorizeChefMeal($request, $meal);
+
+        $data = $request->validate($this->mealValidationRules(false));
+
+        if ($request->hasFile('image')) {
+            if ($meal->image_path) {
+                Storage::disk('public')->delete($meal->image_path);
+            }
+            $data['image_path'] = $request->file('image')->store('meals', 'public');
+        }
+
+        $meal->update([
+            'name' => $data['name'],
+            'description' => $data['description'] ?? null,
+            'heritage_story' => $data['heritage_story'] ?? null,
+            'origin' => $data['origin'] ?? null,
+            'prep_time_minutes' => $data['prep_time_minutes'] ?? null,
+            'price' => $data['price'],
+            'category' => $data['category'] ?? null,
+            'dietary_tags' => $data['dietary_tags'] ?? null,
+            'image_path' => $data['image_path'] ?? $meal->image_path,
+            'is_available' => $request->boolean('is_available'),
+            'is_heritage' => $request->boolean('is_heritage'),
+            'is_popular' => $request->boolean('is_popular'),
+        ]);
+
+        return redirect()->route('chef.meals.show', $meal)->with('status', __('common.meal_updated'));
+    }
+
+    public function toggleAvailability(Request $request, Meal $meal)
+    {
+        $this->authorizeChefMeal($request, $meal);
+
+        $meal->update(['is_available' => ! $meal->is_available]);
+
+        $message = $meal->is_available
+            ? __('common.meal_live', ['name' => $meal->name])
+            : __('common.meal_hidden', ['name' => $meal->name]);
+
+        return back()->with('status', $message);
+    }
+
+    public function destroy(Request $request, Meal $meal)
+    {
+        $this->authorizeChefMeal($request, $meal);
+
+        if ($meal->orderItems()->exists()) {
+            return back()->withErrors([
+                'error' => 'This meal has order history and cannot be deleted. Mark it as unavailable instead.',
+            ]);
+        }
+
+        if ($meal->image_path) {
+            Storage::disk('public')->delete($meal->image_path);
+        }
+
+        $meal->delete();
+
+        return redirect()->route('chef.meals.index')->with('status', __('common.meal_removed'));
+    }
+
+    private function authorizeChefMeal(Request $request, Meal $meal): void
+    {
+        if ((int) $meal->chef_id !== (int) $request->user()->id) {
+            abort(403);
+        }
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function mealValidationRules(bool $creating = true): array
+    {
+        return [
+            'name' => ['required', 'string', 'max:255'],
+            'description' => ['nullable', 'string'],
+            'heritage_story' => ['nullable', 'string'],
+            'origin' => ['nullable', 'string', 'max:255'],
+            'prep_time_minutes' => ['nullable', 'integer', 'min:1', 'max:10000'],
+            'price' => ['required', 'numeric', 'min:0'],
+            'category' => ['nullable', 'string', 'max:255'],
+            'dietary_tags' => ['nullable', 'string', 'max:255'],
+            'image' => [$creating ? 'nullable' : 'nullable', 'image', 'mimes:jpeg,jpg,png,gif', 'max:2048'],
+            'is_available' => ['nullable', 'boolean'],
+            'is_heritage' => ['nullable', 'boolean'],
+            'is_popular' => ['nullable', 'boolean'],
+        ];
     }
 }
 

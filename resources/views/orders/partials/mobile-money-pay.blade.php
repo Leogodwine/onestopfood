@@ -1,5 +1,5 @@
 @php
-    $payment = $order->payment;
+    $payment = $order->effectivePayment();
     $labels = ['mpesa' => 'M-Pesa', 'tigo' => 'Tigo Pesa', 'airtel' => 'Airtel Money'];
     $label = $labels[$payment?->method] ?? 'Mobile money';
     $receipt = $payment?->receiptNumber();

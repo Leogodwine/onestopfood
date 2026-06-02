@@ -87,7 +87,9 @@
 
         <div class="footer">
             You can view your order anytime from "My Orders" in your account.<br>
-            If you have any questions, please contact our support.
+            Need help? Contact us at
+            <a href="mailto:{{ $supportEmail ?? config('contacts.support_email') }}">{{ $supportEmail ?? config('contacts.support_email') }}</a>.<br>
+            <span class="small">This message was sent from {{ $noreplyEmail ?? config('contacts.noreply_email') }} — replies to that address are not monitored.</span>
         </div>
     </div>
 </body>
