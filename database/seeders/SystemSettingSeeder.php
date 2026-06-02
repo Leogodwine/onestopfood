@@ -24,7 +24,7 @@ class SystemSettingSeeder extends Seeder
             [
                 'key' => 'support_email',
                 'label' => 'Support Email',
-                'value' => 'support@onestop.com',
+                'value' => 'support@onestopfood.co.tz',
                 'type' => 'string',
                 'group' => 'General',
                 'description' => 'Contact email for support',

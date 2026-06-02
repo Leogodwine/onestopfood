@@ -109,7 +109,7 @@
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Live Selfie Photo</label>
-                                @include('profile.partials.selfie-capture', ['profile' => $profile])
+                                @include('profile.partials.selfie-capture', ['profile' => $profile, 'user' => $user])
                             </div>
                             <hr class="my-4">
                             <h6 class="fw-bold mb-2">Emergency Contact</h6>
@@ -176,7 +176,7 @@
                                 @endif
                             </div>
                             <div class="col-12">
-                                @include('profile.partials.kitchen-photos-upload', ['profile' => $profile])
+                                @include('profile.partials.kitchen-photos-upload', ['profile' => $profile, 'user' => $user])
                             </div>
                         </div>
                         <div class="mt-4 d-flex justify-content-end gap-2">

@@ -46,6 +46,34 @@ Run a queue worker if using database queues:
 php artisan queue:work --tries=3
 ```
 
+## Public file storage
+
+Uploaded files (meals, verification documents, avatars) are stored under `storage/app/public/`.
+
+**Required on every deploy:**
+
+```bash
+php artisan storage:link
+```
+
+This creates `public/storage` → `storage/app/public`, so URLs like `/storage/verifications/file.pdf` work.
+
+**Verify on the server:**
+
+```bash
+ls -la public/storage
+# Should be a symlink to .../storage/app/public
+ls public/storage/verifications/
+# Should list uploaded PDFs/images
+```
+
+**Uploaded verification files:** Admins and document owners can open files via authenticated routes (no `public/storage` symlink required):
+
+- `GET /documents/verifications/{id}` — row in `user_verification_documents`
+- `GET /documents/users/{userId}/profiles/{field}` — profile uploads (`selfie`, `proof-of-kitchen`, `kitchen-photo-1`, etc.)
+
+Meal catalog images still use `/storage/meals/...`; run `storage:link` for those and other public assets.
+
 ## HTTPS & cookies
 
 - Serve the site over HTTPS only.

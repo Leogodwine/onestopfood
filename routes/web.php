@@ -37,6 +37,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SocialSignupController;
 use App\Http\Controllers\DocumentationController;
 use App\Http\Controllers\VerificationController;
+use App\Http\Controllers\DocumentFileController;
 
 Route::post('/payments/mpesa/callback', [MobileMoneyPaymentController::class, 'mpesaCallback'])
     ->name('payments.mpesa.callback');
@@ -108,7 +109,13 @@ Route::middleware(['auth', 'social.signup.complete'])->group(function () {
     // User Verification Workflow (Chefs & Travelers)
     Route::get('/verify', [VerificationController::class, 'showVerificationForm'])->name('verification.show');
     Route::post('/verify', [VerificationController::class, 'submitVerificationForm'])->name('verification.submit');
-
+    Route::prefix('documents')->name('documents.')->group(function () {
+        Route::get('/verifications/{document}', [DocumentFileController::class, 'verification'])
+            ->name('verifications.show');
+        Route::get('/users/{user}/profiles/{field}', [DocumentFileController::class, 'profile'])
+            ->where('field', '[a-z0-9\-]+')
+            ->name('profiles.show');
+    });
 
     Route::get('/checkout', [OrderController::class, 'checkout'])->name('orders.checkout');
     Route::post('/checkout/delivery', [OrderController::class, 'storeDeliveryStep'])->name('orders.checkout.delivery');

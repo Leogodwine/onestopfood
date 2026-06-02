@@ -1,10 +1,14 @@
 @php
+    use App\Support\UploadedDocumentUrl;
+
     $existingPhotos = $profile->kitchen_photos ?? [];
     if (! is_array($existingPhotos)) {
         $existingPhotos = [];
     }
     $photoOne = $existingPhotos[0] ?? null;
     $photoTwo = $existingPhotos[1] ?? null;
+    $photoOneUrl = $photoOne && isset($user) ? UploadedDocumentUrl::profile($user, 'kitchen-photo-1') : null;
+    $photoTwoUrl = $photoTwo && isset($user) ? UploadedDocumentUrl::profile($user, 'kitchen-photo-2') : null;
 @endphp
 
 <div class="kitchen-photos-upload">
@@ -12,15 +16,15 @@
 
     @if($photoOne || $photoTwo)
         <div class="d-flex flex-wrap gap-3 mb-3">
-            @if($photoOne)
+            @if($photoOneUrl)
                 <div class="text-center">
-                    <img src="{{ asset('storage/' . ltrim($photoOne, '/')) }}" alt="Kitchen photo 1" class="rounded border" style="width: 120px; height: 120px; object-fit: cover;">
+                    <img src="{{ $photoOneUrl }}" alt="Kitchen photo 1" class="rounded border" style="width: 120px; height: 120px; object-fit: cover;">
                     <small class="d-block text-muted mt-1">Photo 1 saved</small>
                 </div>
             @endif
-            @if($photoTwo)
+            @if($photoTwoUrl)
                 <div class="text-center">
-                    <img src="{{ asset('storage/' . ltrim($photoTwo, '/')) }}" alt="Kitchen photo 2" class="rounded border" style="width: 120px; height: 120px; object-fit: cover;">
+                    <img src="{{ $photoTwoUrl }}" alt="Kitchen photo 2" class="rounded border" style="width: 120px; height: 120px; object-fit: cover;">
                     <small class="d-block text-muted mt-1">Photo 2 saved</small>
                 </div>
             @endif

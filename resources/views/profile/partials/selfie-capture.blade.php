@@ -1,6 +1,8 @@
 @php
-    $existingSelfieUrl = !empty($profile->selfie_path)
-        ? asset('storage/' . ltrim($profile->selfie_path, '/'))
+    use App\Support\UploadedDocumentUrl;
+
+    $existingSelfieUrl = ! empty($profile->selfie_path) && isset($user)
+        ? UploadedDocumentUrl::profile($user, 'selfie')
         : null;
 @endphp
 

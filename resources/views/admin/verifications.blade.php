@@ -103,11 +103,11 @@
                         <td>
                             @if($doc->file_path)
                                 @if($doc->isImage())
-                                    <a href="{{ $doc->publicUrl() }}" target="_blank" rel="noopener">
-                                        <img src="{{ $doc->publicUrl() }}" alt="{{ $doc->type }}" class="rounded border" style="width: 72px; height: 72px; object-fit: cover;">
+                                    <a href="{{ $doc->url() }}" target="_blank" rel="noopener">
+                                        <img src="{{ $doc->url() }}" alt="{{ $doc->type }}" class="rounded border" style="width: 72px; height: 72px; object-fit: cover;">
                                     </a>
                                 @else
-                                    <a href="{{ $doc->publicUrl() }}" target="_blank" rel="noopener" class="btn btn-sm btn-outline-info">
+                                    <a href="{{ $doc->url() }}" target="_blank" rel="noopener" class="btn btn-sm btn-outline-info">
                                         <i class="bi bi-file-earmark-arrow-down"></i> View file
                                     </a>
                                 @endif

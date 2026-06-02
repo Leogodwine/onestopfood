@@ -2,7 +2,9 @@
 
 namespace App\Models;
 
+use App\Support\UploadedDocumentUrl;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 
 class UserVerificationDocument extends Model
 {
@@ -28,13 +30,25 @@ class UserVerificationDocument extends Model
         return $this->belongsTo(User::class);
     }
 
+    /** Signed-in route that serves the file from storage/app/public. */
+    public function url(): ?string
+    {
+        return UploadedDocumentUrl::verification($this);
+    }
+
+    /** @deprecated Use url() */
     public function publicUrl(): ?string
     {
+        return $this->url();
+    }
+
+    public function fileExists(): bool
+    {
         if (! $this->file_path) {
-            return null;
+            return false;
         }
 
-        return asset('storage/' . ltrim($this->file_path, '/'));
+        return Storage::disk('public')->exists(ltrim($this->file_path, '/'));
     }
 
     public function isImage(): bool

@@ -165,7 +165,11 @@
                             @if($user->chefProfile->selfie_path)
                                 <tr>
                                     <td class="fw-semibold">Selfie:</td>
-                                    <td><a href="{{ Storage::url($user->chefProfile->selfie_path) }}" target="_blank" class="btn btn-sm btn-outline-info">View Selfie</a></td>
+                                    <td>
+                                        @if($selfieUrl = \App\Support\UploadedDocumentUrl::profile($user, 'selfie'))
+                                            <a href="{{ $selfieUrl }}" target="_blank" rel="noopener" class="btn btn-sm btn-outline-info">View Selfie</a>
+                                        @endif
+                                    </td>
                                 </tr>
                             @endif
                         </tbody>
@@ -232,7 +236,11 @@
                             @if($user->travelerProfile->selfie_path)
                                 <tr>
                                     <td class="fw-semibold">Selfie:</td>
-                                    <td><a href="{{ Storage::url($user->travelerProfile->selfie_path) }}" target="_blank" class="btn btn-sm btn-outline-info">View Selfie</a></td>
+                                    <td>
+                                        @if($selfieUrl = \App\Support\UploadedDocumentUrl::profile($user, 'selfie'))
+                                            <a href="{{ $selfieUrl }}" target="_blank" rel="noopener" class="btn btn-sm btn-outline-info">View Selfie</a>
+                                        @endif
+                                    </td>
                                 </tr>
                             @endif
                         </tbody>
@@ -292,6 +300,7 @@
                                 <th>Status</th>
                                 <th>Expires</th>
                                 <th>Uploaded</th>
+                                <th>File</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -320,6 +329,13 @@
                                         @endif
                                     </td>
                                     <td>{{ $doc->created_at->format('M d, Y') }}</td>
+                                    <td>
+                                        @if($doc->url())
+                                            <a href="{{ $doc->url() }}" target="_blank" rel="noopener" class="btn btn-sm btn-outline-info">View</a>
+                                        @else
+                                            <span class="text-muted small">—</span>
+                                        @endif
+                                    </td>
                                 </tr>
                             @endforeach
                         </tbody>

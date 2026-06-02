@@ -1,6 +1,6 @@
 @php
     $currentLocale = app()->getLocale();
-    $waPhone = preg_replace('/\D+/', '', $supportPhone ?? config('contacts.support_phone', '+255626725383'));
+    $waPhone = preg_replace('/\D+/', '', $supportPhone ?? config('contacts.support_phone', '+255 651 490 677'));
     if (str_starts_with($waPhone, '0')) {
         $waPhone = '255' . substr($waPhone, 1);
     }
