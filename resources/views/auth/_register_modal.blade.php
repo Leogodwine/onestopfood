@@ -92,24 +92,6 @@
                             </div>
                         </div>
 
-                        <div class="col-12 d-none" id="register_social_section" data-social-providers="{{ ($googleSignInEnabled ?? false ? 'Google' : '') . (($googleSignInEnabled ?? false) && ($facebookSignInEnabled ?? false) ? '/' : '') . ($facebookSignInEnabled ?? false ? 'Facebook' : '') }}">
-                            <div class="border-top pt-3 mt-1">
-                                @php
-                                    $registerSocialNames = array_values(array_filter([
-                                        ($googleSignInEnabled ?? false) ? 'Google' : null,
-                                        ($facebookSignInEnabled ?? false) ? 'Facebook' : null,
-                                    ]));
-                                    $registerSocialLabel = count($registerSocialNames) === 1
-                                        ? $registerSocialNames[0]
-                                        : implode(' / ', $registerSocialNames);
-                                @endphp
-                                @if ($registerSocialLabel)
-                                    <p class="small text-muted mb-2 text-center" id="register_social_heading">Or continue with {{ $registerSocialLabel }}</p>
-                                    @include('auth._social_auth_buttons', ['class' => 'mb-0'])
-                                @endif
-                            </div>
-                        </div>
-
                         <div class="col-12">
                             <p class="small text-muted mb-2 password-generate-row">
                                 <span>{{ __('auth.password_own_or_generate') }}</span>
@@ -176,6 +158,22 @@
                             @endif
                         </div>
                     </div>
+
+                    @php
+                        $registerSocialNames = array_values(array_filter([
+                            ($googleSignInEnabled ?? false) ? 'Google' : null,
+                            ($facebookSignInEnabled ?? false) ? 'Facebook' : null,
+                        ]));
+                        $hasRegisterSocial = count($registerSocialNames) > 0;
+                    @endphp
+                    @if ($hasRegisterSocial)
+                        <div class="register-social-footer" id="register_social_section">
+                            <div class="register-social-row">
+                                <span class="register-social-label">Or continue with</span>
+                                @include('auth._social_auth_buttons', ['class' => 'register-social-buttons mb-0'])
+                            </div>
+                        </div>
+                    @endif
                 </div>
 
                 <div class="modal-footer border-0 px-4 pb-4 pt-0">
@@ -190,6 +188,62 @@
         </div>
     </div>
 </div>
+
+<style>
+#registerModal .register-social-footer {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #e9ecef;
+}
+#registerModal .register-social-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0.65rem;
+}
+#registerModal .register-social-label {
+    color: #6c757d;
+    font-size: 0.8rem;
+    white-space: nowrap;
+}
+#registerModal .register-social-buttons.auth-social-buttons {
+    flex-wrap: nowrap;
+    justify-content: center;
+    gap: 0.5rem;
+}
+#registerModal .login-portal-social-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.45rem 1rem;
+    border-radius: 8px;
+    border: 1px solid #d1d5db;
+    background: #fff;
+    color: #374151;
+    font-weight: 600;
+    font-size: 0.875rem;
+    text-decoration: none;
+    white-space: nowrap;
+    line-height: 1.2;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+#registerModal .login-portal-social-btn:hover {
+    border-color: #22c55e;
+    box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.15);
+    color: #1f2937;
+}
+#registerModal .login-portal-social-icon {
+    width: 1.125rem;
+    height: 1.125rem;
+    flex-shrink: 0;
+    display: block;
+}
+#registerModal .login-portal-social-btn span {
+    white-space: nowrap;
+}
+</style>
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
@@ -212,29 +266,15 @@ document.addEventListener('DOMContentLoaded', function () {
     // Role helper note (keeps UI short but clear)
     const roleSelect = document.getElementById('register_role');
     const note = document.getElementById('register_role_note');
-    const socialSection = document.getElementById('register_social_section');
-    const socialProviders = socialSection?.dataset.socialProviders || '';
     function updateNote() {
         if (!roleSelect || !note) return;
         if (roleSelect.value === 'chef' || roleSelect.value === 'traveler') {
-            const socialHint = socialProviders
-                ? ' You can register with email or use ' + socialProviders + ' below.'
-                : ' You can register with email below.';
-            note.innerHTML = '<span class="text-warning"><i class="bi bi-info-circle"></i> This role requires admin approval.' + socialHint + '</span>';
-            if (socialProviders) {
-                socialSection?.classList.remove('d-none');
-            } else {
-                socialSection?.classList.add('d-none');
-            }
-            if (typeof window.setOAuthIntent === 'function') {
-                window.setOAuthIntent(roleSelect.value);
-            }
+            note.innerHTML = '<span class="text-warning"><i class="bi bi-info-circle"></i> This role requires admin approval.</span>';
         } else {
             note.innerHTML = '<span class="text-muted">You can start ordering immediately.</span>';
-            socialSection?.classList.add('d-none');
-            if (typeof window.setOAuthIntent === 'function') {
-                window.setOAuthIntent(null);
-            }
+        }
+        if (typeof window.setOAuthIntent === 'function') {
+            window.setOAuthIntent(roleSelect.value);
         }
     }
     roleSelect?.addEventListener('change', updateNote);

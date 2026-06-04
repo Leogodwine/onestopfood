@@ -215,6 +215,14 @@ class VerificationController extends Controller
             $profile->save();
         }
 
+        if ($request->hasFile('selfie') && ! empty($input['selfie_path'])) {
+            if ($user->avatar && str_starts_with($user->avatar, 'avatars/')) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($user->avatar);
+            }
+            $user->avatar = $input['selfie_path'];
+            $user->save();
+        }
+
         $user->refresh();
         $user->load(['chefProfile', 'travelerProfile']);
         VerificationDocumentSync::syncUser($user);

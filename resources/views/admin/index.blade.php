@@ -2,8 +2,17 @@
 
 @section('content')
 <div class="page-header">
-    <h2>User Management</h2>
-    <p>Review and manage all users on the platform</p>
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <div>
+            <h2>User Management</h2>
+            <p class="mb-0">Review and manage all users on the platform</p>
+        </div>
+        @if(!empty($adminPermissions['users.create']))
+        <a class="btn btn-success" href="javascript:void(0)" onclick="openCreateUserModal()">
+            <i class="bi bi-person-plus"></i> Create User
+        </a>
+        @endif
+    </div>
 </div>
 
 @if($errors->has('bulk_action'))
@@ -211,9 +220,11 @@
                 <i class="bi bi-people"></i> {{ $filterLabel }}
             </h5>
             <div class="d-flex align-items-center gap-2">
+                @if(!empty($adminPermissions['users.export']))
                 <a class="btn btn-sm btn-outline-success" href="{{ route('admin.users.export', request()->query()) }}">
                     <i class="bi bi-download"></i> Export CSV
                 </a>
+                @endif
                 <a class="btn btn-sm btn-outline-secondary" href="{{ route('admin.users.index') }}#all-users">
                     Clear filter
                 </a>
@@ -235,15 +246,19 @@
             </div>
         </div>
     </div>
+    @if(!empty($adminPermissions['users.manage']))
     <form method="POST" action="{{ route('admin.users.bulk') }}">
         @csrf
+    @endif
         <div class="table-responsive">
             <table class="table table-hover">
                 <thead>
                     <tr>
+                        @if(!empty($adminPermissions['users.manage']))
                         <th style="width: 40px;">
                             <input type="checkbox" id="select_all_users" class="form-check-input">
                         </th>
+                        @endif
                         <th>Name</th>
                         <th>Email</th>
                         <th>Role</th>
@@ -255,11 +270,13 @@
                 <tbody>
                     @forelse($allUsers as $user)
                         <tr>
+                            @if(!empty($adminPermissions['users.manage']))
                             <td>
                                 @if($user->role !== 'admin')
                                     <input type="checkbox" name="selected_users[]" value="{{ $user->id }}" class="form-check-input user-checkbox">
                                 @endif
                             </td>
+                            @endif
                             <td>
                                 <div class="fw-semibold">{{ $user->name }}</div>
                                 @if($user->phone)
@@ -269,6 +286,9 @@
                             <td>{{ $user->email }}</td>
                             <td>
                                 <span class="badge badge-primary">{{ ucfirst($user->role) }}</span>
+                                @if($user->role === 'admin')
+                                    <div class="mt-1">@include('admin.partials.role-badge', ['user' => $user])</div>
+                                @endif
                             </td>
                             <td>
                                 <span class="badge badge-{{ $user->status === 'approved' ? 'success' : ($user->status === 'pending' ? 'warning' : ($user->status === 'suspended' ? 'danger' : 'secondary')) }}">
@@ -284,7 +304,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="text-center text-muted">No users found</td>
+                            <td colspan="{{ !empty($adminPermissions['users.manage']) ? 7 : 6 }}" class="text-center text-muted">No users found</td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -294,6 +314,7 @@
             </div>
         </div>
 
+        @if(!empty($adminPermissions['users.manage']))
         <div class="mt-3 d-flex flex-wrap gap-2 align-items-end">
             <div style="min-width: 220px;">
                 <label class="form-label small text-muted">Bulk action</label>
@@ -320,6 +341,7 @@
             </div>
         </div>
     </form>
+    @endif
 </div>
 
 @push('scripts')
@@ -361,4 +383,8 @@ document.querySelector('form[action="{{ route('admin.users.bulk') }}"]')?.addEve
 });
 </script>
 @endpush
+
+@if(!empty($adminPermissions['users.create']))
+    @include('admin.users._create_modal')
+@endif
 @endsection

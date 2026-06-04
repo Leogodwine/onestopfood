@@ -1223,72 +1223,7 @@
                         </li>
                     @endif
                     @if(auth()->user()->role === 'admin')
-                        <li class="nav-item">
-                            <a class="nav-link {{ request()->routeIs('admin.users.*') ? 'active' : '' }}" href="{{ route('admin.users.index') }}" title="Manage Users">
-                                <i class="bi bi-people"></i>
-                                <span class="sidebar-label">{{ __('dashboard.users') }}</span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link {{ request()->routeIs('admin.verifications.*') ? 'active' : '' }}" href="{{ route('admin.verifications.index') }}" title="Verifications">
-                                <i class="bi bi-patch-check"></i>
-                                <span class="sidebar-label">{{ __('dashboard.verifications') }}</span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link {{ request()->routeIs('admin.orders.*') ? 'active' : '' }}" href="{{ route('admin.orders.index') }}" title="Orders">
-                                <i class="bi bi-list-check"></i>
-                                <span class="sidebar-label">{{ __('dashboard.orders') }}</span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link {{ request()->routeIs('admin.finance.*') ? 'active' : '' }}" href="{{ route('admin.finance.index') }}" title="Finance">
-                                <i class="bi bi-cash-stack"></i>
-                                <span class="sidebar-label">{{ __('dashboard.finance') }}</span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link {{ (request()->routeIs('admin.billing.*') || request()->routeIs('admin.invoices.*') || request()->routeIs('invoices.*')) ? 'active' : '' }}" href="{{ route('admin.invoices.index') }}" title="Billing && Invoice">
-                                <i class="bi bi-receipt"></i>
-                                <span class="sidebar-label">{{ __('dashboard.billing_invoice') }}</span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link {{ request()->routeIs('admin.logistics.*') ? 'active' : '' }}" href="{{ route('admin.logistics.index') }}" title="{{ __('dashboard.logistics') }}">
-                                <i class="bi bi-truck"></i>
-                                <span class="sidebar-label">{{ __('dashboard.logistics') }}</span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link {{ request()->routeIs('admin.disputes.*') ? 'active' : '' }}" href="{{ route('admin.disputes.index') }}" title="Disputes">
-                                <i class="bi bi-exclamation-octagon"></i>
-                                <span class="sidebar-label">{{ __('dashboard.disputes') }}</span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link {{ request()->routeIs('admin.notifications.*') ? 'active' : '' }}" href="{{ route('admin.notifications.index') }}" title="Notifications">
-                                <i class="bi bi-megaphone"></i>
-                                <span class="sidebar-label">{{ __('dashboard.notifications') }}</span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link {{ request()->routeIs('admin.analytics.*') ? 'active' : '' }}" href="{{ route('admin.analytics.index') }}" title="Analytics">
-                                <i class="bi bi-graph-up"></i>
-                                <span class="sidebar-label">{{ __('dashboard.analytics') }}</span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link {{ request()->routeIs('admin.config.*') ? 'active' : '' }}" href="{{ route('admin.config.index') }}" title="Configuration">
-                                <i class="bi bi-gear"></i>
-                                <span class="sidebar-label">{{ __('dashboard.config') }}</span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link {{ request()->routeIs('admin.zones.*') ? 'active' : '' }}" href="{{ route('admin.zones.index') }}" title="Zones">
-                                <i class="bi bi-geo-alt"></i>
-                                <span class="sidebar-label">{{ __('dashboard.zones') }}</span>
-                            </a>
-                        </li>
+                        @include('admin.partials.sidebar-nav')
                     @endif
                     
                     @if(auth()->user()->role === 'chef' && auth()->user()->status === 'approved')
@@ -1462,7 +1397,13 @@
                             </div>
                             <div class="d-none d-md-block text-start">
                                 <div style="font-weight: 600; color: var(--black);">{{ auth()->user()->name }}</div>
-                                <div style="font-size: 0.85rem; color: var(--text-gray); text-transform: capitalize;">{{ auth()->user()->role }}</div>
+                                <div style="font-size: 0.85rem; color: var(--text-gray);">
+                                    @if(auth()->user()->role === 'admin' && !empty($adminTitleLabel))
+                                        {{ $adminTitleLabel }}
+                                    @else
+                                        {{ ucfirst(auth()->user()->role) }}
+                                    @endif
+                                </div>
                             </div>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end shadow border-0 py-2" aria-labelledby="profileDropdown">

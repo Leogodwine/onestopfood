@@ -22,6 +22,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'auth' => \App\Http\Middleware\Authenticate::class,
             'role' => \App\Http\Middleware\RoleMiddleware::class,
+            'admin.permission' => \App\Http\Middleware\EnsureAdminPermission::class,
             'social.signup.complete' => \App\Http\Middleware\EnsureSocialSignupComplete::class,
         ]);
         $middleware->web(append: [

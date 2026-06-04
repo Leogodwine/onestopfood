@@ -117,12 +117,10 @@
                         <div class="heritage-chef-meta mb-2">
                             <div class="d-flex flex-wrap gap-1 align-items-center small text-muted">
                                 <span class="heritage-chef-photo-wrap me-1">
-                                    @if($meal->chef?->avatar)
-                                        <img src="{{ $meal->chef->avatar_url }}" alt="{{ $meal->chef->name }}" class="heritage-chef-photo rounded-circle" onerror="this.onerror=null; this.src='{{ asset('images/' . $chefImage) }}';">
-                                    @elseif(file_exists(public_path('images/' . $chefImage)))
-                                        <img src="{{ asset('images/' . $chefImage) }}" alt="{{ $meal->chef?->name ?? 'Chef' }}" class="heritage-chef-photo rounded-circle">
+                                    @if($meal->chef?->avatar_url)
+                                        <img src="{{ $meal->chef->avatar_url }}" alt="{{ $meal->chef->name }}" class="heritage-chef-photo rounded-circle">
                                     @else
-                                        <span class="heritage-chef-photo heritage-chef-initial rounded-circle">{{ $meal->chef ? substr($meal->chef->name, 0, 1) : '?' }}</span>
+                                        <span class="heritage-chef-photo heritage-chef-initial rounded-circle">{{ $meal->chef ? strtoupper(substr($meal->chef->name, 0, 1)) : '?' }}</span>
                                     @endif
                                 </span>
                                 <span>Chef {{ $meal->chef?->name ?? '—' }}</span>
@@ -153,12 +151,10 @@
                             </summary>
                             <div class="heritage-chef-block p-2 rounded bg-light mt-1">
                                 <div class="d-flex align-items-center gap-2 mb-1">
-                                    @if($meal->chef?->avatar)
-                                        <img src="{{ $meal->chef->avatar_url }}" alt="{{ $meal->chef->name }}" class="heritage-chef-photo-sm rounded-circle" onerror="this.onerror=null; this.src='{{ asset('images/' . $chefImage) }}';">
-                                    @elseif(file_exists(public_path('images/' . $chefImage)))
-                                        <img src="{{ asset('images/' . $chefImage) }}" alt="{{ $meal->chef?->name ?? 'Chef' }}" class="heritage-chef-photo-sm rounded-circle">
+                                    @if($meal->chef?->avatar_url)
+                                        <img src="{{ $meal->chef->avatar_url }}" alt="{{ $meal->chef->name }}" class="heritage-chef-photo-sm rounded-circle">
                                     @else
-                                        <span class="heritage-chef-photo-sm heritage-chef-initial rounded-circle">{{ $meal->chef ? substr($meal->chef->name, 0, 1) : '?' }}</span>
+                                        <span class="heritage-chef-photo-sm heritage-chef-initial rounded-circle">{{ $meal->chef ? strtoupper(substr($meal->chef->name, 0, 1)) : '?' }}</span>
                                     @endif
                                     <span class="fw-semibold small">{{ $meal->chef?->name ?? '—' }}</span>
                                 </div>

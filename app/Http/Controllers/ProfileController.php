@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 
 class ProfileController extends Controller
@@ -13,7 +15,7 @@ class ProfileController extends Controller
      */
     public function show(Request $request)
     {
-        $user = User::find($request->user()->id);
+        $user = User::query()->find($request->user()->id);
 
         return view('profile.show', [
             'user' => $user,
@@ -25,7 +27,7 @@ class ProfileController extends Controller
      */
     public function edit(Request $request)
     {
-        $user = User::find($request->user()->id);
+        $user = User::query()->find($request->user()->id);
 
         return view('profile.edit', [
             'user' => $user,
@@ -37,17 +39,17 @@ class ProfileController extends Controller
      */
     public function avatar(Request $request)
     {
-        $user = User::find($request->user()->id);
-        if (empty($user->avatar)) {
-            abort(404);
-        }
-        $path = Storage::disk('public')->path($user->avatar);
-        if (! is_file($path)) {
-            abort(404);
-        }
-        return response()->file($path, [
-            'Content-Type' => \Illuminate\Support\Facades\File::mimeType($path),
-        ]);
+        $user = User::query()->find($request->user()->id);
+
+        return $this->avatarFileResponse($user);
+    }
+
+    /**
+     * Serve any user's avatar for public display (chefs, listings, etc.).
+     */
+    public function userAvatar(User $user)
+    {
+        return $this->avatarFileResponse($user);
     }
 
     public function update(Request $request)
@@ -70,10 +72,8 @@ class ProfileController extends Controller
         $user->name = $data['name'];
 
         if (! empty($data['remove_avatar']) || $request->hasFile('avatar')) {
-            if ($user->avatar) {
-                Storage::disk('public')->delete($user->avatar);
-                $user->avatar = null;
-            }
+            $this->deleteStoredAvatar($user);
+            $user->avatar = null;
         }
 
         if ($request->hasFile('avatar')) {
@@ -86,6 +86,39 @@ class ProfileController extends Controller
 
         $user->save();
 
+        Auth::setUser($user->fresh());
+
         return redirect()->route('profile.show')->with('status', 'Profile updated successfully.');
+    }
+
+    private function avatarFileResponse(User $user)
+    {
+        $path = $user->resolveAvatarStoragePath();
+
+        if ($path === null || filter_var($path, FILTER_VALIDATE_URL)) {
+            abort(404);
+        }
+
+        $absolutePath = Storage::disk('public')->path($path);
+
+        if (! is_file($absolutePath)) {
+            abort(404);
+        }
+
+        return response()->file($absolutePath, [
+            'Content-Type' => File::mimeType($absolutePath),
+            'Cache-Control' => 'private, max-age=0, must-revalidate',
+        ]);
+    }
+
+    private function deleteStoredAvatar(User $user): void
+    {
+        if (empty($user->avatar) || filter_var($user->avatar, FILTER_VALIDATE_URL)) {
+            return;
+        }
+
+        if (str_starts_with($user->avatar, 'avatars/') && Storage::disk('public')->exists($user->avatar)) {
+            Storage::disk('public')->delete($user->avatar);
+        }
     }
 }

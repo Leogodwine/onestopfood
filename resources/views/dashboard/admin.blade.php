@@ -2,21 +2,42 @@
 
 @section('content')
 <div class="page-header">
-    <div class="d-flex justify-content-between align-items-center">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
         <div>
-            <h2>Admin Dashboard</h2>
-            <p class="text-muted mb-0">Overview of your platform statistics and management</p>
+            <h2>
+                @if($adminTitle === 'ceo')
+                    Executive Dashboard
+                @elseif($adminTitle === 'manager')
+                    Operations Dashboard
+                @else
+                    Admin Dashboard
+                @endif
+            </h2>
+            <p class="text-muted mb-1">{{ $adminTitleDescription }}</p>
+            @if($adminTitle !== 'system_administrator')
+            <span class="badge bg-{{ app(\App\Services\AdminAccessService::class)->titleBadge($adminTitle) }}">
+                {{ $adminTitleLabel }}
+            </span>
+            @endif
         </div>
-        <div class="d-flex gap-2">
-            <a class="btn btn-success" href="{{ route('admin.users.index') }}">
-                <i class="bi bi-person-check"></i> Review Pending Approvals
-            </a>
+        <div class="d-flex gap-2 flex-wrap">
+            @if(!empty($adminPermissions['users.create']))
+                <button type="button" class="btn btn-outline-success" onclick="openCreateUserModal()">
+                    <i class="bi bi-person-plus"></i> Create User
+                </button>
+            @endif
+            @if(!empty($adminPermissions['users.view']))
+                <a class="btn btn-success" href="{{ route('admin.users.index', ['filter' => 'pending_approvals']) }}#pending-approvals">
+                    <i class="bi bi-person-check"></i> Review Pending Approvals
+                </a>
+            @endif
         </div>
     </div>
 </div>
 
 <!-- Statistics Cards - Row 1 -->
 <div class="row g-4 mb-4">
+    @if(!empty($adminPermissions['users.view']))
     <div class="col-md-3 col-sm-6">
         <a class="stat-card stat-green d-block text-decoration-none" href="{{ route('admin.users.index') }}#all-users">
             <div class="stat-icon">
@@ -29,6 +50,8 @@
             </div>
         </a>
     </div>
+    @endif
+    @if(!empty($adminPermissions['users.view']))
     <div class="col-md-3 col-sm-6">
         <a class="stat-card stat-blue d-block text-decoration-none" href="{{ route('admin.users.index', ['role' => 'chef', 'status' => 'approved']) }}#all-users">
             <div class="stat-icon">
@@ -41,6 +64,8 @@
             </div>
         </a>
     </div>
+    @endif
+    @if(!empty($adminPermissions['orders']))
     <div class="col-md-3 col-sm-6">
         <a class="stat-card stat-green d-block text-decoration-none" href="{{ route('admin.orders.index') }}">
             <div class="stat-icon">
@@ -53,6 +78,8 @@
             </div>
         </a>
     </div>
+    @endif
+    @if(!empty($adminPermissions['meals']))
     <div class="col-md-3 col-sm-6">
         <a class="stat-card stat-blue d-block text-decoration-none" href="{{ route('admin.meals.index', ['availability' => 'available']) }}">
             <div class="stat-icon">
@@ -65,9 +92,11 @@
             </div>
         </a>
     </div>
+    @endif
 </div>
 
 <!-- Statistics Cards - Row 2 -->
+@if(!empty($adminPermissions['users.view']))
 <div class="row g-4 mb-4">
     <div class="col-md-3 col-sm-6">
         <a class="stat-card stat-green d-block text-decoration-none" href="{{ route('admin.users.index', ['role' => 'customer', 'status' => 'approved']) }}#all-users">
@@ -124,8 +153,10 @@
         </a>
     </div>
 </div>
+@endif
 
 <!-- Quick Actions -->
+@if(!empty($adminPermissions['users.view']) || !empty($adminPermissions['analytics']) || !empty($adminPermissions['config']) || !empty($adminPermissions['system.monitor']) || !empty($adminPermissions['system.security']) || !empty($adminPermissions['system.backups']))
 <div class="dashboard-card mb-4">
     <div class="card-header">
         <h5 class="card-title">
@@ -134,6 +165,7 @@
     </div>
     <div class="card-body">
         <div class="row g-3">
+            @if(!empty($adminPermissions['users.view']))
             <div class="col-md-4">
                 <a class="btn btn-success w-100 d-flex align-items-center justify-content-center gap-2" href="{{ route('admin.users.index') }}" style="height: 60px;">
                     <i class="bi bi-people fs-4"></i>
@@ -143,35 +175,97 @@
                     </div>
                 </a>
             </div>
+            @endif
+            @if(!empty($adminPermissions['analytics']))
             <div class="col-md-4">
-                <a class="btn btn-outline-primary w-100 d-flex align-items-center justify-content-center gap-2" href="{{ route('chefs.index') }}" style="height: 60px;">
-                    <i class="bi bi-egg-fried fs-4"></i>
+                <a class="btn btn-outline-primary w-100 d-flex align-items-center justify-content-center gap-2" href="{{ route('admin.analytics.index') }}" style="height: 60px;">
+                    <i class="bi bi-graph-up fs-4"></i>
                     <div class="text-start">
-                        <div class="fw-bold">View All Chefs</div>
-                        <small class="opacity-75">Browse chef profiles</small>
+                        <div class="fw-bold">View Analytics</div>
+                        <small class="opacity-75">Platform performance insights</small>
                     </div>
                 </a>
             </div>
+            @endif
+            @if(!empty($adminPermissions['config']))
             <div class="col-md-4">
-                <a class="btn btn-outline-primary w-100 d-flex align-items-center justify-content-center gap-2" href="{{ route('meals.index') }}" style="height: 60px;">
-                    <i class="bi bi-utensils fs-4"></i>
+                <a class="btn btn-outline-dark w-100 d-flex align-items-center justify-content-center gap-2" href="{{ route('admin.config.index') }}" style="height: 60px;">
+                    <i class="bi bi-gear fs-4"></i>
                     <div class="text-start">
-                        <div class="fw-bold">View All Meals</div>
-                        <small class="opacity-75">Browse meal catalog</small>
+                        <div class="fw-bold">System Configuration</div>
+                        <small class="opacity-75">Technical settings & controls</small>
                     </div>
                 </a>
             </div>
+            @endif
+            @if(!empty($adminPermissions['system.monitor']))
+            <div class="col-md-4">
+                <a class="btn btn-outline-dark w-100 d-flex align-items-center justify-content-center gap-2" href="{{ route('admin.system.index') }}" style="height: 60px;">
+                    <i class="bi bi-speedometer2 fs-4"></i>
+                    <div class="text-start">
+                        <div class="fw-bold">System Monitor</div>
+                        <small class="opacity-75">Performance, logs & maintenance</small>
+                    </div>
+                </a>
+            </div>
+            @endif
+            @if(!empty($adminPermissions['system.security']))
+            <div class="col-md-4">
+                <a class="btn btn-outline-danger w-100 d-flex align-items-center justify-content-center gap-2" href="{{ route('admin.security.index') }}" style="height: 60px;">
+                    <i class="bi bi-shield-lock fs-4"></i>
+                    <div class="text-start">
+                        <div class="fw-bold">Security Center</div>
+                        <small class="opacity-75">Login activity & audit logs</small>
+                    </div>
+                </a>
+            </div>
+            @endif
+            @if(!empty($adminPermissions['system.backups']))
+            <div class="col-md-4">
+                <a class="btn btn-outline-primary w-100 d-flex align-items-center justify-content-center gap-2" href="{{ route('admin.backups.index') }}" style="height: 60px;">
+                    <i class="bi bi-cloud-arrow-down fs-4"></i>
+                    <div class="text-start">
+                        <div class="fw-bold">Backups</div>
+                        <small class="opacity-75">Protect & restore business data</small>
+                    </div>
+                </a>
+            </div>
+            @endif
+            @if(!empty($adminPermissions['finance']))
+            <div class="col-md-4">
+                <a class="btn btn-outline-success w-100 d-flex align-items-center justify-content-center gap-2" href="{{ route('admin.finance.index') }}" style="height: 60px;">
+                    <i class="bi bi-cash-stack fs-4"></i>
+                    <div class="text-start">
+                        <div class="fw-bold">Finance Overview</div>
+                        <small class="opacity-75">Payments and revenue</small>
+                    </div>
+                </a>
+            </div>
+            @endif
+            @if(!empty($adminPermissions['logistics']))
+            <div class="col-md-4">
+                <a class="btn btn-outline-primary w-100 d-flex align-items-center justify-content-center gap-2" href="{{ route('admin.logistics.index') }}" style="height: 60px;">
+                    <i class="bi bi-truck fs-4"></i>
+                    <div class="text-start">
+                        <div class="fw-bold">Logistics</div>
+                        <small class="opacity-75">Deliveries and travelers</small>
+                    </div>
+                </a>
+            </div>
+            @endif
         </div>
     </div>
 </div>
+@endif
 
 <!-- Recent Orders -->
+@if(!empty($adminPermissions['orders']))
 <div class="dashboard-card">
     <div class="card-header d-flex justify-content-between align-items-center">
         <h5 class="card-title mb-0">
             <i class="bi bi-clock-history"></i> Recent Orders
         </h5>
-        <a href="{{ route('meals.index') }}" class="btn btn-sm btn-outline-primary">
+        <a href="{{ route('admin.orders.index') }}" class="btn btn-sm btn-outline-primary">
             View All Orders
         </a>
     </div>
@@ -277,11 +371,16 @@
         <div class="card-footer bg-light">
             <div class="d-flex justify-content-between align-items-center">
                 <small class="text-muted">Showing {{ $stats['recent_orders']->count() }} most recent orders</small>
-                <a href="{{ route('meals.index') }}" class="btn btn-sm btn-outline-primary">
+                <a href="{{ route('admin.orders.index') }}" class="btn btn-sm btn-outline-primary">
                     View All Orders <i class="bi bi-arrow-right"></i>
                 </a>
             </div>
         </div>
     @endif
 </div>
+@endif
+
+@if(!empty($adminPermissions['users.create']))
+    @include('admin.users._create_modal')
+@endif
 @endsection

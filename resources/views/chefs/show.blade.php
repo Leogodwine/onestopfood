@@ -35,14 +35,14 @@
             <div class="chef-profile-card sticky-top">
                 <div class="chef-profile-card-body">
                     <div class="text-center mb-3">
-                        @if(file_exists(public_path('images/' . $chefImage)))
-                            <img src="{{ asset('images/' . $chefImage) }}"
+                        @if($chef->avatar_url)
+                            <img src="{{ $chef->avatar_url }}"
                                  alt="{{ $chef->name }}"
-                                 class="chef-profile-compact-img"
-                                 onerror="this.onerror=null; this.src='{{ asset('images/african chef 01.jpg') }}';">
+                                 class="chef-profile-compact-img rounded-circle object-fit-cover"
+                                 style="width: 120px; height: 120px;">
                         @else
                             <div class="chef-profile-avatar-placeholder">
-                                <span>{{ substr($chef->name, 0, 1) }}</span>
+                                <span>{{ strtoupper(substr($chef->name, 0, 1)) }}</span>
                             </div>
                         @endif
                     </div>

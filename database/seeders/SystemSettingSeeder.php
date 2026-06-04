@@ -109,6 +109,46 @@ class SystemSettingSeeder extends Seeder
                 'group' => 'Security',
                 'description' => 'Require manual approval for new travelers',
             ],
+            [
+                'key' => 'max_failed_login_attempts',
+                'label' => 'Max Failed Login Attempts',
+                'value' => '5',
+                'type' => 'integer',
+                'group' => 'Security',
+                'description' => 'Lock admin accounts after this many consecutive failed logins',
+            ],
+            [
+                'key' => 'admin_2fa_required',
+                'label' => 'Require Admin 2FA',
+                'value' => 'false',
+                'type' => 'boolean',
+                'group' => 'Security',
+                'description' => 'When enabled, all admin accounts must use email two-factor authentication',
+            ],
+            [
+                'key' => 'backup_auto_enabled',
+                'label' => 'Automatic Backups Enabled',
+                'value' => 'false',
+                'type' => 'boolean',
+                'group' => 'Backup',
+                'description' => 'Run scheduled database backups automatically',
+            ],
+            [
+                'key' => 'backup_schedule_frequency',
+                'label' => 'Backup Frequency',
+                'value' => 'daily',
+                'type' => 'string',
+                'group' => 'Backup',
+                'description' => 'How often automatic backups run (daily or weekly)',
+            ],
+            [
+                'key' => 'backup_retention_days',
+                'label' => 'Backup Retention (Days)',
+                'value' => '14',
+                'type' => 'integer',
+                'group' => 'Backup',
+                'description' => 'Delete backups older than this many days',
+            ],
         ];
 
         foreach ($settings as $setting) {

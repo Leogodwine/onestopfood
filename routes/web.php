@@ -28,6 +28,9 @@ use App\Http\Controllers\AdminDisputeController;
 use App\Http\Controllers\AdminNotificationController;
 use App\Http\Controllers\AdminAnalyticsController;
 use App\Http\Controllers\AdminConfigController;
+use App\Http\Controllers\AdminSystemController;
+use App\Http\Controllers\AdminSecurityController;
+use App\Http\Controllers\AdminBackupController;
 use App\Http\Controllers\AdminZoneController;
 use App\Http\Controllers\AdminMealController;
 use App\Http\Controllers\AdminInvoiceController;
@@ -53,6 +56,7 @@ Route::get('/locale/{locale}', [LocaleController::class, 'switch'])->name('local
 Route::get('/meals', [MealController::class, 'index'])->name('meals.index');
 Route::get('/chefs', [ChefController::class, 'index'])->name('chefs.index');
 Route::get('/chefs/{chef}', [ChefController::class, 'show'])->name('chefs.show');
+Route::get('/users/{user}/avatar', [ProfileController::class, 'userAvatar'])->name('users.avatar');
 Route::get('/stories', [StoryController::class, 'index'])->name('stories.index');
 
 Route::get('/docs/user-manual', [DocumentationController::class, 'userManual'])->name('docs.user-manual');
@@ -154,62 +158,117 @@ Route::middleware(['auth', 'social.signup.complete'])->group(function () {
     Route::put('/reviews/{review}', [ReviewController::class, 'update'])->name('reviews.update');
 
     Route::middleware('role:admin')->prefix('/admin')->name('admin.')->group(function () {
-        Route::get('/users', [AdminController::class, 'index'])->name('users.index');
-        Route::get('/users/export', [AdminController::class, 'export'])->name('users.export');
-        Route::post('/users/bulk', [AdminController::class, 'bulkUpdate'])->name('users.bulk');
-        Route::get('/users/{user}', [AdminController::class, 'showUser'])->name('users.show');
-        Route::post('/users/{user}/approve', [AdminController::class, 'approve'])->name('users.approve');
-        Route::post('/users/{user}/reject', [AdminController::class, 'reject'])->name('users.reject');
-        Route::post('/users/{user}/suspend', [AdminController::class, 'suspend'])->name('users.suspend');
-        Route::post('/users/{user}/unsuspend', [AdminController::class, 'unsuspend'])->name('users.unsuspend');
-        Route::post('/users/{user}/impersonate', [AdminController::class, 'impersonate'])->name('users.impersonate');
+        Route::middleware('admin.permission:users.view')->group(function () {
+            Route::get('/users', [AdminController::class, 'index'])->name('users.index');
+            Route::get('/users/create', [AdminController::class, 'createUser'])->name('users.create');
+            Route::get('/users/{user}', [AdminController::class, 'showUser'])->name('users.show');
+        });
 
-        // Admin meals
-        Route::get('/meals', [AdminMealController::class, 'index'])->name('meals.index');
+        Route::middleware('admin.permission:users.create')->group(function () {
+            Route::post('/users', [AdminController::class, 'storeUser'])->name('users.store');
+        });
 
-        // Admin billing & invoices
-        Route::get('/invoices', [AdminInvoiceController::class, 'index'])->name('invoices.index');
-        Route::get('/billing', fn () => redirect()->route('admin.invoices.index'))->name('billing.index');
+        Route::middleware('admin.permission:users.export')->group(function () {
+            Route::get('/users/export', [AdminController::class, 'export'])->name('users.export');
+        });
 
-        // FR-ADMIN-03: Verification workflow
-        Route::get('/verifications', [AdminVerificationController::class, 'index'])->name('verifications.index');
-        Route::post('/verifications/{document}/approve', [AdminVerificationController::class, 'approve'])->name('verifications.approve');
-        Route::post('/verifications/{document}/reject', [AdminVerificationController::class, 'reject'])->name('verifications.reject');
-        Route::post('/verifications/{document}/request-more', [AdminVerificationController::class, 'requestMore'])->name('verifications.request-more');
+        Route::middleware('admin.permission:users.manage')->group(function () {
+            Route::post('/users/bulk', [AdminController::class, 'bulkUpdate'])->name('users.bulk');
+            Route::post('/users/{user}/suspend', [AdminController::class, 'suspend'])->name('users.suspend');
+        });
 
-        // FR-ADMIN-05: Order monitoring
-        Route::get('/orders', [AdminOrderController::class, 'index'])->name('orders.index');
-        Route::get('/orders/{order}', [AdminOrderController::class, 'show'])->name('orders.show');
-        Route::post('/orders/{order}/status', [AdminOrderController::class, 'updateStatus'])->name('orders.update-status');
-        Route::post('/orders/{order}/cancel', [AdminOrderController::class, 'cancel'])->name('orders.cancel');
-        Route::post('/orders/{order}/reassign-traveler', [AdminOrderController::class, 'reassignTraveler'])->name('orders.reassign-traveler');
+        Route::middleware('admin.permission:users.approve')->group(function () {
+            Route::post('/users/{user}/approve', [AdminController::class, 'approve'])->name('users.approve');
+            Route::post('/users/{user}/reject', [AdminController::class, 'reject'])->name('users.reject');
+            Route::post('/users/{user}/unsuspend', [AdminController::class, 'unsuspend'])->name('users.unsuspend');
+        });
 
-        // FR-ADMIN-06: Finance
-        Route::get('/finance', [AdminFinanceController::class, 'index'])->name('finance.index');
-        Route::post('/payments/{payment}/refund', [AdminFinanceController::class, 'refund'])->name('payments.refund');
+        Route::middleware('admin.permission:users.impersonate')->group(function () {
+            Route::post('/users/{user}/impersonate', [AdminController::class, 'impersonate'])->name('users.impersonate');
+        });
 
-        // FR-ADMIN-07: Logistics
-        Route::get('/logistics', [AdminLogisticsController::class, 'index'])->name('logistics.index');
+        Route::middleware('admin.permission:meals')->group(function () {
+            Route::get('/meals', [AdminMealController::class, 'index'])->name('meals.index');
+        });
 
-        // FR-ADMIN-08: Disputes
-        Route::get('/disputes', [AdminDisputeController::class, 'index'])->name('disputes.index');
-        Route::get('/disputes/{dispute}', [AdminDisputeController::class, 'show'])->name('disputes.show');
-        Route::post('/disputes/{dispute}/resolve', [AdminDisputeController::class, 'resolve'])->name('disputes.resolve');
+        Route::middleware('admin.permission:invoices')->group(function () {
+            Route::get('/invoices', [AdminInvoiceController::class, 'index'])->name('invoices.index');
+            Route::get('/billing', fn () => redirect()->route('admin.invoices.index'))->name('billing.index');
+        });
 
-        // FR-ADMIN-09: Notifications
-        Route::get('/notifications', [AdminNotificationController::class, 'index'])->name('notifications.index');
+        Route::middleware('admin.permission:verifications')->group(function () {
+            Route::get('/verifications', [AdminVerificationController::class, 'index'])->name('verifications.index');
+            Route::post('/verifications/{document}/approve', [AdminVerificationController::class, 'approve'])->name('verifications.approve');
+            Route::post('/verifications/{document}/reject', [AdminVerificationController::class, 'reject'])->name('verifications.reject');
+            Route::post('/verifications/{document}/request-more', [AdminVerificationController::class, 'requestMore'])->name('verifications.request-more');
+        });
 
-        // FR-ADMIN-10 & 12: Analytics & performance
-        Route::get('/analytics', [AdminAnalyticsController::class, 'index'])->name('analytics.index');
-        Route::get('/analytics/delivery-locations', [AdminAnalyticsController::class, 'deliveryLocations'])->name('analytics.delivery-locations');
+        Route::middleware('admin.permission:orders')->group(function () {
+            Route::get('/orders', [AdminOrderController::class, 'index'])->name('orders.index');
+            Route::get('/orders/{order}', [AdminOrderController::class, 'show'])->name('orders.show');
+            Route::post('/orders/{order}/status', [AdminOrderController::class, 'updateStatus'])->name('orders.update-status');
+            Route::post('/orders/{order}/cancel', [AdminOrderController::class, 'cancel'])->name('orders.cancel');
+            Route::post('/orders/{order}/reassign-traveler', [AdminOrderController::class, 'reassignTraveler'])->name('orders.reassign-traveler');
+        });
 
-        // FR-ADMIN-11: Configuration
-        Route::get('/config', [AdminConfigController::class, 'index'])->name('config.index');
-        Route::post('/config', [AdminConfigController::class, 'update'])->name('config.update');
+        Route::middleware('admin.permission:finance')->group(function () {
+            Route::get('/finance', [AdminFinanceController::class, 'index'])->name('finance.index');
+        });
 
-        // FR-ADMIN-13: Zones
-        Route::get('/zones', [AdminZoneController::class, 'index'])->name('zones.index');
-        Route::post('/zones', [AdminZoneController::class, 'store'])->name('zones.store');
+        Route::middleware('admin.permission:finance.refund')->group(function () {
+            Route::post('/payments/{payment}/refund', [AdminFinanceController::class, 'refund'])->name('payments.refund');
+        });
+
+        Route::middleware('admin.permission:logistics')->group(function () {
+            Route::get('/logistics', [AdminLogisticsController::class, 'index'])->name('logistics.index');
+        });
+
+        Route::middleware('admin.permission:disputes')->group(function () {
+            Route::get('/disputes', [AdminDisputeController::class, 'index'])->name('disputes.index');
+            Route::get('/disputes/{dispute}', [AdminDisputeController::class, 'show'])->name('disputes.show');
+            Route::post('/disputes/{dispute}/resolve', [AdminDisputeController::class, 'resolve'])->name('disputes.resolve');
+        });
+
+        Route::middleware('admin.permission:notifications')->group(function () {
+            Route::get('/notifications', [AdminNotificationController::class, 'index'])->name('notifications.index');
+        });
+
+        Route::middleware('admin.permission:analytics')->group(function () {
+            Route::get('/analytics', [AdminAnalyticsController::class, 'index'])->name('analytics.index');
+            Route::get('/analytics/delivery-locations', [AdminAnalyticsController::class, 'deliveryLocations'])->name('analytics.delivery-locations');
+        });
+
+        Route::middleware('admin.permission:config')->group(function () {
+            Route::get('/config', [AdminConfigController::class, 'index'])->name('config.index');
+            Route::post('/config', [AdminConfigController::class, 'update'])->name('config.update');
+        });
+
+        Route::middleware('admin.permission:zones')->group(function () {
+            Route::get('/zones', [AdminZoneController::class, 'index'])->name('zones.index');
+            Route::post('/zones', [AdminZoneController::class, 'store'])->name('zones.store');
+        });
+
+        Route::middleware('admin.permission:system.monitor')->group(function () {
+            Route::get('/system', [AdminSystemController::class, 'index'])->name('system.index');
+            Route::post('/system/maintenance', [AdminSystemController::class, 'maintenance'])->name('system.maintenance');
+            Route::post('/system/tasks', [AdminSystemController::class, 'runTask'])->name('system.tasks');
+        });
+
+        Route::middleware('admin.permission:system.security')->group(function () {
+            Route::get('/security', [AdminSecurityController::class, 'index'])->name('security.index');
+            Route::post('/security/settings', [AdminSecurityController::class, 'updateSettings'])->name('security.settings');
+            Route::post('/security/users/{user}/block', [AdminSecurityController::class, 'blockUser'])->name('security.block');
+            Route::post('/security/users/{user}/reset-login', [AdminSecurityController::class, 'resetLoginAttempts'])->name('security.reset-login');
+        });
+
+        Route::middleware('admin.permission:system.backups')->group(function () {
+            Route::get('/backups', [AdminBackupController::class, 'index'])->name('backups.index');
+            Route::post('/backups', [AdminBackupController::class, 'store'])->name('backups.store');
+            Route::post('/backups/schedule', [AdminBackupController::class, 'updateSchedule'])->name('backups.schedule');
+            Route::post('/backups/{backup}/restore', [AdminBackupController::class, 'restore'])->name('backups.restore');
+            Route::delete('/backups/{backup}', [AdminBackupController::class, 'destroy'])->name('backups.destroy');
+            Route::get('/backups/{backup}/download', [AdminBackupController::class, 'download'])->name('backups.download');
+        });
     });
 
     Route::middleware('role:chef')->prefix('/chef')->name('chef.')->group(function () {

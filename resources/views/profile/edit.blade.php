@@ -35,7 +35,7 @@
                         <input type="file" name="avatar" id="avatar" class="form-control form-control-sm w-auto mx-auto" accept="image/jpeg,image/jpg,image/png,image/gif,image/webp">
                         <small class="text-muted d-block mt-1">JPEG, PNG, GIF or WebP. Max 2 MB.</small>
                     </div>
-                    @if($user->avatar)
+                    @if($user->avatar_url)
                         <div class="form-check form-check-inline mt-2">
                             <input class="form-check-input" type="checkbox" name="remove_avatar" value="1" id="remove_avatar">
                             <label class="form-check-label text-danger" for="remove_avatar">Remove current photo</label>

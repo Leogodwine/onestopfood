@@ -47,7 +47,12 @@
                         @endif
                         <tr>
                             <td class="fw-semibold">Role:</td>
-                            <td><span class="badge badge-primary">{{ ucfirst($user->role) }}</span></td>
+                            <td>
+                                <span class="badge badge-primary">{{ ucfirst($user->role) }}</span>
+                                @if($user->role === 'admin')
+                                    <span class="ms-2">@include('admin.partials.role-badge', ['user' => $user])</span>
+                                @endif
+                            </td>
                         </tr>
                         <tr>
                             <td class="fw-semibold">Status:</td>
@@ -352,7 +357,7 @@
                 <h5 class="card-title"><i class="bi bi-gear"></i> Actions</h5>
             </div>
             <div class="d-grid gap-2">
-                @if($user->status === 'pending')
+                @if($user->status === 'pending' && !empty($adminPermissions['users.approve']))
                     <form method="POST" action="{{ route('admin.users.approve', $user) }}">
                         @csrf
                         <button class="btn btn-success w-100" type="submit">
@@ -369,14 +374,14 @@
                             <i class="bi bi-x-circle"></i> Reject User
                         </button>
                     </form>
-                @elseif($user->status === 'approved')
+                @elseif($user->status === 'approved' && !empty($adminPermissions['users.manage']))
                     <form method="POST" action="{{ route('admin.users.suspend', $user) }}">
                         @csrf
                         <button class="btn btn-warning w-100" type="submit">
                             <i class="bi bi-pause-circle"></i> Suspend User
                         </button>
                     </form>
-                @elseif($user->status === 'suspended')
+                @elseif($user->status === 'suspended' && !empty($adminPermissions['users.approve']))
                     <form method="POST" action="{{ route('admin.users.unsuspend', $user) }}">
                         @csrf
                         <button class="btn btn-success w-100" type="submit">
@@ -384,7 +389,7 @@
                         </button>
                     </form>
                 @endif
-                @if(auth()->user()->role === 'admin' && auth()->user()->is_super_admin && auth()->id() !== $user->id)
+                @if(!empty($adminPermissions['users.impersonate']) && auth()->id() !== $user->id)
                     <form method="POST" action="{{ route('admin.users.impersonate', $user) }}">
                         @csrf
                         <button class="btn btn-outline-primary w-100" type="submit">

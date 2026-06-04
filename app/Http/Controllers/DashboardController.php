@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Models\Order;
 use App\Models\Meal;
 use App\Models\Delivery;
+use App\Services\AdminAccessService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -38,7 +39,16 @@ class DashboardController extends Controller
                     'total_meals' => Meal::count(),
                     'recent_orders' => Order::with(['customer', 'chef.chefProfile'])->latest()->limit(10)->get()
                 ];
-                return view('dashboard.admin', compact('stats'));
+                $access = app(AdminAccessService::class);
+                $adminTitle = $access->effectiveTitle($user);
+
+                return view('dashboard.admin', [
+                    'stats' => $stats,
+                    'adminTitle' => $adminTitle,
+                    'adminTitleLabel' => $access->titleLabel($adminTitle),
+                    'adminTitleDescription' => $access->titleDescription($adminTitle),
+                    'adminPermissions' => $access->permissionsMap($user),
+                ]);
 
             case User::ROLE_CHEF:
                 $stats = [

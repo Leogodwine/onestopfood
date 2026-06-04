@@ -23,10 +23,16 @@
 @include('auth._register_modal')
 @include('auth._social_auth_intent_script')
 
+@php
+    $registerModalRole = in_array(request('role'), ['chef', 'traveler', 'customer'], true)
+        ? request('role')
+        : null;
+@endphp
+
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    window.openRegisterModal?.(@json(in_array(request('role'), ['chef', 'traveler', 'customer'], true) ? request('role') : null));
+    window.openRegisterModal?.(@json($registerModalRole));
 });
 </script>
 @endpush

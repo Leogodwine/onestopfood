@@ -22,6 +22,7 @@ class AdminUserSeeder extends Seeder
                 'name' => 'Administrator',
                 'password' => Hash::make($password),
                 'role' => User::ROLE_ADMIN,
+                'admin_title' => User::ADMIN_TITLE_SYSTEM_ADMINISTRATOR,
                 'is_super_admin' => true,
                 'status' => User::STATUS_APPROVED,
                 'approved_at' => now(),

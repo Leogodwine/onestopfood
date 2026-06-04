@@ -2,12 +2,19 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ChefProfile;
+use App\Models\TravelerProfile;
 use App\Models\User;
 use App\Models\UserVerificationDocument;
 use App\Models\AdminAction;
+use App\Services\AdminAccessService;
 use App\Services\UserAccountGuardService;
+use App\Support\PasswordRules;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
 
 class AdminController extends Controller
 {
@@ -103,7 +110,95 @@ class AdminController extends Controller
             'search' => $search,
             'role' => $role,
             'status' => $status,
+            'canCreateAdmin' => $request->user()->adminCan('users.create_admin'),
         ]);
+    }
+
+    public function createUser(Request $request): RedirectResponse
+    {
+        if (! $request->user()->adminCan('users.create')) {
+            return redirect()
+                ->route('admin.users.index')
+                ->withErrors(['bulk_action' => 'You do not have permission to create users.'], 'default');
+        }
+
+        return redirect()
+            ->route('admin.users.index')
+            ->with('open_create_user_modal', true);
+    }
+
+    public function storeUser(Request $request): RedirectResponse
+    {
+        $admin = $request->user();
+        $access = app(AdminAccessService::class);
+        $allowedRoles = [User::ROLE_CUSTOMER, User::ROLE_CHEF, User::ROLE_TRAVELER];
+
+        if ($admin->adminCan('users.create_admin')) {
+            $allowedRoles[] = User::ROLE_ADMIN;
+        }
+
+        $rules = [
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'email', 'max:255', 'unique:users,email'],
+            'phone' => ['required', 'string', 'max:30', 'unique:users,phone'],
+            'role' => ['required', Rule::in($allowedRoles)],
+            'status' => ['nullable', Rule::in([User::STATUS_PENDING, User::STATUS_APPROVED])],
+            'password' => PasswordRules::forRegistration(),
+        ];
+
+        if ($admin->adminCan('users.create_admin')) {
+            $rules['admin_title'] = ['nullable', Rule::in(array_keys($access->titles()))];
+        }
+
+        $data = $request->validateWithBag('create_user', $rules, PasswordRules::validationMessages());
+
+        if ($data['role'] === User::ROLE_ADMIN && ! $admin->adminCan('users.create_admin')) {
+            abort(403, 'Only system administrators can create admin accounts.');
+        }
+
+        $status = in_array($data['role'], [User::ROLE_CHEF, User::ROLE_TRAVELER], true)
+            ? ($data['status'] ?? User::STATUS_APPROVED)
+            : User::STATUS_APPROVED;
+
+        $adminTitle = null;
+        $isSuperAdmin = false;
+
+        if ($data['role'] === User::ROLE_ADMIN) {
+            $adminTitle = $data['admin_title'] ?? User::ADMIN_TITLE_MANAGER;
+            $isSuperAdmin = $adminTitle === User::ADMIN_TITLE_SYSTEM_ADMINISTRATOR;
+        }
+
+        $user = User::create([
+            'name' => $data['name'],
+            'email' => $data['email'],
+            'phone' => $data['phone'],
+            'role' => $data['role'],
+            'status' => $status,
+            'locale' => in_array(session('locale'), ['en', 'sw'], true) ? session('locale') : 'en',
+            'password' => Hash::make($data['password']),
+            'email_verified_at' => now(),
+            'approved_at' => $status === User::STATUS_APPROVED ? now() : null,
+            'admin_title' => $adminTitle,
+            'is_super_admin' => $isSuperAdmin,
+        ]);
+
+        if ($data['role'] === User::ROLE_CHEF) {
+            ChefProfile::create(['user_id' => $user->id]);
+        }
+
+        if ($data['role'] === User::ROLE_TRAVELER) {
+            TravelerProfile::create(['user_id' => $user->id]);
+        }
+
+        $this->logAdminAction('create_user', $user, null, [
+            'role' => $user->role,
+            'status' => $user->status,
+            'admin_title' => $user->admin_title,
+        ]);
+
+        return redirect()
+            ->route('admin.users.show', $user)
+            ->with('status', 'User account created successfully.');
     }
 
     public function showUser(User $user)
@@ -350,7 +445,7 @@ class AdminController extends Controller
     {
         $admin = $request->user();
 
-        if ($admin->role !== User::ROLE_ADMIN || !$admin->is_super_admin) {
+        if ($admin->role !== User::ROLE_ADMIN || ! $admin->adminCan('users.impersonate')) {
             abort(403);
         }
 

@@ -512,14 +512,13 @@
                 <div class="card chef-card chef-card-featured h-100 text-center d-flex flex-column">
                     <div class="card-body flex-grow-1">
                         <div class="mb-3">
-                            @if(file_exists(public_path('images/' . $chefImage)))
-                                <img src="{{ asset('images/' . $chefImage) }}" 
-                                     alt="{{ $chef->name }}" 
-                                     class="chef-profile-image rounded-circle"
-                                     onerror="this.onerror=null; this.src='{{ asset('images/african chef 01.jpg') }}';">
+                            @if($chef->avatar_url)
+                                <img src="{{ $chef->avatar_url }}"
+                                     alt="{{ $chef->name }}"
+                                     class="chef-profile-image rounded-circle object-fit-cover">
                             @else
                                 <div class="bg-primary rounded-circle d-inline-flex align-items-center justify-content-center chef-profile-image">
-                                    <span class="text-white fs-3 fw-bold">{{ substr($chef->name, 0, 1) }}</span>
+                                    <span class="text-white fs-3 fw-bold">{{ strtoupper(substr($chef->name, 0, 1)) }}</span>
                                 </div>
                             @endif
                         </div>

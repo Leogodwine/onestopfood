@@ -44,13 +44,11 @@
                         }
                     @endphp
                     <a href="{{ route('chefs.show', $chef) }}" class="popular-chef-item text-decoration-none text-dark d-flex flex-column align-items-center">
-                        <div class="popular-chef-avatar rounded-circle overflow-hidden flex-shrink-0">
-                            @if($chef->avatar)
-                                <img src="{{ $chef->avatar_url }}" alt="{{ $chef->name }}" class="w-100 h-100 object-fit-cover" onerror="this.onerror=null; this.src='{{ asset('images/' . $chefImg) }}';">
-                            @elseif(file_exists(public_path('images/' . $chefImg)))
-                                <img src="{{ asset('images/' . $chefImg) }}" alt="{{ $chef->name }}" class="w-100 h-100 object-fit-cover">
+                        <div class="popular-chef-avatar rounded-circle overflow-hidden flex-shrink-0 d-flex align-items-center justify-content-center bg-light">
+                            @if($chef->avatar_url)
+                                <img src="{{ $chef->avatar_url }}" alt="{{ $chef->name }}" class="w-100 h-100 object-fit-cover">
                             @else
-                                <img src="{{ asset('images/african chef 01.jpg') }}" alt="{{ $chef->name }}" class="w-100 h-100 object-fit-cover" onerror="this.src='{{ asset('images/food 01.jpeg') }}'">
+                                <span class="fw-bold text-secondary">{{ strtoupper(substr($chef->name, 0, 1)) }}</span>
                             @endif
                         </div>
                         <span class="popular-chef-name mt-2 small fw-semibold text-center">{{ $chef->name }}</span>
@@ -171,13 +169,11 @@
                 <div class="card chef-card h-100 d-flex flex-column border shadow-sm overflow-hidden">
                     <div class="card-body text-center p-4 flex-grow-1 d-flex flex-column">
                         <div class="mb-3">
-                            @if($chef->avatar)
-                                <img src="{{ $chef->avatar_url }}" alt="{{ $chef->name }}" class="chef-profile-image rounded-circle object-fit-cover" style="width: 100px; height: 100px;" onerror="this.onerror=null; this.src='{{ asset('images/' . ($chefImage ?? 'african chef 01.jpg')) }}';">
-                            @elseif(!empty($chefImage) && file_exists(public_path('images/' . $chefImage)))
-                                <img src="{{ asset('images/' . $chefImage) }}" alt="{{ $chef->name }}" class="chef-profile-image rounded-circle object-fit-cover" style="width: 100px; height: 100px;" onerror="this.onerror=null; this.src='{{ asset('images/african chef 01.jpg') }}';">
+                            @if($chef->avatar_url)
+                                <img src="{{ $chef->avatar_url }}" alt="{{ $chef->name }}" class="chef-profile-image rounded-circle object-fit-cover" style="width: 100px; height: 100px;">
                             @else
                                 <div class="bg-primary rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 100px; height: 100px;">
-                                    <span class="text-white fs-3 fw-bold">{{ substr($chef->name, 0, 1) }}</span>
+                                    <span class="text-white fs-3 fw-bold">{{ strtoupper(substr($chef->name, 0, 1)) }}</span>
                                 </div>
                             @endif
                         </div>

@@ -7,6 +7,7 @@ use App\Models\Meal;
 use App\Models\Payment;
 use App\Models\SystemSetting;
 use App\Observers\PaymentObserver;
+use App\Services\AdminAccessService;
 use App\Services\SocialAuthService;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Cache;
@@ -44,6 +45,25 @@ class AppServiceProvider extends ServiceProvider
         $socialAuth = app(SocialAuthService::class);
         View::share('googleSignInEnabled', $socialAuth->isConfigured('google'));
         View::share('facebookSignInEnabled', $socialAuth->isConfigured('facebook'));
+
+        View::composer('*', function ($view) {
+            $user = auth()->user();
+
+            if (! $user || $user->role !== \App\Models\User::ROLE_ADMIN) {
+                $view->with('adminPermissions', []);
+                $view->with('adminTitle', null);
+                $view->with('adminTitleLabel', null);
+
+                return;
+            }
+
+            $access = app(AdminAccessService::class);
+            $title = $access->effectiveTitle($user);
+
+            $view->with('adminPermissions', $access->permissionsMap($user));
+            $view->with('adminTitle', $title);
+            $view->with('adminTitleLabel', $access->titleLabel($title));
+        });
 
         if (Schema::hasTable('system_settings')) {
             View::share('siteName', Cache::remember(

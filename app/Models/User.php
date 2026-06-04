@@ -6,6 +6,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Storage;
 
 class User extends Authenticatable
 {
@@ -25,6 +26,7 @@ class User extends Authenticatable
         'password',
         'role',
         'is_super_admin',
+        'admin_title',
         'status',
         'locale',
         'approved_at',
@@ -75,6 +77,10 @@ class User extends Authenticatable
     public const ROLE_CHEF = 'chef';
     public const ROLE_CUSTOMER = 'customer';
     public const ROLE_TRAVELER = 'traveler';
+
+    public const ADMIN_TITLE_CEO = 'ceo';
+    public const ADMIN_TITLE_MANAGER = 'manager';
+    public const ADMIN_TITLE_SYSTEM_ADMINISTRATOR = 'system_administrator';
 
     public const STATUS_PENDING = 'pending';
     public const STATUS_APPROVED = 'approved';
@@ -136,6 +142,34 @@ class User extends Authenticatable
         return $this->socialAccounts()->exists() && empty($this->password);
     }
 
+    public function effectiveAdminTitle(): ?string
+    {
+        return app(\App\Services\AdminAccessService::class)->effectiveTitle($this);
+    }
+
+    public function adminCan(string $permission): bool
+    {
+        return app(\App\Services\AdminAccessService::class)->can($this, $permission);
+    }
+
+    public function isCeo(): bool
+    {
+        return $this->role === self::ROLE_ADMIN
+            && $this->effectiveAdminTitle() === self::ADMIN_TITLE_CEO;
+    }
+
+    public function isOperationsManager(): bool
+    {
+        return $this->role === self::ROLE_ADMIN
+            && $this->effectiveAdminTitle() === self::ADMIN_TITLE_MANAGER;
+    }
+
+    public function isSystemAdministrator(): bool
+    {
+        return $this->role === self::ROLE_ADMIN
+            && $this->effectiveAdminTitle() === self::ADMIN_TITLE_SYSTEM_ADMINISTRATOR;
+    }
+
     public function reviewsReceived()
     {
         return $this->hasMany(Review::class, 'chef_id')
@@ -172,22 +206,53 @@ class User extends Authenticatable
     }
 
     /**
+     * Storage path or external URL for this user's profile photo.
+     * Priority: uploaded avatar, then verification selfie.
+     */
+    public function resolveAvatarStoragePath(): ?string
+    {
+        if (filled($this->avatar)) {
+            if (filter_var($this->avatar, FILTER_VALIDATE_URL)) {
+                return $this->avatar;
+            }
+
+            if (Storage::disk('public')->exists($this->avatar)) {
+                return $this->avatar;
+            }
+        }
+
+        $this->loadMissing(['chefProfile', 'travelerProfile']);
+
+        $selfie = $this->chefProfile?->selfie_path ?? $this->travelerProfile?->selfie_path;
+
+        if ($selfie && Storage::disk('public')->exists($selfie)) {
+            return $selfie;
+        }
+
+        return null;
+    }
+
+    /**
      * Get the full URL for the user's avatar, or null if none set.
-     * For the current user, uses a route that serves the file from storage (works without symlink).
      */
     public function getAvatarUrlAttribute(): ?string
     {
-        if (empty($this->avatar)) {
+        $path = $this->resolveAvatarStoragePath();
+
+        if ($path === null) {
             return null;
         }
 
-        $ts = $this->updated_at ? $this->updated_at->timestamp : time();
-
-        // For the logged-in user, serve avatar via app so it works even if public/storage link is broken
-        if (auth()->check() && (int) auth()->id() === (int) $this->id) {
-            return route('profile.avatar') . '?v=' . $ts;
+        if (filter_var($path, FILTER_VALIDATE_URL)) {
+            return $path;
         }
 
-        return \Illuminate\Support\Facades\Storage::disk('public')->url($this->avatar) . '?v=' . $ts;
+        $version = $this->updated_at?->getTimestamp() ?? time();
+
+        if (auth()->check() && (int) auth()->id() === (int) $this->id) {
+            return route('profile.avatar', ['v' => $version]);
+        }
+
+        return route('users.avatar', ['user' => $this->id, 'v' => $version]);
     }
 }
