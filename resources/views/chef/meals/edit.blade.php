@@ -1,11 +1,11 @@
 @extends('layouts.dashboard')
 
 @section('content')
-<div class="page-header">
+<div class="page-header page-header-split">
     <div class="d-flex justify-content-between align-items-center">
         <div>
             <h2>Edit Meal</h2>
-            <p class="text-muted mb-0">{{ $meal->name }}</p>
+            <p class="text-muted mb-0 page-header-subtitle">{{ $meal->name }}</p>
         </div>
         <div class="d-flex gap-2">
             <a class="btn btn-outline-primary" href="{{ route('chef.meals.show', $meal) }}">

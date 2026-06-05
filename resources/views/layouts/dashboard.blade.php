@@ -816,24 +816,31 @@
             margin-bottom: 0;
         }
 
+        .dashboard-card > .table-scroll-pro,
+        .dashboard-card .table-scroll-pro:last-child {
+            margin-bottom: -1px;
+        }
+
         .table thead {
-            background: var(--light-gray);
+            background: #f3f4f6;
             color: var(--text-secondary);
         }
 
         .table thead th {
             border: none;
-            padding: 12px 16px;
-            font-weight: 600;
-            font-size: 0.75rem;
-            letter-spacing: 0.02em;
-            color: var(--text-secondary);
-            border-bottom: 1px solid var(--border-subtle);
+            padding: 0.75rem 1rem;
+            font-weight: 700;
+            font-size: 0.6875rem;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            color: #5c5c6f;
+            border-bottom: 2px solid var(--border-subtle);
+            white-space: nowrap;
         }
 
         .table tbody tr {
             transition: background 0.15s ease;
-            border-bottom: 1px solid var(--border-subtle);
+            border-bottom: 1px solid #f0f1f3;
         }
 
         .table tbody tr:last-child {
@@ -841,18 +848,23 @@
         }
 
         .table tbody tr:hover {
-            background-color: var(--light-gray) !important;
+            background-color: #f8fafc !important;
         }
         .table tbody tr:hover td,
-        .table-striped tbody tr:nth-of-type(odd) td {
-            background-color: var(--light-gray) !important;
+        .table-striped tbody tr:nth-of-type(odd):hover td {
+            background-color: #f8fafc !important;
             box-shadow: none !important;
         }
 
+        .table-striped tbody tr:nth-of-type(even) td {
+            background-color: #fafbfc;
+        }
+
         .table tbody td {
-            padding: 14px 16px;
+            padding: 0.8125rem 1rem;
             vertical-align: middle;
             color: var(--text-primary);
+            font-size: 0.8125rem;
         }
 
         /* Badges */
@@ -968,23 +980,23 @@
                 display: none !important;
             }
         }
-        /* Hamburger visible on mobile and tablet; sidebar pushes content right when open */
+        /* Hamburger visible on mobile and tablet; sidebar overlays content */
         @media (max-width: 992px) {
             .sidebar {
-                margin-left: -260px;
-                transform: translateX(0);
-                transition: margin-left 0.3s ease;
+                margin-left: 0 !important;
+                transform: translateX(-100%);
+                transition: transform 0.3s ease, box-shadow 0.3s ease;
             }
             .sidebar.active {
-                margin-left: 0;
+                transform: translateX(0);
+                box-shadow: 4px 0 24px rgba(0, 0, 0, 0.12);
             }
             .main-content {
                 margin-left: 0 !important;
-                transition: margin-left 0.3s ease;
+                transition: none;
             }
-            /* When sidebar is open: push content to the right and reduce content width */
             body.sidebar-open .main-content {
-                margin-left: 260px !important;
+                margin-left: 0 !important;
             }
         }
         /* Desktop: sidebar visible by default; hamburger toggles collapse (narrow/wide) */
@@ -995,85 +1007,89 @@
         }
         @media (max-width: 768px) {
             .content-wrapper {
-                padding: 16px 12px;
+                padding: 12px 10px;
             }
             .top-navbar {
-                padding: 12px 16px;
+                padding: 10px 12px;
             }
             .navbar-brand {
                 font-size: 1rem;
             }
+            .page-header {
+                margin-bottom: 0.75rem;
+                padding-bottom: 0.5rem;
+            }
+            .page-header.page-header-split {
+                margin-bottom: 0.375rem;
+                padding-bottom: 0.25rem;
+            }
             .page-header h2 {
                 font-size: 1.25rem !important;
             }
-            .page-header p {
-                font-size: 0.8125rem;
+            .page-header p,
+            .page-header-subtitle {
+                font-size: 0.875rem;
             }
             .stat-card {
-                padding: 18px 16px;
+                padding: 10px 8px;
             }
             .stat-card .stat-value {
-                font-size: 1.5rem;
+                font-size: 1.35rem;
             }
             .stat-card .stat-icon {
-                width: 44px;
-                height: 44px;
-                font-size: 1.1rem;
+                width: 34px;
+                height: 34px;
+                font-size: 0.9375rem;
+                margin-bottom: 6px;
             }
             .dashboard-card {
-                padding: 18px 16px;
+                padding: 12px 10px;
+                margin-bottom: 10px;
             }
             .dashboard-card .card-header {
-                padding-bottom: 12px;
-                margin-bottom: 16px;
+                padding-bottom: 8px;
+                margin-bottom: 8px;
+                gap: 0.375rem;
             }
             .dashboard-card .card-title {
                 font-size: 1rem;
             }
-            .table-responsive {
-                margin-left: -16px;
-                margin-right: -16px;
-                padding-left: 16px;
-                padding-right: 16px;
-                -webkit-overflow-scrolling: touch;
-                overflow-x: auto;
-            }
             .table {
                 font-size: 0.875rem;
             }
-            .table thead th,
-            .table tbody td {
-                padding: 10px 12px;
-            }
-            .table thead th {
-                white-space: nowrap;
-            }
             .nav-pills {
                 flex-wrap: wrap;
-                gap: 0.35rem;
+                gap: 0.25rem;
             }
             .nav-pills .nav-link {
-                padding: 6px 12px;
-                font-size: 0.8125rem;
+                padding: 6px 11px;
+                font-size: 0.875rem;
+            }
+            .btn {
+                font-size: 0.9375rem;
+                padding: 0.4rem 0.65rem;
+            }
+            .btn-sm {
+                font-size: 0.875rem;
+                padding: 0.3rem 0.5rem;
             }
         }
         @media (max-width: 575.98px) {
             .content-wrapper {
-                padding: 12px 10px;
-            }
-            .table-responsive {
-                margin-left: -10px;
-                margin-right: -10px;
-                padding-left: 10px;
-                padding-right: 10px;
+                padding: 10px 8px;
             }
         }
 
         /* Page Header */
         .page-header {
-            margin-bottom: 28px;
-            padding-bottom: 14px;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
             border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .page-header.page-header-split {
+            margin-bottom: 0.5rem;
+            padding-bottom: 0.375rem;
         }
 
         .page-header h2 {
@@ -1082,6 +1098,10 @@
             color: var(--text-primary);
             margin-bottom: 6px;
             letter-spacing: -0.02em;
+        }
+
+        .page-header.page-header-split h2 {
+            margin-bottom: 0;
         }
 
         .page-header p {
@@ -1174,6 +1194,7 @@
         }
         .cart-toast i { font-size: 1.25rem; }
     </style>
+    <link rel="stylesheet" href="{{ asset('css/mobile-responsive.css') }}">
     @php
         $isApproved = auth()->check() && (auth()->user()->status === 'approved' || auth()->user()->role === 'admin' || auth()->user()->role === 'customer');
     @endphp
@@ -1363,7 +1384,15 @@
                             @if(auth()->user()->role === 'chef')
                                 {{ $isApproved ? __('dashboard.chef_dashboard') : __('dashboard.chef_verification') }}
                             @elseif(auth()->user()->role === 'admin')
-                                {{ __('dashboard.admin_dashboard') }}
+                                @if(($adminTitle ?? null) === 'ceo')
+                                    {{ __('dashboard.executive_dashboard') }}
+                                @elseif(($adminTitle ?? null) === 'manager')
+                                    {{ __('dashboard.manager_dashboard') }}
+                                @elseif(($adminTitle ?? null) === 'system_administrator')
+                                    {{ __('dashboard.system_admin_dashboard') }}
+                                @else
+                                    {{ __('dashboard.manager_dashboard') }}
+                                @endif
                             @elseif(auth()->user()->role === 'traveler')
                                 {{ $isApproved ? __('dashboard.traveler_dashboard') : __('dashboard.traveler_verification') }}
                             @else
@@ -1554,6 +1583,7 @@
 
     <!-- Bootstrap 5 JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ asset('js/mobile-responsive.js') }}"></script>
     <script>
         (function() {
             var sidebar = document.getElementById('sidebar');
@@ -1569,6 +1599,7 @@
                 if (isSmall) {
                     overlay.classList.add('active');
                     overlay.setAttribute('aria-hidden', 'false');
+                    document.body.style.overflow = 'hidden';
                 }
                 if (toggle) {
                     toggle.setAttribute('aria-expanded', 'true');

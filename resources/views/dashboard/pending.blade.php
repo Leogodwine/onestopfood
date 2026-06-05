@@ -1,8 +1,8 @@
 @extends('layouts.dashboard')
 
 @section('content')
-<div class="page-header">
-    <h2>Account Pending Approval</h2>
+<div class="page-header page-header-split">
+    <h2 class="mb-0">Account Pending Approval</h2>
     <p>Your account verification status</p>
 </div>
 
@@ -12,7 +12,7 @@
             <i class="bi bi-clock-history" style="font-size: 2rem; margin-right: 15px;"></i>
             <div>
                 <h4 class="alert-heading mb-2" style="color: #856404;">Account Pending Approval</h4>
-                <p class="mb-0">
+                <p class="mb-0 page-header-subtitle">
                     Your account is pending admin verification. Once approved, you'll be able to access your full dashboard and all features.
                 </p>
             </div>

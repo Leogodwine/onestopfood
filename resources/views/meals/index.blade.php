@@ -90,16 +90,7 @@
                 <div class="card h-100 shadow-sm border-0 meal-product-card">
                     <!-- Image Section -->
                     <div class="position-relative">
-                        @if($meal->image_path)
-                            <img src="{{ asset('storage/' . $meal->image_path) }}" 
-                                 class="card-img-top meal-card-img" 
-                                 alt="{{ $meal->name }}" 
-                                 onerror="this.src='{{ asset('images/food 01.jpeg') }}'">
-                        @else
-                            <div class="card-img-top bg-light d-flex align-items-center justify-content-center meal-card-img-placeholder">
-                                <i class="bi bi-image text-muted"></i>
-                            </div>
-                        @endif
+                        @include('meals.partials.thumbnail', ['meal' => $meal, 'class' => 'card-img-top meal-card-img'])
                         
                         <!-- Badges Overlay -->
                         <div class="position-absolute top-0 start-0 p-2 d-flex flex-column gap-1">

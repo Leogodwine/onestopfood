@@ -6,6 +6,7 @@
     <title>Invoice {{ $invoice->invoice_number }}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="{{ asset('css/mobile-responsive.css') }}">
     <style>
         body { font-size: 14px; color: #222; }
         @media print {
@@ -20,10 +21,10 @@
         $currency = $invoice->currency ?? 'TZS';
     @endphp
 
-    <div class="no-print mb-3 d-flex gap-2">
+    <div class="no-print mb-3 invoice-action-btns">
         <button onclick="window.print()" class="btn btn-primary btn-sm"><i class="bi bi-printer"></i> Print</button>
-        <a href="{{ route('invoices.download', $invoice) }}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-download"></i> Download PDF</a>
-        <a href="{{ route('invoices.show', $invoice) }}" class="btn btn-outline-secondary btn-sm">Back to invoice</a>
+        <a href="{{ route('invoices.download', $invoice) }}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-download"></i> Download</a>
+        <a href="{{ route('invoices.show', $invoice) }}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-arrow-left"></i> Back</a>
     </div>
 
     <div class="border p-4">
@@ -58,7 +59,8 @@
             </div>
         </div>
 
-        <table class="table table-bordered">
+        <table class="table table-bordered order-line-table">
+            @include('partials.order-line-colgroup')
             <thead>
                 <tr>
                     <th>Item</th>

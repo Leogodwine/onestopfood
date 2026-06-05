@@ -1,9 +1,9 @@
 @extends('layouts.dashboard')
 
 @section('content')
-<div class="page-header">
-    <h2>Geospatial Zones</h2>
-    <p class="text-muted mb-0">Manage service zones and delivery fees</p>
+<div class="page-header page-header-split">
+    <h2 class="mb-0">Geospatial Zones</h2>
+    <p class="text-muted mb-0 page-header-subtitle">Manage service zones and delivery fees</p>
 </div>
 
 <div class="row g-4">

@@ -1,14 +1,16 @@
 @extends('layouts.dashboard')
 
 @section('content')
-<div class="page-header d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
-    <div>
-        <h2>My Orders</h2>
-        <p class="text-muted mb-0">View and track your order history</p>
+<div class="page-header page-header-split">
+    <div class="d-flex justify-content-between align-items-center page-header-top">
+        <h2 class="mb-0">My Orders</h2>
+        <div class="page-header-actions">
+            <a class="btn btn-sm btn-primary page-header-action-btn" href="{{ route('meals.index') }}">
+                <i class="bi bi-shop"></i> Browse
+            </a>
+        </div>
     </div>
-    <a class="btn btn-primary" href="{{ route('meals.index') }}">
-        <i class="bi bi-shop"></i> Browse Meals
-    </a>
+    <p class="text-muted mb-0 page-header-subtitle">View and track your order history</p>
 </div>
 
 @if($orders->isEmpty())
@@ -76,18 +78,23 @@
                                     @endif
                                 </td>
                                 <td>{{ $order->created_at->format('M d, Y') }}</td>
-                                <td class="text-nowrap">
-                                    @if($order->invoice)
-                                        <a class="btn btn-sm btn-outline-success" href="{{ route('invoices.show', $order->invoice) }}" title="Invoice">
-                                            <i class="bi bi-receipt"></i>
+                                <td class="text-end">
+                                    <div class="invoice-table-actions">
+                                        @if($order->invoice)
+                                            <a class="btn btn-sm btn-outline-success" href="{{ route('invoices.show', $order->invoice) }}" title="Invoice">
+                                                <i class="bi bi-eye"></i> View
+                                            </a>
+                                            <a class="btn btn-sm btn-outline-primary" href="{{ route('invoices.print', $order->invoice) }}" target="_blank" title="Print">
+                                                <i class="bi bi-printer"></i> Print
+                                            </a>
+                                            <a class="btn btn-sm btn-outline-secondary" href="{{ route('invoices.download', $order->invoice) }}" title="Download PDF">
+                                                <i class="bi bi-download"></i> Download
+                                            </a>
+                                        @endif
+                                        <a class="btn btn-sm btn-outline-primary" href="{{ route('orders.show', $order) }}">
+                                            <i class="bi bi-box-seam"></i> Order
                                         </a>
-                                        <a class="btn btn-sm btn-outline-secondary" href="{{ route('invoices.download', $order->invoice) }}" title="Download PDF">
-                                            <i class="bi bi-download"></i>
-                                        </a>
-                                    @endif
-                                    <a class="btn btn-sm btn-outline-primary" href="{{ route('orders.show', $order) }}">
-                                        <i class="bi bi-eye"></i> View
-                                    </a>
+                                    </div>
                                 </td>
                             </tr>
                         @endforeach

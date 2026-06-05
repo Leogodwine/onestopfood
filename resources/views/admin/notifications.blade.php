@@ -1,9 +1,9 @@
 @extends('layouts.dashboard')
 
 @section('content')
-<div class="page-header">
-    <h2>Notifications</h2>
-    <p class="text-muted mb-0">In-app notifications sent to users (database channel). Broadcast campaigns remain a future enhancement.</p>
+<div class="page-header page-header-split">
+    <h2 class="mb-0">Notifications</h2>
+    <p class="text-muted mb-0 page-header-subtitle">In-app notifications sent to users (database channel). Broadcast campaigns remain a future enhancement.</p>
 </div>
 
 <div class="row g-3 mb-4">

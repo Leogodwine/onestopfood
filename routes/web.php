@@ -54,6 +54,7 @@ Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/locale/{locale}', [LocaleController::class, 'switch'])->name('locale.switch');
 
 Route::get('/meals', [MealController::class, 'index'])->name('meals.index');
+Route::get('/meals/{meal}/image', [MealController::class, 'image'])->name('meals.image');
 Route::get('/chefs', [ChefController::class, 'index'])->name('chefs.index');
 Route::get('/chefs/{chef}', [ChefController::class, 'show'])->name('chefs.show');
 Route::get('/users/{user}/avatar', [ProfileController::class, 'userAvatar'])->name('users.avatar');

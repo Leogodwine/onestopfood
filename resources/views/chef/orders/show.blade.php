@@ -6,25 +6,25 @@
     $mySubtotal = $chefPortion ? (float)$chefPortion->subtotal : (float)$order->subtotal;
     $myStatus = $chefPortion ? $chefPortion->status : $order->status;
 @endphp
-<div class="page-header">
-    <div class="d-flex justify-content-between align-items-center">
-        <div>
-            <h2>Order #{{ $order->id }}</h2>
-            <p class="text-muted mb-0">
-                @if($chefPortion)
-                    Your portion ({{ $myItems->count() }} item(s)) – TZS {{ number_format($mySubtotal, 2) }}
-                @else
-                    Order details and management
-                @endif
-            </p>
+<div class="page-header page-header-split">
+    <div class="d-flex justify-content-between align-items-center page-header-top">
+        <h2 class="mb-0">Order #{{ $order->id }}</h2>
+        <div class="page-header-actions">
+            <a class="btn btn-sm btn-outline-primary page-header-action-btn" href="{{ route('chef.orders.index') }}">
+                <i class="bi bi-arrow-left"></i> Back
+            </a>
         </div>
-        <a class="btn btn-outline-primary" href="{{ route('chef.orders.index') }}">
-            <i class="bi bi-arrow-left"></i> Back to Orders
-        </a>
     </div>
+    <p class="text-muted mb-0 page-header-subtitle">
+        @if($chefPortion)
+            Your portion ({{ $myItems->count() }} item(s)) – TZS {{ number_format($mySubtotal, 2) }}
+        @else
+            Order details and management
+        @endif
+    </p>
 </div>
 
-<div class="row g-4">
+<div class="row g-3 g-md-4">
     <div class="col-md-8">
         <div class="dashboard-card mb-4">
             <div class="card-header">

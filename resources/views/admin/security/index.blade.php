@@ -1,9 +1,9 @@
 @extends('layouts.dashboard')
 
 @section('content')
-<div class="page-header">
-    <h2>Security Management</h2>
-    <p class="text-muted mb-0">Manage permissions, monitor login activity, block suspicious accounts, and review security logs</p>
+<div class="page-header page-header-split">
+    <h2 class="mb-0">Security Management</h2>
+    <p class="text-muted mb-0 page-header-subtitle">Manage permissions, monitor login activity, block suspicious accounts, and review security logs</p>
 </div>
 
 @if($errors->has('security'))
@@ -35,7 +35,7 @@
                             @endif
                         </div>
                     @empty
-                        <p class="text-muted mb-0">No security settings configured.</p>
+                        <p class="text-muted mb-0 page-header-subtitle">No security settings configured.</p>
                     @endforelse
                 </div>
                 @if($securitySettings->isNotEmpty())

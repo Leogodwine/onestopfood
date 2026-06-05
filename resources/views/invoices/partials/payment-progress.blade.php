@@ -7,7 +7,7 @@
     $badge = $invoice?->paymentStatusBadgeClass() ?? 'warning';
 @endphp
 
-<div class="invoice-payment-tracker mb-4">
+<div class="invoice-payment-tracker mb-3 mb-md-4">
     <div class="d-flex justify-content-between align-items-center mb-2">
         <span class="fw-semibold">Payment progress</span>
         <span class="badge bg-{{ $badge }}">{{ $label }}</span>

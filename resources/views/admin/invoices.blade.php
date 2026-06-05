@@ -1,46 +1,36 @@
 @extends('layouts.dashboard')
 
 @section('content')
-<div class="page-header">
-    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
-        <div>
-            <h2>Billing && Invoice</h2>
-            <p class="text-muted mb-0">Manage invoices and track payment status</p>
-        </div>
-    </div>
+<div class="page-header page-header-split">
+    <h2 class="mb-0">Billing && Invoice</h2>
+    <p class="text-muted mb-0 page-header-subtitle">Manage invoices and track payment status</p>
 </div>
 
-<div class="dashboard-card mb-4">
+<div class="dashboard-card mb-3 mb-md-4">
     <div class="card-header">
         <h5 class="card-title mb-0"><i class="bi bi-filter"></i> Filters</h5>
     </div>
-    <form method="GET" action="{{ route('admin.invoices.index') }}" class="row g-3 p-2 align-items-end">
-        <div class="col-md-5">
-            <label class="form-label small text-muted">Search</label>
-            <input type="text" name="search" value="{{ $search }}" class="form-control" placeholder="Invoice number or order ID">
+    <form method="GET" action="{{ route('admin.invoices.index') }}" class="dashboard-filter-form row g-2 align-items-end">
+        <div class="col-6 col-lg-5">
+            <label class="form-label dashboard-filter-label" for="invoice-search">Search</label>
+            <input type="text" id="invoice-search" name="search" value="{{ $search }}" class="form-control" placeholder="Invoice number or order ID">
         </div>
-        <div class="col-md-4">
-            <label class="form-label small text-muted">Payment status</label>
-            <select name="status" class="form-select">
+        <div class="col-6 col-lg-4">
+            <label class="form-label dashboard-filter-label" for="invoice-status">Payment status</label>
+            <select id="invoice-status" name="status" class="form-select">
                 <option value="" @selected($status === '')>All</option>
                 @foreach(['paid','pending','failed','refunded'] as $s)
                     <option value="{{ $s }}" @selected($status === $s)>{{ ucfirst($s) }}</option>
                 @endforeach
             </select>
         </div>
-        <div class="col-md-3 d-flex gap-2">
-            <div class="flex-grow-1">
-                <label class="form-label small text-muted d-block">&nbsp;</label>
-                <button type="submit" class="btn btn-primary w-100">
-                    <i class="bi bi-funnel"></i> Apply
-                </button>
-            </div>
-            <div class="flex-grow-1">
-                <label class="form-label small text-muted d-block">&nbsp;</label>
-                <a href="{{ route('admin.invoices.index') }}" class="btn btn-outline-secondary w-100">Reset</a>
-            </div>
+        <div class="col-12 col-lg-3 dashboard-filter-actions">
+            <button type="submit" class="btn btn-primary">
+                <i class="bi bi-funnel"></i> Apply
+            </button>
+            <a href="{{ route('admin.invoices.index') }}" class="btn btn-outline-secondary">Reset</a>
         </div>
-        <div class="col-12 d-flex justify-content-end">
+        <div class="col-12 d-flex justify-content-end pt-1">
             <div class="dropdown">
                 <button class="btn btn-sm btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
                     Per page: {{ (int)$perPage }}
@@ -95,16 +85,18 @@
                         </td>
                         <td class="text-end fw-bold">{{ $currency }} {{ number_format((float)$invoice->amount, 2) }}</td>
                         <td class="text-muted small">{{ optional($invoice->issued_at)->format('M d, Y') }}</td>
-                        <td class="text-end text-nowrap">
-                            <a class="btn btn-sm btn-outline-success" href="{{ route('invoices.show', $invoice) }}" title="View invoice">
-                                <i class="bi bi-receipt"></i>
-                            </a>
-                            <a class="btn btn-sm btn-outline-primary" href="{{ route('invoices.print', $invoice) }}" target="_blank" title="Print">
-                                <i class="bi bi-printer"></i>
-                            </a>
-                            <a class="btn btn-sm btn-outline-secondary" href="{{ route('invoices.download', $invoice) }}" title="Download PDF">
-                                <i class="bi bi-download"></i>
-                            </a>
+                        <td class="text-end">
+                            <div class="invoice-table-actions">
+                                <a class="btn btn-sm btn-outline-success" href="{{ route('invoices.show', $invoice) }}" title="View invoice">
+                                    <i class="bi bi-eye"></i> View
+                                </a>
+                                <a class="btn btn-sm btn-outline-primary" href="{{ route('invoices.print', $invoice) }}" target="_blank" title="Print">
+                                    <i class="bi bi-printer"></i> Print
+                                </a>
+                                <a class="btn btn-sm btn-outline-secondary" href="{{ route('invoices.download', $invoice) }}" title="Download PDF">
+                                    <i class="bi bi-download"></i> Download
+                                </a>
+                            </div>
                         </td>
                     </tr>
                 @empty

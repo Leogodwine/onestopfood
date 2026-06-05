@@ -1,41 +1,35 @@
 @extends('layouts.dashboard')
 
 @section('content')
-<div class="page-header">
-    <h2>Meals</h2>
-    <p class="text-muted mb-0">Browse and review all meals on the platform</p>
+<div class="page-header page-header-split">
+    <h2 class="mb-0">Meals</h2>
+    <p class="text-muted mb-0 page-header-subtitle">Browse and review all meals on the platform</p>
 </div>
 
-<div class="dashboard-card mb-4">
+<div class="dashboard-card mb-3 mb-md-4">
     <div class="card-header">
         <h5 class="card-title mb-0"><i class="bi bi-filter"></i> Filters</h5>
     </div>
-    <form method="GET" action="{{ route('admin.meals.index') }}" class="row g-3 p-2 align-items-end">
-        <div class="col-md-6">
-            <label class="form-label small text-muted">Search</label>
-            <input type="text" name="search" value="{{ $search }}" class="form-control" placeholder="Meal name, category, origin">
+    <form method="GET" action="{{ route('admin.meals.index') }}" class="dashboard-filter-form row g-2 align-items-end">
+        <div class="col-12 col-lg-6">
+            <label class="form-label dashboard-filter-label" for="meal-search">Search</label>
+            <input type="text" id="meal-search" name="search" value="{{ $search }}" class="form-control" placeholder="Meal name, category, origin">
         </div>
-        <div class="col-md-3">
-            <label class="form-label small text-muted">Availability</label>
-            <select name="availability" class="form-select">
+        <div class="col-6 col-lg-3">
+            <label class="form-label dashboard-filter-label" for="meal-availability">Availability</label>
+            <select id="meal-availability" name="availability" class="form-select">
                 <option value="" @selected($availability === '')>All</option>
                 <option value="available" @selected($availability === 'available')>Available</option>
                 <option value="unavailable" @selected($availability === 'unavailable')>Unavailable</option>
             </select>
         </div>
-        <div class="col-md-3 d-flex gap-2">
-            <div class="flex-grow-1">
-                <label class="form-label small text-muted d-block">&nbsp;</label>
-                <button type="submit" class="btn btn-primary w-100">
-                    <i class="bi bi-funnel"></i> Apply
-                </button>
-            </div>
-            <div class="flex-grow-1">
-                <label class="form-label small text-muted d-block">&nbsp;</label>
-                <a href="{{ route('admin.meals.index') }}" class="btn btn-outline-secondary w-100">
-                    Reset
-                </a>
-            </div>
+        <div class="col-6 col-lg-3 dashboard-filter-actions">
+            <button type="submit" class="btn btn-primary">
+                <i class="bi bi-funnel"></i> Apply
+            </button>
+            <a href="{{ route('admin.meals.index') }}" class="btn btn-outline-secondary">
+                Reset
+            </a>
         </div>
         <div class="col-12 d-flex justify-content-end">
             <div class="dropdown">

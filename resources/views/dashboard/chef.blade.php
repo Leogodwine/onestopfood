@@ -1,8 +1,8 @@
 @extends('layouts.dashboard')
 
 @section('content')
-<div class="page-header">
-    <h2>Chef Dashboard</h2>
+<div class="page-header page-header-split">
+    <h2 class="mb-0">Chef Dashboard</h2>
     <p>Manage your meals and handle incoming orders</p>
 </div>
 

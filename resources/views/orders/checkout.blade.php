@@ -53,12 +53,11 @@
                                     <div class="order-item card h-100 border-0 shadow-sm">
                                         <div class="card-body p-2">
                                             <div class="item-image mb-2 rounded overflow-hidden" style="height: 90px;">
-                                                @if($item['meal']->image_path)
-                                                    <img src="{{ asset('storage/' . $item['meal']->image_path) }}" 
+                                                @if($item['meal']->image_url)
+                                                    <img src="{{ $item['meal']->image_url }}" 
                                                          alt="{{ $item['meal']->name }}" 
                                                          class="w-100 h-100 object-fit-cover"
-                                                         style="object-fit: cover;"
-                                                         onerror="this.src='{{ asset('images/food 01.jpeg') }}'">
+                                                         style="object-fit: cover;">
                                                 @else
                                                     <div class="bg-light w-100 h-100 d-flex align-items-center justify-content-center">
                                                         <i class="bi bi-image text-muted"></i>
@@ -386,17 +385,16 @@
             <!-- Right Sidebar: Order Summary (always visible) -->
             <div class="col-lg-4">
                 <div class="order-summary-card">
-                    <h3 class="section-title mb-4">ORDER SUMMARY</h3>
-                    <div class="order-items mb-4">
+                    <h3 class="section-title mb-3 mb-md-4">ORDER SUMMARY</h3>
+                    <div class="order-items mb-3 mb-md-4">
                         @foreach($items as $item)
                             <div class="order-item-small d-flex mb-2 pb-2 border-bottom">
                                 <div class="item-image-small me-2">
-                                    @if($item['meal']->image_path)
-                                        <img src="{{ asset('storage/' . $item['meal']->image_path) }}" 
+                                    @if($item['meal']->image_url)
+                                        <img src="{{ $item['meal']->image_url }}" 
                                              alt="{{ $item['meal']->name }}" 
                                              class="rounded"
-                                             style="width: 50px; height: 50px; object-fit: cover;"
-                                             onerror="this.src='{{ asset('images/food 01.jpeg') }}'">
+                                             style="width: 50px; height: 50px; object-fit: cover;">
                                     @else
                                         <div class="bg-light rounded d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
                                             <i class="bi bi-image text-muted" style="font-size: 0.75rem;"></i>
@@ -412,11 +410,11 @@
                         @endforeach
                     </div>
                     <div class="price-breakdown">
-                        <div class="d-flex justify-content-between mb-2">
+                        <div class="d-flex justify-content-between mb-1 mb-md-2">
                             <span class="text-muted">Subtotal</span>
                             <span class="price">TZS {{ number_format((float)$subtotal, 2) }}</span>
                         </div>
-                        <div class="d-flex justify-content-between mb-2">
+                        <div class="d-flex justify-content-between mb-1 mb-md-2">
                             <span class="text-muted">
                                 Delivery Fee
                                 @if(!empty($isMultiChef))
@@ -434,10 +432,10 @@
                         @if(!empty($isMultiChef))
                             <div class="small text-muted mb-2">Separate delivery per chef (TZS {{ number_format((float)($deliveryFeePerChef ?? 0), 0) }} each)</div>
                         @endif
-                        <hr class="my-3">
+                        <hr class="my-2 my-md-3">
                         <div class="d-flex justify-content-between align-items-center">
-                            <span class="fw-bold fs-5">Total</span>
-                            <span class="price fs-4 text-success">TZS {{ number_format((float)$total, 2) }}</span>
+                            <span class="fw-bold fs-6">Total</span>
+                            <span class="price fs-5 text-success">TZS {{ number_format((float)$total, 2) }}</span>
                         </div>
                     </div>
                 </div>
@@ -575,17 +573,16 @@
 @media (max-width: 767.98px) {
     .chef-order-columns .col-md-4,
     .chef-order-columns .col-md-6 {
-        margin-bottom: 0.5rem;
+        margin-bottom: 0.375rem;
     }
-}
     .order-summary-card {
         position: relative;
         top: 0;
-        margin-top: 2rem;
+        margin-top: 0.75rem;
     }
     .checkout-steps {
         flex-wrap: wrap;
-        gap: 1rem;
+        gap: 0.625rem;
     }
     .checkout-steps::before {
         display: none;

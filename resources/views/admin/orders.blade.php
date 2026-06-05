@@ -1,39 +1,39 @@
 @extends('layouts.dashboard')
 
 @section('content')
-<div class="page-header">
-    <h2>Order Monitoring</h2>
-    <p class="text-muted mb-0">Monitor all orders and intervene when needed</p>
+<div class="page-header page-header-split">
+    <h2 class="mb-0">Order Monitoring</h2>
+    <p class="text-muted mb-0 page-header-subtitle">Monitor all orders and intervene when needed</p>
 </div>
 
-<div class="dashboard-card mb-4">
+<div class="dashboard-card mb-3 mb-md-4">
     <div class="card-header">
         <h5 class="card-title mb-0"><i class="bi bi-filter"></i> Filters</h5>
     </div>
-    <form method="GET" action="{{ route('admin.orders.index') }}" class="row g-3 p-2">
-        <div class="col-md-3">
-            <label class="form-label small text-muted">Order ID</label>
-            <input type="text" name="order_id" value="{{ $orderId }}" class="form-control" placeholder="#123">
+    <form method="GET" action="{{ route('admin.orders.index') }}" class="dashboard-filter-form row g-2 align-items-end">
+        <div class="col-6 col-lg-3">
+            <label class="form-label dashboard-filter-label" for="filter-order-id">Order ID</label>
+            <input type="text" id="filter-order-id" name="order_id" value="{{ $orderId }}" class="form-control" placeholder="#123" inputmode="numeric">
         </div>
-        <div class="col-md-3">
-            <label class="form-label small text-muted">Status</label>
-            <select name="status" class="form-select">
+        <div class="col-6 col-lg-3">
+            <label class="form-label dashboard-filter-label" for="filter-status">Status</label>
+            <select id="filter-status" name="status" class="form-select">
                 <option value="">All</option>
                 @foreach(['pending','accepted','preparing','ready','out_for_delivery','delivered','cancelled'] as $s)
                     <option value="{{ $s }}" @selected($status === $s)>{{ ucfirst(str_replace('_',' ',$s)) }}</option>
                 @endforeach
             </select>
         </div>
-        <div class="col-md-2">
-            <label class="form-label small text-muted">From</label>
-            <input type="date" name="from" value="{{ $from }}" class="form-control">
+        <div class="col-6 col-lg-2">
+            <label class="form-label dashboard-filter-label" for="filter-from">From</label>
+            <input type="date" id="filter-from" name="from" value="{{ $from }}" class="form-control">
         </div>
-        <div class="col-md-2">
-            <label class="form-label small text-muted">To</label>
-            <input type="date" name="to" value="{{ $to }}" class="form-control">
+        <div class="col-6 col-lg-2">
+            <label class="form-label dashboard-filter-label" for="filter-to">To</label>
+            <input type="date" id="filter-to" name="to" value="{{ $to }}" class="form-control">
         </div>
-        <div class="col-md-2 d-flex gap-2 align-items-end">
-            <button type="submit" class="btn btn-primary flex-grow-1">
+        <div class="col-12 col-lg-2 dashboard-filter-actions">
+            <button type="submit" class="btn btn-primary">
                 <i class="bi bi-funnel"></i> Apply
             </button>
             <a href="{{ route('admin.orders.index') }}" class="btn btn-outline-secondary">
@@ -88,4 +88,3 @@
     </div>
 </div>
 @endsection
-

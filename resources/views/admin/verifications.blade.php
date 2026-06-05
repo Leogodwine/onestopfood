@@ -1,13 +1,13 @@
 @extends('layouts.dashboard')
 
 @section('content')
-<div class="page-header">
-    <h2>Chef & Traveler Verification</h2>
-    <p class="text-muted mb-0">Review documents, certificates, and images submitted during partner verification</p>
+<div class="page-header page-header-split">
+    <h2 class="mb-0">Chef & Traveler Verification</h2>
+    <p class="text-muted mb-0 page-header-subtitle">Review documents, certificates, and images submitted during partner verification</p>
 </div>
 
-<div class="row g-4 mb-4">
-    <div class="col-md-6">
+<div class="row g-3 g-md-4 mb-3 mb-md-4">
+    <div class="col-6 col-md-6">
         <div class="stat-card stat-green">
             <div class="stat-icon">
                 <i class="bi bi-hourglass-split"></i>
@@ -16,7 +16,7 @@
             <div class="stat-label">Pending Documents</div>
         </div>
     </div>
-    <div class="col-md-6">
+    <div class="col-6 col-md-6">
         <div class="stat-card stat-blue">
             <div class="stat-icon">
                 <i class="bi bi-calendar-event"></i>
@@ -27,36 +27,36 @@
     </div>
 </div>
 
-<div class="dashboard-card mb-4">
+<div class="dashboard-card mb-3 mb-md-4">
     <div class="card-header">
         <h5 class="card-title mb-0">
             <i class="bi bi-filter"></i> Filters
         </h5>
     </div>
-    <form method="GET" action="{{ route('admin.verifications.index') }}" class="row g-3 p-2">
-        <div class="col-md-3">
-            <label class="form-label small text-muted">Status</label>
-            <select name="status" class="form-select">
+    <form method="GET" action="{{ route('admin.verifications.index') }}" class="dashboard-filter-form row g-2 align-items-end">
+        <div class="col-6 col-lg-3">
+            <label class="form-label dashboard-filter-label" for="verification-status">Status</label>
+            <select id="verification-status" name="status" class="form-select">
                 <option value="">All</option>
                 <option value="pending" @selected($status === 'pending')>Pending</option>
                 <option value="approved" @selected($status === 'approved')>Approved</option>
                 <option value="rejected" @selected($status === 'rejected')>Rejected</option>
             </select>
         </div>
-        <div class="col-md-3">
-            <label class="form-label small text-muted">Role</label>
-            <select name="role" class="form-select">
+        <div class="col-6 col-lg-3">
+            <label class="form-label dashboard-filter-label" for="verification-role">Role</label>
+            <select id="verification-role" name="role" class="form-select">
                 <option value="">All</option>
                 <option value="chef" @selected($role === 'chef')>Chef</option>
                 <option value="traveler" @selected($role === 'traveler')>Traveler</option>
             </select>
         </div>
-        <div class="col-md-3">
-            <label class="form-label small text-muted">Type</label>
-            <input type="text" name="type" value="{{ $type }}" class="form-control" placeholder="e.g. selfie, license">
+        <div class="col-12 col-lg-3">
+            <label class="form-label dashboard-filter-label" for="verification-type">Type</label>
+            <input type="text" id="verification-type" name="type" value="{{ $type }}" class="form-control" placeholder="e.g. selfie, license">
         </div>
-        <div class="col-md-3 d-flex gap-2 align-items-end">
-            <button type="submit" class="btn btn-primary flex-grow-1">
+        <div class="col-12 col-lg-3 dashboard-filter-actions">
+            <button type="submit" class="btn btn-primary">
                 <i class="bi bi-funnel"></i> Apply
             </button>
             <a href="{{ route('admin.verifications.index') }}" class="btn btn-outline-secondary">

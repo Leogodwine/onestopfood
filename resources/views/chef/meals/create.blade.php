@@ -1,11 +1,11 @@
 @extends('layouts.dashboard')
 
 @section('content')
-<div class="page-header">
+<div class="page-header page-header-split">
     <div class="d-flex justify-content-between align-items-center">
         <div>
             <h2>Add New Meal</h2>
-            <p class="text-muted mb-0">Create a new meal offering</p>
+            <p class="text-muted mb-0 page-header-subtitle">Create a new meal offering</p>
         </div>
         <a class="btn btn-outline-primary" href="{{ route('chef.meals.index') }}">
             <i class="bi bi-arrow-left"></i> Back

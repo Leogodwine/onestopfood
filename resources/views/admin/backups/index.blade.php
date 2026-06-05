@@ -1,17 +1,19 @@
 @extends('layouts.dashboard')
 
 @section('content')
-<div class="page-header d-flex justify-content-between align-items-start flex-wrap gap-3">
-    <div>
-        <h2>Backup &amp; Recovery</h2>
-        <p class="text-muted mb-0">Create database backups, schedule automatic backups, restore data, and monitor backup status</p>
+<div class="page-header page-header-split">
+    <div class="d-flex justify-content-between align-items-center page-header-top">
+        <h2 class="mb-0">Backup &amp; Recovery</h2>
+        <div class="page-header-actions">
+            <form method="POST" action="{{ route('admin.backups.store') }}" class="d-inline">
+                @csrf
+                <button type="submit" class="btn btn-sm btn-success page-header-action-btn" onclick="return confirm('Create a new database backup now?')">
+                    <i class="bi bi-cloud-download"></i> Backup
+                </button>
+            </form>
+        </div>
     </div>
-    <form method="POST" action="{{ route('admin.backups.store') }}">
-        @csrf
-        <button type="submit" class="btn btn-success" onclick="return confirm('Create a new database backup now?')">
-            <i class="bi bi-cloud-download"></i> Create Backup Now
-        </button>
-    </form>
+    <p class="text-muted mb-0 page-header-subtitle">Create database backups, schedule automatic backups, restore data, and monitor backup status</p>
 </div>
 
 @if($errors->has('backup'))

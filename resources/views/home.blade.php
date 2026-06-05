@@ -420,13 +420,7 @@
             <div class="col-12 col-sm-6 col-md-6 col-lg-3">
                 <div class="card meal-card h-100">
                     <div class="position-relative popular-meal-image-wrap">
-                        @if($meal->image_path)
-                            <img src="{{ asset('storage/' . $meal->image_path) }}" class="meal-image" alt="{{ $meal->name }}" onerror="this.src='{{ asset('images/food 01.jpeg') }}'">
-                        @else
-                            <div class="meal-image bg-light d-flex align-items-center justify-content-center">
-                                <i class="bi bi-image text-muted fs-1"></i>
-                            </div>
-                        @endif
+                        @include('meals.partials.thumbnail', ['meal' => $meal, 'class' => 'meal-image'])
                         <div class="popular-badge-overlay">
                             <span class="badge badge-popular">Popular</span>
                         </div>

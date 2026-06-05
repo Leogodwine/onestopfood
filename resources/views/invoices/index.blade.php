@@ -1,14 +1,16 @@
 @extends('layouts.dashboard')
 
 @section('content')
-<div class="page-header d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
-    <div>
-        <h2>Billing && Invoice</h2>
-        <p class="text-muted mb-0">View and download your invoices</p>
+<div class="page-header page-header-split">
+    <div class="d-flex justify-content-between align-items-center page-header-top">
+        <h2 class="mb-0">Billing && Invoice</h2>
+        <div class="page-header-actions">
+            <a class="btn btn-sm btn-outline-primary page-header-action-btn" href="{{ auth()->user()->role === 'chef' ? route('chef.orders.index') : route('customer.orders') }}">
+                <i class="bi bi-arrow-left"></i> Orders
+            </a>
+        </div>
     </div>
-    <a class="btn btn-outline-primary" href="{{ auth()->user()->role === 'chef' ? route('chef.orders.index') : route('customer.orders') }}">
-        <i class="bi bi-arrow-left"></i> My Orders
-    </a>
+    <p class="text-muted mb-0 page-header-subtitle">View and download your invoices</p>
 </div>
 
 <div class="dashboard-card">
@@ -41,16 +43,18 @@
                         </td>
                         <td class="text-end fw-bold">{{ $currency }} {{ number_format((float)$invoice->amount, 2) }}</td>
                         <td class="text-muted small">{{ optional($invoice->issued_at)->format('M d, Y') }}</td>
-                        <td class="text-end text-nowrap">
-                            <a class="btn btn-sm btn-outline-success" href="{{ route('invoices.show', $invoice) }}" title="View invoice">
-                                <i class="bi bi-receipt"></i>
-                            </a>
-                            <a class="btn btn-sm btn-outline-primary" href="{{ route('invoices.print', $invoice) }}" target="_blank" title="Print">
-                                <i class="bi bi-printer"></i>
-                            </a>
-                            <a class="btn btn-sm btn-outline-secondary" href="{{ route('invoices.download', $invoice) }}" title="Download PDF">
-                                <i class="bi bi-download"></i>
-                            </a>
+                        <td class="text-end">
+                            <div class="invoice-table-actions">
+                                <a class="btn btn-sm btn-outline-success" href="{{ route('invoices.show', $invoice) }}" title="View invoice">
+                                    <i class="bi bi-eye"></i> View
+                                </a>
+                                <a class="btn btn-sm btn-outline-primary" href="{{ route('invoices.print', $invoice) }}" target="_blank" title="Print">
+                                    <i class="bi bi-printer"></i> Print
+                                </a>
+                                <a class="btn btn-sm btn-outline-secondary" href="{{ route('invoices.download', $invoice) }}" title="Download PDF">
+                                    <i class="bi bi-download"></i> Download
+                                </a>
+                            </div>
                         </td>
                     </tr>
                 @empty

@@ -1,14 +1,16 @@
 @extends(auth()->check() ? 'layouts.dashboard' : 'layout')
 
 @section('content')
-<div class="page-header d-flex justify-content-between align-items-center flex-wrap gap-2">
-    <div>
-        <h2>Cart</h2>
-        <p class="text-muted mb-0">{{ empty($items) ? 'Your cart is empty.' : count($items) . ' item(s) in your cart' }}</p>
+<div class="page-header page-header-split">
+    <div class="d-flex justify-content-between align-items-center page-header-top">
+        <h2 class="mb-0">Cart</h2>
+        <div class="page-header-actions">
+            <a class="btn btn-sm btn-outline-primary page-header-action-btn" href="{{ route('meals.index') }}">
+                <i class="bi bi-shop"></i> Shop
+            </a>
+        </div>
     </div>
-    <a class="btn btn-outline-primary" href="{{ route('meals.index') }}">
-        <i class="bi bi-shop"></i> Continue shopping
-    </a>
+    <p class="text-muted mb-0 page-header-subtitle">{{ empty($items) ? 'Your cart is empty.' : count($items) . ' item(s) in your cart' }}</p>
 </div>
 
 @if(!empty($removedUnavailableCount))
@@ -91,10 +93,10 @@
                     </tbody>
                 </table>
             </div>
-            <div class="d-flex justify-content-end pt-3 border-top">
+            <div class="d-flex justify-content-end pt-2 pt-md-3 border-top cart-totals-strip">
                 <div class="text-end">
-                    <div class="text-muted">Subtotal</div>
-                    <div class="h4 mb-3">TZS {{ number_format((float)$subtotal, 2) }}</div>
+                    <div class="text-muted small">Subtotal</div>
+                    <div class="h5 mb-2 mb-md-3 cart-subtotal-amount">TZS {{ number_format((float)$subtotal, 2) }}</div>
                     @auth
                         <a class="btn btn-success" href="{{ route('orders.checkout') }}">Proceed to Checkout</a>
                     @else

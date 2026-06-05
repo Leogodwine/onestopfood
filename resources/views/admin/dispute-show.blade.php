@@ -1,16 +1,16 @@
 @extends('layouts.dashboard')
 
 @section('content')
-<div class="page-header">
-    <div class="d-flex justify-content-between align-items-center">
-        <div>
-            <h2>Dispute #{{ $dispute->id }}</h2>
-            <p class="text-muted mb-0">Review dispute details and resolution</p>
+<div class="page-header page-header-split">
+    <div class="d-flex justify-content-between align-items-center page-header-top">
+        <h2 class="mb-0">Dispute #{{ $dispute->id }}</h2>
+        <div class="page-header-actions">
+            <a href="{{ route('admin.disputes.index') }}" class="btn btn-sm btn-outline-primary page-header-action-btn">
+                <i class="bi bi-arrow-left"></i> Back
+            </a>
         </div>
-        <a href="{{ route('admin.disputes.index') }}" class="btn btn-outline-primary">
-            <i class="bi bi-arrow-left"></i> Back to Disputes
-        </a>
     </div>
+    <p class="text-muted mb-0 page-header-subtitle">Review dispute details and resolution</p>
 </div>
 
 <div class="row g-4">

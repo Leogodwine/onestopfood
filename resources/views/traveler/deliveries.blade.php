@@ -7,11 +7,11 @@
     $trackGpsForAdminMap = $isOnline || $assignedDeliveries->contains(fn ($d) => in_array($d->status, ['assigned', 'picked_up'], true));
 @endphp
 
-<div class="page-header">
+<div class="page-header page-header-split">
     <div class="d-flex justify-content-between align-items-center">
         <div>
             <h2>My Deliveries</h2>
-            <p class="text-muted mb-0">Manage your delivery assignments</p>
+            <p class="text-muted mb-0 page-header-subtitle">Manage your delivery assignments</p>
         </div>
         <form method="POST" action="{{ route('traveler.toggle-online') }}" class="d-inline">
             @csrf
@@ -51,7 +51,7 @@
                         </div>
                     </div>
                 @empty
-                    <p class="text-muted mb-0">No available deliveries</p>
+                    <p class="text-muted mb-0 page-header-subtitle">No available deliveries</p>
                 @endforelse
             </div>
         </div>
@@ -100,7 +100,7 @@
                         @endif
                     </div>
                 @empty
-                    <p class="text-muted mb-0">No assigned deliveries</p>
+                    <p class="text-muted mb-0 page-header-subtitle">No assigned deliveries</p>
                 @endforelse
             </div>
         </div>

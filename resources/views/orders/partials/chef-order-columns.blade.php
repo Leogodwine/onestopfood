@@ -24,13 +24,12 @@
                 <div class="card-body p-3">
                     @foreach($group['items'] as $item)
                         <div class="chef-order-item {{ !$loop->last ? 'mb-3 pb-3 border-bottom' : '' }}">
-                            @if($showImages && $item['meal']->image_path)
+                            @if($showImages && $item['meal']->image_url)
                                 <div class="rounded overflow-hidden mb-2" style="height: 88px;">
                                     <img
-                                        src="{{ asset('storage/' . $item['meal']->image_path) }}"
+                                        src="{{ $item['meal']->image_url }}"
                                         alt=""
                                         class="w-100 h-100 object-fit-cover"
-                                        onerror="this.src='{{ asset('images/food 01.jpeg') }}'"
                                     >
                                 </div>
                             @endif

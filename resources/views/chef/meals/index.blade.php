@@ -1,11 +1,11 @@
 @extends('layouts.dashboard')
 
 @section('content')
-<div class="page-header">
+<div class="page-header page-header-split">
     <div class="d-flex justify-content-between align-items-center">
         <div>
             <h2>My Meals</h2>
-            <p class="text-muted mb-0">Manage your meal offerings</p>
+            <p class="text-muted mb-0 page-header-subtitle">Manage your meal offerings</p>
         </div>
         <a class="btn btn-primary" href="{{ route('chef.meals.create') }}">
             <i class="bi bi-plus-circle"></i> Add Meal

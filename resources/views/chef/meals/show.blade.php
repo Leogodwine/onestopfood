@@ -1,29 +1,27 @@
 @extends('layouts.dashboard')
 
 @section('content')
-<div class="page-header">
-    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
-        <div>
-            <h2>{{ $meal->name }}</h2>
-            <p class="text-muted mb-0">Meal details</p>
-        </div>
-        <div class="d-flex flex-wrap gap-2">
-            <a class="btn btn-outline-primary" href="{{ route('chef.meals.index') }}">
-                <i class="bi bi-arrow-left"></i> Back to meals
+<div class="page-header page-header-split">
+    <div class="d-flex justify-content-between align-items-center page-header-top">
+        <h2 class="mb-0">{{ $meal->name }}</h2>
+        <div class="page-header-actions">
+            <a class="btn btn-sm btn-outline-primary page-header-action-btn" href="{{ route('chef.meals.index') }}">
+                <i class="bi bi-arrow-left"></i> Back
             </a>
-            <a class="btn btn-primary" href="{{ route('chef.meals.edit', $meal) }}">
+            <a class="btn btn-sm btn-primary page-header-action-btn" href="{{ route('chef.meals.edit', $meal) }}">
                 <i class="bi bi-pencil"></i> Edit
             </a>
         </div>
     </div>
+    <p class="text-muted mb-0 page-header-subtitle">Meal details</p>
 </div>
 
 <div class="row g-4">
     <div class="col-lg-5">
         <div class="dashboard-card">
             <div class="card-body text-center">
-                @if($meal->image_path)
-                    <img src="{{ asset('storage/' . $meal->image_path) }}" alt="{{ $meal->name }}" class="img-fluid rounded mb-3" style="max-height: 280px; object-fit: cover;">
+                @if($meal->image_url)
+                    <img src="{{ $meal->image_url }}" alt="{{ $meal->name }}" class="img-fluid rounded mb-3" style="max-height: 280px; object-fit: cover;">
                 @else
                     <div class="bg-body-secondary rounded d-flex align-items-center justify-content-center mb-3" style="height: 200px;">
                         <i class="bi bi-image text-muted" style="font-size: 2.5rem;"></i>
@@ -87,7 +85,7 @@
                     <h5 class="card-title mb-0">Description</h5>
                 </div>
                 <div class="card-body">
-                    <p class="mb-0">{{ $meal->description }}</p>
+                    <p class="mb-0 page-header-subtitle">{{ $meal->description }}</p>
                 </div>
             </div>
         @endif
@@ -98,7 +96,7 @@
                     <h5 class="card-title mb-0">Heritage Story</h5>
                 </div>
                 <div class="card-body">
-                    <p class="mb-0">{{ $meal->heritage_story }}</p>
+                    <p class="mb-0 page-header-subtitle">{{ $meal->heritage_story }}</p>
                 </div>
             </div>
         @endif

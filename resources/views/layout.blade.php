@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     @php $brand = $siteName ?? config('app.name', 'One Stop'); @endphp
-    <meta name="description" content="{{ $brand }} — Food order & delivery. Direct chef-to-customer: restaurant-quality meals from verified chefs to your doorstep. Order online, Dar es Salaam.">
+    <meta name="description" content="{{ $brand }} — Food order & delivery. Direct chef-to-customer: restaurant-quality meals from verified chefs to your doorstep. Order online, Dar es Salaam, Tanzania.">
     <title>{{ $brand }} — Food Order &amp; Delivery</title>
     <!-- Typography: Poppins (headlines) + Roboto (body) + Montserrat (accent) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -757,12 +757,16 @@
 
             /* Buttons Mobile */
             .btn-gold, .btn-view-all {
-                padding: 0.5rem 1rem !important;
-                font-size: 0.85rem !important;
+                padding: 0.45rem 0.8rem !important;
+                font-size: 0.9rem !important;
             }
             .btn-sm {
-                padding: 0.35rem 0.75rem !important;
-                font-size: 0.8rem !important;
+                padding: 0.32rem 0.6rem !important;
+                font-size: 0.875rem !important;
+            }
+            .btn {
+                font-size: 0.9375rem;
+                padding: 0.4rem 0.65rem;
             }
 
             /* Container Padding Mobile */
@@ -1491,6 +1495,7 @@
             }
         }
     </style>
+    <link rel="stylesheet" href="{{ asset('css/mobile-responsive.css') }}">
 </head>
 <body>
 @php
@@ -1901,6 +1906,7 @@
 @include('partials.floating-actions', ['brand' => $brand, 'supportPhone' => $supportPhone ?? null])
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="{{ asset('js/mobile-responsive.js') }}"></script>
 @php
     $cartAddedQty = session()->pull('cart_added_qty');
 @endphp

@@ -1,32 +1,36 @@
 @extends('layouts.dashboard')
 
 @section('content')
-<div class="page-header d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
-    <div>
-        <h2>Order #{{ $order->id }}</h2>
-        <p class="text-muted mb-0">
-            @if($order->chef)
-                Chef: {{ $order->chef->name }}
-            @endif
-            @if($order->checkout_batch_id && isset($batchOrders) && $batchOrders->count() > 1)
-                · Part of a {{ $batchOrders->count() }}-chef checkout
-            @endif
-        </p>
-    </div>
-    <div class="d-flex flex-wrap gap-2">
-        @if($order->invoice)
-            <a class="btn btn-success" href="{{ route('invoices.show', $order->invoice) }}">
-                <i class="bi bi-receipt"></i> View invoice
+<div class="page-header page-header-split">
+    <div class="d-flex justify-content-between align-items-center page-header-top">
+        <h2 class="mb-0">Order #{{ $order->id }}</h2>
+        <div class="page-header-actions">
+            <a class="btn btn-sm btn-outline-primary page-header-action-btn" href="{{ route('customer.orders') }}">
+                <i class="bi bi-arrow-left"></i> Back
             </a>
-        @elseif($order->effectivePayment())
-            <a class="btn btn-success" href="{{ route('orders.invoice', $order) }}">
-                <i class="bi bi-receipt"></i> View invoice
+        </div>
+    </div>
+    <p class="text-muted mb-0 page-header-subtitle">
+        @if($order->chef)
+            Chef: {{ $order->chef->name }}
+        @endif
+        @if($order->checkout_batch_id && isset($batchOrders) && $batchOrders->count() > 1)
+            · Part of a {{ $batchOrders->count() }}-chef checkout
+        @endif
+    </p>
+    @if($order->invoice || $order->effectivePayment())
+    <div class="page-header-actions page-header-actions-secondary">
+        @if($order->invoice)
+            <a class="btn btn-sm btn-success page-header-action-btn" href="{{ route('invoices.show', $order->invoice) }}">
+                <i class="bi bi-receipt"></i> Invoice
+            </a>
+        @else
+            <a class="btn btn-sm btn-success page-header-action-btn" href="{{ route('orders.invoice', $order) }}">
+                <i class="bi bi-receipt"></i> Invoice
             </a>
         @endif
-        <a class="btn btn-outline-primary" href="{{ route('customer.orders') }}">
-            <i class="bi bi-arrow-left"></i> Back to Orders
-        </a>
     </div>
+    @endif
 </div>
 
 @if($order->checkout_batch_id && isset($batchOrders) && $batchOrders->count() > 1)
@@ -39,7 +43,7 @@
     </div>
 @endif
 
-<div class="row g-4">
+<div class="row g-3 g-md-4">
     <div class="col-md-7">
         <div class="dashboard-card">
             <div class="card-header">
@@ -47,7 +51,8 @@
             </div>
             <div class="card-body">
                 <div class="table-responsive">
-                    <table class="table align-middle">
+                    <table class="table align-middle order-line-table">
+                        @include('partials.order-line-colgroup')
                         <thead>
                             <tr>
                                 <th>Item</th>

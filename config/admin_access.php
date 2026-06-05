@@ -19,7 +19,7 @@ return [
             'badge' => 'primary',
         ],
         'manager' => [
-            'label' => 'Operations Manager',
+            'label' => 'Manager',
             'short' => 'Manager',
             'description' => 'Day-to-day operations — users, orders, logistics, verifications, and disputes.',
             'badge' => 'success',

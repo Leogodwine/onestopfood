@@ -1,16 +1,16 @@
 @extends('layouts.dashboard')
 
 @section('content')
-<div class="page-header">
-    <div class="d-flex justify-content-between align-items-center">
-        <div>
-            <h2>User Details: {{ $user->name }}</h2>
-            <p class="text-muted mb-0">Review user information and documents</p>
+<div class="page-header page-header-split">
+    <div class="d-flex justify-content-between align-items-center page-header-top">
+        <h2 class="mb-0">User Details: {{ $user->name }}</h2>
+        <div class="page-header-actions">
+            <a class="btn btn-sm btn-outline-primary page-header-action-btn" href="{{ route('admin.users.index') }}">
+                <i class="bi bi-arrow-left"></i> Back
+            </a>
         </div>
-        <a class="btn btn-outline-primary" href="{{ route('admin.users.index') }}">
-            <i class="bi bi-arrow-left"></i> Back to Users
-        </a>
     </div>
+    <p class="text-muted mb-0 page-header-subtitle">Review user information and documents</p>
 </div>
 
 <div class="row g-4">

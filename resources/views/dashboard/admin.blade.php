@@ -1,44 +1,46 @@
 @extends('layouts.dashboard')
 
 @section('content')
-<div class="page-header">
-    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
-        <div>
-            <h2>
-                @if($adminTitle === 'ceo')
-                    Executive Dashboard
-                @elseif($adminTitle === 'manager')
-                    Operations Dashboard
-                @else
-                    Admin Dashboard
-                @endif
-            </h2>
-            <p class="text-muted mb-1">{{ $adminTitleDescription }}</p>
-            @if($adminTitle !== 'system_administrator')
-            <span class="badge bg-{{ app(\App\Services\AdminAccessService::class)->titleBadge($adminTitle) }}">
-                {{ $adminTitleLabel }}
-            </span>
+<div class="page-header page-header-split">
+    <div class="page-header-top page-header-top--solo">
+        <h2 class="mb-0">
+            @if($adminTitle === 'ceo')
+                {{ __('dashboard.executive_dashboard') }}
+            @elseif($adminTitle === 'manager')
+                {{ __('dashboard.operations_manager_dashboard') }}
+            @elseif($adminTitle === 'system_administrator')
+                {{ __('dashboard.system_admin_dashboard') }}
+            @else
+                {{ __('dashboard.manager_dashboard') }}
             @endif
-        </div>
-        <div class="d-flex gap-2 flex-wrap">
-            @if(!empty($adminPermissions['users.create']))
-                <button type="button" class="btn btn-outline-success" onclick="openCreateUserModal()">
-                    <i class="bi bi-person-plus"></i> Create User
-                </button>
-            @endif
-            @if(!empty($adminPermissions['users.view']))
-                <a class="btn btn-success" href="{{ route('admin.users.index', ['filter' => 'pending_approvals']) }}#pending-approvals">
-                    <i class="bi bi-person-check"></i> Review Pending Approvals
-                </a>
-            @endif
-        </div>
+        </h2>
     </div>
+    <p class="text-muted page-header-subtitle mb-1">{{ $adminTitleDescription }}</p>
+    @if($adminTitle === 'ceo')
+    <span class="badge bg-{{ app(\App\Services\AdminAccessService::class)->titleBadge($adminTitle) }}">
+        {{ $adminTitleLabel }}
+    </span>
+    @endif
+    @if(!empty($adminPermissions['users.create']) || !empty($adminPermissions['users.view']))
+    <div class="page-header-actions page-header-actions-secondary">
+        @if(!empty($adminPermissions['users.create']))
+            <button type="button" class="btn btn-sm btn-outline-success page-header-action-btn" onclick="openCreateUserModal()">
+                <i class="bi bi-person-plus"></i> Create User
+            </button>
+        @endif
+        @if(!empty($adminPermissions['users.view']))
+            <a class="btn btn-sm btn-success page-header-action-btn" href="{{ route('admin.users.index', ['filter' => 'pending_approvals']) }}#pending-approvals">
+                <i class="bi bi-person-check"></i> Pending
+            </a>
+        @endif
+    </div>
+    @endif
 </div>
 
 <!-- Statistics Cards - Row 1 -->
-<div class="row g-4 mb-4">
+<div class="row g-3 g-md-4 mb-3 mb-md-4">
     @if(!empty($adminPermissions['users.view']))
-    <div class="col-md-3 col-sm-6">
+    <div class="col-6 col-md-3">
         <a class="stat-card stat-green d-block text-decoration-none" href="{{ route('admin.users.index') }}#all-users">
             <div class="stat-icon">
                 <i class="bi bi-people"></i>
@@ -52,7 +54,7 @@
     </div>
     @endif
     @if(!empty($adminPermissions['users.view']))
-    <div class="col-md-3 col-sm-6">
+    <div class="col-6 col-md-3">
         <a class="stat-card stat-blue d-block text-decoration-none" href="{{ route('admin.users.index', ['role' => 'chef', 'status' => 'approved']) }}#all-users">
             <div class="stat-icon">
                 <i class="bi bi-egg-fried"></i>
@@ -66,7 +68,7 @@
     </div>
     @endif
     @if(!empty($adminPermissions['orders']))
-    <div class="col-md-3 col-sm-6">
+    <div class="col-6 col-md-3">
         <a class="stat-card stat-green d-block text-decoration-none" href="{{ route('admin.orders.index') }}">
             <div class="stat-icon">
                 <i class="bi bi-cart-check"></i>
@@ -80,7 +82,7 @@
     </div>
     @endif
     @if(!empty($adminPermissions['meals']))
-    <div class="col-md-3 col-sm-6">
+    <div class="col-6 col-md-3">
         <a class="stat-card stat-blue d-block text-decoration-none" href="{{ route('admin.meals.index', ['availability' => 'available']) }}">
             <div class="stat-icon">
                 <i class="bi bi-utensils"></i>
@@ -97,8 +99,8 @@
 
 <!-- Statistics Cards - Row 2 -->
 @if(!empty($adminPermissions['users.view']))
-<div class="row g-4 mb-4">
-    <div class="col-md-3 col-sm-6">
+<div class="row g-3 g-md-4 mb-3 mb-md-4">
+    <div class="col-6 col-md-3">
         <a class="stat-card stat-green d-block text-decoration-none" href="{{ route('admin.users.index', ['role' => 'customer', 'status' => 'approved']) }}#all-users">
             <div class="stat-icon">
                 <i class="bi bi-person-check"></i>
@@ -110,7 +112,7 @@
             </div>
         </a>
     </div>
-    <div class="col-md-3 col-sm-6">
+    <div class="col-6 col-md-3">
         <a class="stat-card stat-blue d-block text-decoration-none" href="{{ route('admin.users.index', ['role' => 'traveler', 'status' => 'approved']) }}#all-users">
             <div class="stat-icon">
                 <i class="bi bi-truck"></i>
@@ -122,7 +124,7 @@
             </div>
         </a>
     </div>
-    <div class="col-md-3 col-sm-6">
+    <div class="col-6 col-md-3">
         <a class="stat-card stat-green d-block text-decoration-none" href="{{ route('admin.users.index', ['filter' => 'pending_approvals']) }}#pending-approvals">
             <div class="stat-icon">
                 <i class="bi bi-clock-history"></i>
@@ -140,7 +142,7 @@
             @endif
         </a>
     </div>
-    <div class="col-md-3 col-sm-6">
+    <div class="col-6 col-md-3">
         <a class="stat-card stat-blue d-block text-decoration-none" href="{{ route('admin.users.index', ['filter' => 'active_partners']) }}#all-users">
             <div class="stat-icon">
                 <i class="bi bi-shield-check"></i>
@@ -164,7 +166,7 @@
         </h5>
     </div>
     <div class="card-body">
-        <div class="row g-3">
+        <div class="row g-2 g-md-3">
             @if(!empty($adminPermissions['users.view']))
             <div class="col-md-4">
                 <a class="btn btn-success w-100 d-flex align-items-center justify-content-center gap-2" href="{{ route('admin.users.index') }}" style="height: 60px;">

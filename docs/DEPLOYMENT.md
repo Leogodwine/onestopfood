@@ -72,7 +72,7 @@ ls public/storage/verifications/
 - `GET /documents/verifications/{id}` — row in `user_verification_documents`
 - `GET /documents/users/{userId}/profiles/{field}` — profile uploads (`selfie`, `proof-of-kitchen`, `kitchen-photo-1`, etc.)
 
-Meal catalog images still use `/storage/meals/...`; run `storage:link` for those and other public assets.
+Meal photos are served via `/meals/{id}/image` (no `public/storage` symlink required). Run `storage:link` only if you prefer direct `/storage/meals/...` URLs.
 
 ## HTTPS & cookies
 

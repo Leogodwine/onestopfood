@@ -14,49 +14,54 @@
     </div>
 @endif
 
-<div class="page-header d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
-    <div>
-        <h2>Invoice {{ $invoice->invoice_number }}</h2>
-        <p class="text-muted mb-0">Order #{{ $order->id }} · Issued {{ $invoice->issued_at->format('M d, Y') }}</p>
+@php
+    $backRoute = match(auth()->user()->role) {
+        'admin' => route('admin.invoices.index'),
+        'chef' => route('chef.orders.index'),
+        'traveler' => route('traveler.deliveries'),
+        default => route('billing.index'),
+    };
+    $backLabel = match(auth()->user()->role) {
+        'admin' => 'Invoices',
+        'chef' => 'Orders',
+        'traveler' => 'Deliveries',
+        default => 'Billing',
+    };
+@endphp
+
+<div class="page-header page-header-split">
+    <div class="d-flex justify-content-between align-items-center page-header-top">
+        <h2 class="mb-0">Invoice {{ $invoice->invoice_number }}</h2>
+        <div class="page-header-actions">
+            <a class="btn btn-sm btn-outline-primary page-header-action-btn" href="{{ $backRoute }}">
+                <i class="bi bi-arrow-left"></i> {{ $backLabel }}
+            </a>
+        </div>
     </div>
-    <div class="d-flex flex-wrap gap-2">
-        <a class="btn btn-outline-secondary" href="{{ route('orders.show', $order) }}">
-            <i class="bi bi-box-seam"></i> Order details
+    <p class="text-muted mb-0 page-header-subtitle">Order #{{ $order->id }} · Issued {{ $invoice->issued_at->format('M d, Y') }}</p>
+    <div class="page-header-actions page-header-actions-secondary">
+        <a class="btn btn-sm btn-outline-secondary page-header-action-btn" href="{{ route('orders.show', $order) }}">
+            <i class="bi bi-box-seam"></i> Order
         </a>
-        <a class="btn btn-outline-primary" href="{{ route('billing.index') }}">
-            <i class="bi bi-wallet2"></i> Billing &amp; invoices
+        <a class="btn btn-sm btn-outline-primary page-header-action-btn" href="{{ route('billing.index') }}">
+            <i class="bi bi-wallet2"></i> Billing
         </a>
-        <a class="btn btn-outline-primary" href="{{ route('invoices.print', $invoice) }}" target="_blank">
-            <i class="bi bi-printer"></i> Print
-        </a>
-        <a class="btn btn-outline-secondary" href="{{ route('invoices.download', $invoice) }}">
-            <i class="bi bi-download"></i> Download PDF
-        </a>
-        @php
-            $backRoute = match(auth()->user()->role) {
-                'admin' => route('admin.invoices.index'),
-                'chef' => route('chef.orders.index'),
-                'traveler' => route('traveler.deliveries'),
-                default => route('billing.index'),
-            };
-            $backLabel = match(auth()->user()->role) {
-                'admin' => 'All invoices',
-                'chef' => 'My orders',
-                'traveler' => 'My deliveries',
-                default => 'Billing & invoices',
-            };
-        @endphp
-        <a class="btn btn-outline-primary" href="{{ $backRoute }}">
-            <i class="bi bi-arrow-left"></i> {{ $backLabel }}
-        </a>
+        <div class="invoice-action-btns">
+            <a class="btn btn-sm btn-outline-primary" href="{{ route('invoices.print', $invoice) }}" target="_blank">
+                <i class="bi bi-printer"></i> Print
+            </a>
+            <a class="btn btn-sm btn-outline-secondary" href="{{ route('invoices.download', $invoice) }}">
+                <i class="bi bi-download"></i> Download
+            </a>
+        </div>
     </div>
 </div>
 
-<div class="row g-4">
+<div class="row g-3 g-md-4">
     <div class="col-lg-8">
         <div class="dashboard-card invoice-document">
-            <div class="card-body p-4">
-                <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-4 pb-3 border-bottom">
+            <div class="card-body p-3 p-md-4">
+                <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 gap-md-3 mb-3 mb-md-4 pb-2 pb-md-3 border-bottom">
                     <div>
                         <h4 class="mb-1 text-success">{{ $brand }}</h4>
                         <p class="text-muted small mb-0">Food order & delivery</p>
@@ -67,7 +72,7 @@
                     </div>
                 </div>
 
-                <div class="row mb-4">
+                <div class="row mb-3 mb-md-4">
                     <div class="col-md-6">
                         <p class="text-muted small mb-1">Bill to</p>
                         <p class="mb-0 fw-semibold">{{ $order->customer->name }}</p>
@@ -87,7 +92,8 @@
                 </div>
 
                 <div class="table-responsive">
-                    <table class="table align-middle">
+                    <table class="table align-middle order-line-table">
+                        @include('partials.order-line-colgroup')
                         <thead class="table-light">
                             <tr>
                                 <th>Description</th>

@@ -1,16 +1,16 @@
 @extends('layouts.dashboard')
 
 @section('content')
-<div class="page-header">
-    <div class="d-flex justify-content-between align-items-center">
-        <div>
-            <h2>My Orders</h2>
-            <p class="text-muted mb-0">Manage incoming orders from customers</p>
+<div class="page-header page-header-split">
+    <div class="d-flex justify-content-between align-items-center page-header-top">
+        <h2 class="mb-0">My Orders</h2>
+        <div class="page-header-actions">
+            <a class="btn btn-sm btn-outline-primary page-header-back-btn" href="{{ route('dashboard') }}">
+                <i class="bi bi-arrow-left"></i> Dashboard
+            </a>
         </div>
-        <a class="btn btn-outline-primary" href="{{ route('dashboard') }}">
-            <i class="bi bi-arrow-left"></i> Dashboard
-        </a>
     </div>
+    <p class="text-muted mb-0 page-header-subtitle">Manage incoming orders from customers</p>
 </div>
 
 <div class="dashboard-card">

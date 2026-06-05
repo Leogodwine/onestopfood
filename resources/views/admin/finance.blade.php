@@ -1,13 +1,13 @@
 @extends('layouts.dashboard')
 
 @section('content')
-<div class="page-header">
-    <h2>Financial Dashboard</h2>
-    <p class="text-muted mb-0">Monitor transactions, refunds, and payouts</p>
+<div class="page-header page-header-split">
+    <h2 class="mb-0">Financial Dashboard</h2>
+    <p class="text-muted mb-0 page-header-subtitle">Monitor transactions, refunds, and payouts</p>
 </div>
 
-<div class="row g-4 mb-4">
-    <div class="col-md-4">
+<div class="row g-3 g-md-4 mb-3 mb-md-4">
+    <div class="col-6 col-md-4">
         <div class="stat-card stat-green">
             <div class="stat-icon">
                 <i class="bi bi-currency-exchange"></i>
@@ -16,7 +16,7 @@
             <div class="stat-label">Total Collected</div>
         </div>
     </div>
-    <div class="col-md-4">
+    <div class="col-6 col-md-4">
         <div class="stat-card stat-blue">
             <div class="stat-icon">
                 <i class="bi bi-arrow-counterclockwise"></i>
@@ -25,7 +25,7 @@
             <div class="stat-label">Total Refunded</div>
         </div>
     </div>
-    <div class="col-md-4">
+    <div class="col-12 col-md-4">
         <div class="stat-card stat-green">
             <div class="stat-icon">
                 <i class="bi bi-receipt-cutoff"></i>
@@ -36,30 +36,30 @@
     </div>
 </div>
 
-<div class="dashboard-card mb-4">
+<div class="dashboard-card mb-3 mb-md-4">
     <div class="card-header">
         <h5 class="card-title mb-0"><i class="bi bi-filter"></i> Filters</h5>
     </div>
-    <form method="GET" action="{{ route('admin.finance.index') }}" class="row g-3 p-2">
-        <div class="col-md-3">
-            <label class="form-label small text-muted">Status</label>
-            <select name="status" class="form-select">
+    <form method="GET" action="{{ route('admin.finance.index') }}" class="dashboard-filter-form row g-2 align-items-end">
+        <div class="col-12 col-sm-6 col-lg-3">
+            <label class="form-label dashboard-filter-label" for="finance-status">Status</label>
+            <select id="finance-status" name="status" class="form-select">
                 <option value="">All</option>
                 @foreach(['pending','paid','failed','refunded'] as $s)
                     <option value="{{ $s }}" @selected($status === $s)>{{ ucfirst($s) }}</option>
                 @endforeach
             </select>
         </div>
-        <div class="col-md-3">
-            <label class="form-label small text-muted">From</label>
-            <input type="date" name="from" value="{{ $from }}" class="form-control">
+        <div class="col-6 col-lg-3">
+            <label class="form-label dashboard-filter-label" for="finance-from">From</label>
+            <input type="date" id="finance-from" name="from" value="{{ $from }}" class="form-control">
         </div>
-        <div class="col-md-3">
-            <label class="form-label small text-muted">To</label>
-            <input type="date" name="to" value="{{ $to }}" class="form-control">
+        <div class="col-6 col-lg-3">
+            <label class="form-label dashboard-filter-label" for="finance-to">To</label>
+            <input type="date" id="finance-to" name="to" value="{{ $to }}" class="form-control">
         </div>
-        <div class="col-md-3 d-flex gap-2 align-items-end">
-            <button type="submit" class="btn btn-primary flex-grow-1">
+        <div class="col-12 col-lg-3 dashboard-filter-actions">
+            <button type="submit" class="btn btn-primary">
                 <i class="bi bi-funnel"></i> Apply
             </button>
             <a href="{{ route('admin.finance.index') }}" class="btn btn-outline-secondary">

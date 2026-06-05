@@ -70,7 +70,7 @@ class Invoice extends Model
     {
         return match ($this->payment_status) {
             'paid' => 'Paid',
-            'pending' => 'Unpaid — waiting for payment',
+            'pending' => __('payments.status_waiting'),
             'failed' => 'Payment failed',
             'refunded' => 'Refunded',
             default => ucfirst($this->payment_status),

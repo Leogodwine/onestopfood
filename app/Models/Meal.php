@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Review;
+use Illuminate\Support\Facades\Storage;
 
 class Meal extends Model
 {
@@ -48,6 +49,26 @@ class Meal extends Model
     public function isVisibleToCustomers(): bool
     {
         return (bool) $this->is_available;
+    }
+
+    /**
+     * URL for the meal photo (served via app route — works without public/storage symlink).
+     */
+    public function getImageUrlAttribute(): ?string
+    {
+        if (empty($this->image_path)) {
+            return null;
+        }
+
+        $path = ltrim($this->image_path, '/');
+
+        if (! Storage::disk('public')->exists($path)) {
+            return null;
+        }
+
+        $version = $this->updated_at ? $this->updated_at->timestamp : time();
+
+        return route('meals.image', $this) . '?v=' . $version;
     }
 
     public function reviews()

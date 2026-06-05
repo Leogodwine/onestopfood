@@ -1,27 +1,27 @@
 @extends('layouts.dashboard')
 
 @section('content')
-<div class="page-header">
-    <h2>Delivery & Logistics</h2>
-    <p class="text-muted mb-0">Monitor active deliveries across the platform</p>
+<div class="page-header page-header-split">
+    <h2 class="mb-0">Delivery & Logistics</h2>
+    <p class="text-muted mb-0 page-header-subtitle">Monitor active deliveries across the platform</p>
 </div>
 
-<div class="dashboard-card mb-4">
+<div class="dashboard-card mb-3 mb-md-4">
     <div class="card-header">
         <h5 class="card-title mb-0"><i class="bi bi-filter"></i> Filters</h5>
     </div>
-    <form method="GET" action="{{ route('admin.logistics.index') }}" class="row g-3 p-2">
-        <div class="col-md-4">
-            <label class="form-label small text-muted">Status</label>
-            <select name="status" class="form-select">
+    <form method="GET" action="{{ route('admin.logistics.index') }}" class="dashboard-filter-form row g-2 align-items-end">
+        <div class="col-12 col-lg-6">
+            <label class="form-label dashboard-filter-label" for="logistics-status">Status</label>
+            <select id="logistics-status" name="status" class="form-select">
                 <option value="">All</option>
                 @foreach(['unassigned','assigned','picked_up','delivered','failed'] as $s)
                     <option value="{{ $s }}" @selected($status === $s)>{{ ucfirst(str_replace('_',' ',$s)) }}</option>
                 @endforeach
             </select>
         </div>
-        <div class="col-md-4 d-flex gap-2 align-items-end">
-            <button type="submit" class="btn btn-primary flex-grow-1">
+        <div class="col-12 col-lg-6 dashboard-filter-actions">
+            <button type="submit" class="btn btn-primary">
                 <i class="bi bi-funnel"></i> Apply
             </button>
             <a href="{{ route('admin.logistics.index') }}" class="btn btn-outline-secondary">

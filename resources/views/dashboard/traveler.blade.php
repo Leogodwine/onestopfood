@@ -1,8 +1,8 @@
 @extends('layouts.dashboard')
 
 @section('content')
-<div class="page-header">
-    <h2>Traveler Dashboard</h2>
+<div class="page-header page-header-split">
+    <h2 class="mb-0">Traveler Dashboard</h2>
     <p>Accept deliveries and track your earnings</p>
 </div>
 

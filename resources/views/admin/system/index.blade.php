@@ -1,9 +1,9 @@
 @extends('layouts.dashboard')
 
 @section('content')
-<div class="page-header">
-    <h2>System Monitoring &amp; Maintenance</h2>
-    <p class="text-muted mb-0">Monitor platform performance, server resources, error logs, and maintenance tasks</p>
+<div class="page-header page-header-split">
+    <h2 class="mb-0">System Monitoring &amp; Maintenance</h2>
+    <p class="text-muted mb-0 page-header-subtitle">Monitor platform performance, server resources, error logs, and maintenance tasks</p>
 </div>
 
 <div class="row g-4 mb-4">

@@ -64,9 +64,9 @@
 </div>
 <div class="mb-3">
     <label class="form-label">Meal Image</label>
-    @if($meal?->image_path)
+    @if($meal?->image_url)
         <div class="mb-2">
-            <img src="{{ asset('storage/' . $meal->image_path) }}" alt="{{ $meal->name }}" class="rounded border" style="max-height: 120px;">
+            <img src="{{ $meal->image_url }}" alt="{{ $meal->name }}" class="rounded border" style="max-height: 120px;">
             <div class="form-text">Upload a new image to replace the current one.</div>
         </div>
     @endif

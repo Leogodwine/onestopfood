@@ -48,47 +48,10 @@
 
     <div class="row g-4" id="heritage-dishes-grid">
         @foreach($heritageMeals as $meal)
-            @php
-                $category = strtolower($meal->category ?? '');
-                $origin = strtolower($meal->origin ?? '');
-                $name = strtolower($meal->name ?? '');
-                $storyImage = 'food 01.jpeg';
-                if ($name === 'korean bbq tacos' || str_contains($category, 'korean') || str_contains($category, 'fusion')) {
-                    $storyImage = 'american food 02.jpg';
-                } elseif (str_contains($category, 'italian') || str_contains($category, 'dessert') || str_contains($category, 'chocolate') || str_contains($origin, 'umbrian') || str_contains($origin, 'turin')) {
-                    $storyImage = 'european food 01.jpg';
-                } elseif (str_contains($category, 'bbq') || str_contains($category, 'american') || str_contains($origin, 'hyogo') || str_contains($origin, 'texas')) {
-                    $storyImage = 'american food 01.jpeg';
-                } elseif (str_contains($category, 'sushi') || str_contains($category, 'japanese')) {
-                    $storyImage = 'asian food 01.jpg';
-                } elseif (str_contains($category, 'african') || str_contains($origin, 'africa')) {
-                    $storyImage = 'african food 0' . (($loop->index % 6) + 1) . '.jpg';
-                } else {
-                    $fallbacks = ['food 01.jpeg', 'food 03.png', 'juice and food 01.jpg', 'one stop food 01.jpeg'];
-                    $storyImage = $fallbacks[$loop->index % count($fallbacks)];
-                }
-                $cuisineType = strtolower($meal->chef?->chefProfile?->cuisine_type ?? '');
-                $chefImage = 'african chef 01.jpg';
-                if (str_contains($cuisineType, 'asian') || str_contains($cuisineType, 'fusion')) {
-                    $chefImage = 'asian chef 0' . (($loop->index % 4) + 1) . '.jpg';
-                } elseif (str_contains($cuisineType, 'american') || str_contains($cuisineType, 'bbq')) {
-                    $chefImage = 'american chef 0' . (($loop->index % 2) + 1) . '.jpg';
-                } elseif (str_contains($cuisineType, 'european') || str_contains($cuisineType, 'french') || str_contains($cuisineType, 'italian') || str_contains($cuisineType, 'mediterranean')) {
-                    $chefImage = 'european chef 0' . (($loop->index % 2) + 1) . '.jpg';
-                }
-            @endphp
             <div class="col-12 col-sm-6 col-lg-4 heritage-dish-card" data-category="{{ $meal->category ?? '' }}">
                 <div class="card heritage-card meal-card h-100">
                     <div class="position-relative heritage-image-wrap">
-                        @if($meal->image_path)
-                            <img src="{{ asset('storage/' . $meal->image_path) }}" class="meal-image heritage-image" alt="{{ $meal->name }}" onerror="this.src='{{ asset('images/' . $storyImage) }}'">
-                        @elseif(file_exists(public_path('images/' . $storyImage)))
-                            <img src="{{ asset('images/' . $storyImage) }}" class="meal-image heritage-image" alt="{{ $meal->name }}">
-                        @else
-                            <div class="meal-image heritage-image bg-light d-flex align-items-center justify-content-center">
-                                <i class="bi bi-image text-muted fs-1"></i>
-                            </div>
-                        @endif
+                        @include('meals.partials.thumbnail', ['meal' => $meal, 'class' => 'meal-image heritage-image'])
                         <div class="heritage-badges-overlay">
                             @if($meal->is_popular)
                                 <span class="badge badge-popular">Popular</span>

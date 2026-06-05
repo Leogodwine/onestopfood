@@ -96,6 +96,33 @@ class MealController extends Controller
         return view('meals.index', compact('meals', 'categories', 'heritageMeals'));
     }
 
+    /**
+     * Serve meal image from storage/app/public (no symlink required).
+     */
+    public function image(Meal $meal)
+    {
+        $path = $meal->image_path ? ltrim($meal->image_path, '/') : '';
+
+        if ($path === '' || str_contains($path, '..') || ! str_starts_with($path, 'meals/')) {
+            abort(404);
+        }
+
+        if (! $meal->is_available) {
+            $user = request()->user();
+            $allowed = $user
+                && ((int) $user->id === (int) $meal->chef_id || $user->role === \App\Models\User::ROLE_ADMIN);
+            if (! $allowed) {
+                abort(404);
+            }
+        }
+
+        if (! Storage::disk('public')->exists($path)) {
+            abort(404);
+        }
+
+        return Storage::disk('public')->response($path);
+    }
+
     private function mealAverageRating(int $mealId): float
     {
         $orderIds = OrderItem::query()->where('meal_id', $mealId)->pluck('order_id');

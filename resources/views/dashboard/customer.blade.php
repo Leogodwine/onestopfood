@@ -1,9 +1,9 @@
 @extends('layouts.dashboard')
 
 @section('content')
-<div class="page-header">
-    <h2>Customer Dashboard</h2>
-    <p>Browse meals, place orders, and track your deliveries</p>
+<div class="page-header page-header-split">
+    <h2 class="mb-0">Customer Dashboard</h2>
+    <p class="text-muted mb-0 page-header-subtitle">Browse meals, place orders, and track your deliveries</p>
 </div>
 
 <!-- Statistics Cards -->
@@ -135,10 +135,22 @@
                 @endif
             </div>
 
-            <a href="{{ route('orders.show', $order) }}" class="btn btn-sm btn-outline-primary">View full statement</a>
+            <div class="invoice-action-btns mt-2">
+                <a href="{{ route('orders.show', $order) }}" class="btn btn-sm btn-outline-primary">
+                    <i class="bi bi-eye"></i> View full
+                </a>
+                @if($order->invoice)
+                    <a class="btn btn-sm btn-outline-primary" href="{{ route('invoices.print', $order->invoice) }}" target="_blank">
+                        <i class="bi bi-printer"></i> Print
+                    </a>
+                    <a class="btn btn-sm btn-outline-secondary" href="{{ route('invoices.download', $order->invoice) }}">
+                        <i class="bi bi-download"></i> Download
+                    </a>
+                @endif
+            </div>
         </div>
         @empty
-        <p class="text-muted mb-0">No orders yet. <a href="{{ route('meals.index') }}">Start ordering!</a></p>
+        <p class="text-muted mb-0 page-header-subtitle">No orders yet. <a href="{{ route('meals.index') }}">Start ordering!</a></p>
         @endforelse
     </div>
 </div>

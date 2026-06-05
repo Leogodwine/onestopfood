@@ -1,9 +1,9 @@
 @extends('layouts.dashboard')
 
 @section('content')
-<div class="page-header">
-    <h2>System Configuration</h2>
-    <p class="text-muted mb-0">Global runtime settings for the platform</p>
+<div class="page-header page-header-split">
+    <h2 class="mb-0">System Configuration</h2>
+    <p class="text-muted mb-0 page-header-subtitle">Global runtime settings for the platform</p>
 </div>
 
 <form method="POST" action="{{ route('admin.config.update') }}">

@@ -1,18 +1,18 @@
 @extends('layouts.dashboard')
 
 @section('content')
-<div class="page-header">
-    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
-        <div>
-            <h2>User Management</h2>
-            <p class="mb-0">Review and manage all users on the platform</p>
-        </div>
+<div class="page-header page-header-split">
+    <div class="d-flex justify-content-between align-items-center page-header-top">
+        <h2 class="mb-0">User Management</h2>
         @if(!empty($adminPermissions['users.create']))
-        <a class="btn btn-success" href="javascript:void(0)" onclick="openCreateUserModal()">
-            <i class="bi bi-person-plus"></i> Create User
-        </a>
+        <div class="page-header-actions">
+            <a class="btn btn-sm btn-success page-header-action-btn" href="javascript:void(0)" onclick="openCreateUserModal()">
+                <i class="bi bi-person-plus"></i> Create
+            </a>
+        </div>
         @endif
     </div>
+    <p class="text-muted mb-0 page-header-subtitle">Review and manage all users on the platform</p>
 </div>
 
 @if($errors->has('bulk_action'))
@@ -23,15 +23,18 @@
 @endif
 
 <!-- Filters & Search -->
-<div class="dashboard-card mb-4">
-    <form method="GET" action="{{ route('admin.users.index') }}" class="row g-3 align-items-end">
-        <div class="col-md-3">
-            <label class="form-label small text-muted">Search</label>
-            <input type="text" name="search" value="{{ $search }}" class="form-control" placeholder="Name, email, phone, ID">
+<div class="dashboard-card mb-3 mb-md-4">
+    <div class="card-header py-2">
+        <h5 class="card-title mb-0"><i class="bi bi-filter"></i> Filters</h5>
+    </div>
+    <form method="GET" action="{{ route('admin.users.index') }}" class="dashboard-filter-form row g-2 align-items-end">
+        <div class="col-6 col-lg-3">
+            <label class="form-label dashboard-filter-label" for="user-search">Search</label>
+            <input type="text" id="user-search" name="search" value="{{ $search }}" class="form-control" placeholder="Name, email, phone, ID">
         </div>
-        <div class="col-md-3">
-            <label class="form-label small text-muted">Role</label>
-            <select name="role" class="form-select">
+        <div class="col-6 col-lg-3">
+            <label class="form-label dashboard-filter-label" for="user-role">Role</label>
+            <select id="user-role" name="role" class="form-select">
                 <option value="">All roles</option>
                 <option value="customer" @selected($role === 'customer')>Customer</option>
                 <option value="chef" @selected($role === 'chef')>Chef</option>
@@ -39,9 +42,9 @@
                 <option value="admin" @selected($role === 'admin')>Admin</option>
             </select>
         </div>
-        <div class="col-md-3">
-            <label class="form-label small text-muted">Status</label>
-            <select name="status" class="form-select">
+        <div class="col-6 col-lg-3">
+            <label class="form-label dashboard-filter-label" for="user-status">Status</label>
+            <select id="user-status" name="status" class="form-select">
                 <option value="">All statuses</option>
                 <option value="approved" @selected($status === 'approved')>Approved</option>
                 <option value="pending" @selected($status === 'pending')>Pending</option>
@@ -49,26 +52,20 @@
                 <option value="suspended" @selected($status === 'suspended')>Suspended</option>
             </select>
         </div>
-        <div class="col-md-3 d-flex gap-2">
-            <div class="flex-grow-1">
-                <label class="form-label small text-muted d-block">&nbsp;</label>
-                <button type="submit" class="btn btn-primary w-100">
-                    <i class="bi bi-funnel"></i> Apply Filters
-                </button>
-            </div>
-            <div class="flex-grow-1">
-                <label class="form-label small text-muted d-block">&nbsp;</label>
-                <a href="{{ route('admin.users.index') }}" class="btn btn-outline-secondary w-100">
-                    Reset
-                </a>
-            </div>
+        <div class="col-6 col-lg-3 dashboard-filter-actions">
+            <button type="submit" class="btn btn-primary">
+                <i class="bi bi-funnel"></i> Apply
+            </button>
+            <a href="{{ route('admin.users.index') }}" class="btn btn-outline-secondary">
+                Reset
+            </a>
         </div>
     </form>
 </div>
 
 <!-- Statistics Cards -->
-<div class="row g-4 mb-4">
-    <div class="col-md-3">
+<div class="row g-3 g-md-4 mb-3 mb-md-4">
+    <div class="col-6 col-md-3">
         <a class="stat-card stat-green d-block text-decoration-none" href="{{ route('admin.users.index', ['filter' => 'pending_approvals']) }}#pending-approvals">
             <div class="stat-icon">
                 <i class="bi bi-people"></i>
@@ -80,7 +77,7 @@
             </div>
         </a>
     </div>
-    <div class="col-md-3">
+    <div class="col-6 col-md-3">
         <a class="stat-card stat-blue d-block text-decoration-none" href="{{ route('admin.users.index', ['filter' => 'pending_chefs']) }}#pending-chefs">
             <div class="stat-icon">
                 <i class="bi bi-person-check"></i>
@@ -92,7 +89,7 @@
             </div>
         </a>
     </div>
-    <div class="col-md-3">
+    <div class="col-6 col-md-3">
         <a class="stat-card stat-green d-block text-decoration-none" href="{{ route('admin.users.index', ['filter' => 'pending_travelers']) }}#pending-travelers">
             <div class="stat-icon">
                 <i class="bi bi-truck"></i>
@@ -104,7 +101,7 @@
             </div>
         </a>
     </div>
-    <div class="col-md-3">
+    <div class="col-6 col-md-3">
         <a class="stat-card stat-blue d-block text-decoration-none" href="{{ route('admin.users.index', ['filter' => 'active_partners']) }}#all-users">
             <div class="stat-icon">
                 <i class="bi bi-shield-check"></i>

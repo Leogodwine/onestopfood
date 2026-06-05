@@ -1,19 +1,17 @@
 @extends('layouts.dashboard')
 
 @section('content')
-<div class="page-header">
-    <div class="d-flex justify-content-between align-items-center">
-        <div>
-            <h2>Order #{{ str_pad($order->id, 6, '0', STR_PAD_LEFT) }}</h2>
-            <p class="text-muted mb-0">Full order details and admin controls</p>
-        </div>
-        <a href="{{ route('admin.orders.index') }}" class="btn btn-outline-primary">
+<div class="page-header page-header-split">
+    <div class="d-flex justify-content-between align-items-center page-header-top">
+        <h2 class="mb-0">Order #{{ str_pad($order->id, 6, '0', STR_PAD_LEFT) }}</h2>
+        <a href="{{ route('admin.orders.index') }}" class="btn btn-sm btn-outline-primary page-header-action-btn">
             <i class="bi bi-arrow-left"></i> Back to Orders
         </a>
     </div>
+    <p class="text-muted mb-0 page-header-subtitle">Full order details and admin controls</p>
 </div>
 
-<div class="row g-4">
+<div class="row g-3 g-md-4">
     <div class="col-md-8">
         <div class="dashboard-card mb-4">
             <div class="card-header">
@@ -102,17 +100,17 @@
 
         @if(!empty($invoice))
             <div class="dashboard-card mt-4">
-                <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <div class="card-header invoice-card-header">
                     <h5 class="card-title mb-0"><i class="bi bi-file-earmark-text"></i> Invoice</h5>
-                    <div class="d-flex flex-wrap gap-2">
+                    <div class="invoice-action-btns">
                         <a class="btn btn-sm btn-outline-primary" href="{{ route('invoices.show', $invoice) }}">
-                            <i class="bi bi-eye"></i> Full view
+                            <i class="bi bi-eye"></i> View
                         </a>
                         <a class="btn btn-sm btn-outline-primary" href="{{ route('invoices.print', $invoice) }}" target="_blank">
                             <i class="bi bi-printer"></i> Print
                         </a>
                         <a class="btn btn-sm btn-outline-secondary" href="{{ route('invoices.download', $invoice) }}">
-                            <i class="bi bi-download"></i> Download PDF
+                            <i class="bi bi-download"></i> Download
                         </a>
                     </div>
                 </div>

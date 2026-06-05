@@ -1,14 +1,16 @@
 @extends('layouts.dashboard')
 
 @section('content')
-<div class="page-header d-flex justify-content-between align-items-center flex-wrap gap-2">
-    <div>
-        <h2>Edit Profile</h2>
-        <p class="text-muted mb-0">Update your name and profile picture</p>
+<div class="page-header page-header-split">
+    <div class="d-flex justify-content-between align-items-center page-header-top">
+        <h2 class="mb-0">Edit Profile</h2>
+        <div class="page-header-actions">
+            <a href="{{ route('profile.show') }}" class="btn btn-sm btn-outline-secondary page-header-action-btn">
+                <i class="bi bi-arrow-left"></i> Back
+            </a>
+        </div>
     </div>
-    <a href="{{ route('profile.show') }}" class="btn btn-outline-secondary">
-        <i class="bi bi-arrow-left"></i> Back to Profile
-    </a>
+    <p class="text-muted mb-0 page-header-subtitle">Update your name and profile picture</p>
 </div>
 
 <div class="row justify-content-center">

@@ -1,26 +1,26 @@
 @extends('layouts.dashboard')
 
 @section('content')
-<div class="page-header">
-    <h2>Analytics & Reports</h2>
-    <p class="text-muted mb-0">Key performance indicators for the platform</p>
+<div class="page-header page-header-split">
+    <h2 class="mb-0">Analytics & Reports</h2>
+    <p class="text-muted mb-0 page-header-subtitle">Key performance indicators for the platform</p>
 </div>
 
-<div class="dashboard-card mb-4">
+<div class="dashboard-card mb-3 mb-md-4">
     <div class="card-header">
         <h5 class="card-title mb-0"><i class="bi bi-filter"></i> Date Range</h5>
     </div>
-    <form method="GET" action="{{ route('admin.analytics.index') }}" class="row g-3 p-2">
-        <div class="col-md-3">
-            <label class="form-label small text-muted">From</label>
-            <input type="date" name="from" value="{{ $from }}" class="form-control">
+    <form method="GET" action="{{ route('admin.analytics.index') }}" class="dashboard-filter-form row g-2 align-items-end">
+        <div class="col-6 col-md-4 col-lg-3">
+            <label class="form-label dashboard-filter-label" for="analytics-from">From</label>
+            <input type="date" id="analytics-from" name="from" value="{{ $from }}" class="form-control">
         </div>
-        <div class="col-md-3">
-            <label class="form-label small text-muted">To</label>
-            <input type="date" name="to" value="{{ $to }}" class="form-control">
+        <div class="col-6 col-md-4 col-lg-3">
+            <label class="form-label dashboard-filter-label" for="analytics-to">To</label>
+            <input type="date" id="analytics-to" name="to" value="{{ $to }}" class="form-control">
         </div>
-        <div class="col-md-3 d-flex gap-2 align-items-end">
-            <button type="submit" class="btn btn-primary flex-grow-1">
+        <div class="col-12 col-md-4 col-lg-3 dashboard-filter-actions">
+            <button type="submit" class="btn btn-primary">
                 <i class="bi bi-funnel"></i> Apply
             </button>
             <a href="{{ route('admin.analytics.index') }}" class="btn btn-outline-secondary">
@@ -30,8 +30,8 @@
     </form>
 </div>
 
-<div class="row g-4 mb-4">
-    <div class="col-md-3 col-sm-6">
+<div class="row g-3 g-md-4 mb-3 mb-md-4">
+    <div class="col-6 col-md-3">
         <div class="stat-card stat-green">
             <div class="stat-icon">
                 <i class="bi bi-bag-check"></i>
@@ -40,7 +40,7 @@
             <div class="stat-label">Total Orders</div>
         </div>
     </div>
-    <div class="col-md-3 col-sm-6">
+    <div class="col-6 col-md-3">
         <div class="stat-card stat-blue">
             <div class="stat-icon">
                 <i class="bi bi-check-circle"></i>
@@ -49,7 +49,7 @@
             <div class="stat-label">Completed Orders</div>
         </div>
     </div>
-    <div class="col-md-3 col-sm-6">
+    <div class="col-6 col-md-3">
         <div class="stat-card stat-green">
             <div class="stat-icon">
                 <i class="bi bi-x-circle"></i>
@@ -58,7 +58,7 @@
             <div class="stat-label">Cancelled Orders</div>
         </div>
     </div>
-    <div class="col-md-3 col-sm-6">
+    <div class="col-6 col-md-3">
         <div class="stat-card stat-blue">
             <div class="stat-icon">
                 <i class="bi bi-currency-exchange"></i>

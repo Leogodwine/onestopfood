@@ -82,8 +82,8 @@
                 <div class="col-12 col-sm-6 col-lg-4">
                     <div class="meal-card">
                         <div class="meal-card-image-wrap">
-                            @if($meal->image_path)
-                                <img src="{{ asset('storage/' . $meal->image_path) }}" class="meal-card-img" alt="{{ $meal->name }}" onerror="this.src='{{ asset('images/food 01.jpeg') }}'">
+                            @if($meal->image_url)
+                                <img src="{{ $meal->image_url }}" class="meal-card-img" alt="{{ $meal->name }}">
                             @else
                                 <div class="meal-card-img-placeholder">
                                     <i class="bi bi-image"></i>

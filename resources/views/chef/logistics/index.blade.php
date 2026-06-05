@@ -1,11 +1,11 @@
 @extends('layouts.dashboard')
 
 @section('content')
-<div class="page-header">
+<div class="page-header page-header-split">
     <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
         <div>
             <h2>Logistics & Travelers</h2>
-            <p class="text-muted mb-0">Travelers who picked up your orders and commission per delivery</p>
+            <p class="text-muted mb-0 page-header-subtitle">Travelers who picked up your orders and commission per delivery</p>
         </div>
         <a class="btn btn-outline-primary" href="{{ route('dashboard') }}">
             <i class="bi bi-arrow-left"></i> Dashboard
