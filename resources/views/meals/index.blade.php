@@ -144,7 +144,7 @@
                         <div class="mt-auto pt-2 border-top">
                             <div class="d-flex justify-content-between align-items-center gap-2 flex-wrap">
                                 <div>
-                                    <span class="text-success fw-bold">TZS {{ number_format((float)$meal->price, 2) }}</span>
+                                    <span class="text-success fw-bold">{{ money($meal->price) }}</span>
                                     @if($meal->prep_time_minutes)
                                         <small class="text-muted ms-1"><i class="bi bi-clock"></i> {{ $meal->prep_time_minutes }}m</small>
                                     @endif
@@ -187,7 +187,7 @@
     @endif
 
     <div class="mt-5 pt-4 border-top">
-        @include('partials.heritage-stories-section', ['heritageCurrency' => 'TZS'])
+        @include('partials.heritage-stories-section')
     </div>
 </div>
 

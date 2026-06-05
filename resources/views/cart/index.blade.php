@@ -61,9 +61,9 @@
                                     <tr>
                                         <td>{{ $item['meal']->name }}</td>
                                         <td class="text-muted">{{ $group['chef']->name }}</td>
-                                        <td class="text-end">TZS {{ number_format((float)$item['meal']->price, 2) }}</td>
+                                        <td class="text-end">{{ money($item['meal']->price) }}</td>
                                         <td class="text-end">{{ $item['quantity'] }}</td>
-                                        <td class="text-end fw-bold">TZS {{ number_format((float)$item['line_total'], 2) }}</td>
+                                        <td class="text-end fw-bold">{{ money($item['line_total']) }}</td>
                                         <td class="text-end">
                                             <form method="POST" action="{{ route('cart.remove', $item['meal']) }}" class="d-inline">
                                                 @csrf
@@ -78,9 +78,9 @@
                             <tr>
                                 <td>{{ $item['meal']->name }}</td>
                                 <td class="text-muted">{{ $item['meal']->chef?->name }}</td>
-                                <td class="text-end">TZS {{ number_format((float)$item['meal']->price, 2) }}</td>
+                                <td class="text-end">{{ money($item['meal']->price) }}</td>
                                 <td class="text-end">{{ $item['quantity'] }}</td>
-                                <td class="text-end fw-bold">TZS {{ number_format((float)$item['line_total'], 2) }}</td>
+                                <td class="text-end fw-bold">{{ money($item['line_total']) }}</td>
                                 <td class="text-end">
                                     <form method="POST" action="{{ route('cart.remove', $item['meal']) }}" class="d-inline">
                                         @csrf
@@ -96,7 +96,7 @@
             <div class="d-flex justify-content-end pt-2 pt-md-3 border-top cart-totals-strip">
                 <div class="text-end">
                     <div class="text-muted small">Subtotal</div>
-                    <div class="h5 mb-2 mb-md-3 cart-subtotal-amount">TZS {{ number_format((float)$subtotal, 2) }}</div>
+                    <div class="h5 mb-2 mb-md-3 cart-subtotal-amount">{{ money($subtotal) }}</div>
                     @auth
                         <a class="btn btn-success" href="{{ route('orders.checkout') }}">Proceed to Checkout</a>
                     @else

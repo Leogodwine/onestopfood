@@ -91,7 +91,7 @@
                             <div class="text-muted small">{{ $meal->chef?->chefProfile?->cuisine_type ?? '' }}</div>
                         </td>
                         <td>{{ $meal->category ?? '—' }}</td>
-                        <td class="fw-bold text-success">${{ number_format((float)$meal->price, 2) }}</td>
+                        <td class="fw-bold text-success">{{ money($meal->price) }}</td>
                         <td>
                             @if($meal->is_available)
                                 <span class="badge bg-success">Available</span>

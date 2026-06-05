@@ -89,7 +89,7 @@
                             <p class="card-text small mb-3">{{ \Illuminate\Support\Str::limit($meal->heritage_story, 140) }}</p>
                         @endif
                         <div class="d-flex justify-content-between align-items-center">
-                            <div class="fw-bold text-primary">TZS {{ number_format((float)$meal->price, 2) }}</div>
+                            <div class="fw-bold text-primary">{{ money($meal->price) }}</div>
                             <a href="{{ route('meals.index', ['search' => $meal->name]) }}" class="btn btn-sm btn-view">View Dish</a>
                         </div>
                     </div>

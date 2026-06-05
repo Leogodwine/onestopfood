@@ -5,20 +5,31 @@ namespace App\Services;
 use App\Models\Invoice;
 use App\Models\Order;
 use App\Models\Payment;
-use App\Models\SystemSetting;
+use App\Services\CurrencyService;
 
 class InvoiceService
 {
-    public function createForOrder(Order $order, Payment $payment): Invoice
+    public function __construct(
+        private readonly CurrencyService $currencies,
+    ) {}
+
+    public function createForOrder(Order $order, Payment $payment, ?string $displayCurrency = null): Invoice
     {
-        $currency = SystemSetting::getValue('currency', 'TZS');
+        $currency = strtoupper($displayCurrency ?? session('checkout_currency', $this->currencies->default()));
+        if (! $this->currencies->isSupported($currency)) {
+            $currency = $this->currencies->default();
+        }
+
+        $amount = $currency === $this->currencies->base()
+            ? (float) $order->total
+            : $this->currencies->fromTzs((float) $order->total, $currency);
 
         return Invoice::create([
             'order_id' => $order->id,
             'invoice_number' => $this->generateInvoiceNumber($order),
             'issued_at' => now(),
             'due_at' => now()->addDays(7),
-            'amount' => $order->total,
+            'amount' => $amount,
             'currency' => $currency,
             'payment_status' => $payment->status,
             'paid_at' => $payment->status === 'paid' ? now() : null,

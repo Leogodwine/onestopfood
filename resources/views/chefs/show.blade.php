@@ -112,7 +112,7 @@
                             <p class="meal-card-desc">{{ \Illuminate\Support\Str::limit($meal->description ?? '', 80) }}</p>
                             <div class="meal-card-footer">
                                 <div class="meal-card-meta">
-                                    <span class="meal-card-price">TZS {{ number_format((float)$meal->price, 2) }}</span>
+                                    <span class="meal-card-price">{{ money($meal->price) }}</span>
                                     @if($meal->prep_time_minutes)
                                         <span class="meal-card-time"><i class="bi bi-clock"></i> {{ $meal->prep_time_minutes }}m</span>
                                     @endif

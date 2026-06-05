@@ -13,6 +13,7 @@ use App\Http\Controllers\EarningsController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\LocaleController;
+use App\Http\Controllers\CurrencyController;
 use App\Http\Controllers\LocationController;
 use App\Http\Controllers\MealController;
 use App\Http\Controllers\MobileMoneyPaymentController;
@@ -52,6 +53,7 @@ Route::post('/payments/airtel/callback', [MobileMoneyPaymentController::class, '
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
 Route::get('/locale/{locale}', [LocaleController::class, 'switch'])->name('locale.switch');
+Route::get('/currency/{currency}', [CurrencyController::class, 'switch'])->name('currency.switch');
 
 Route::get('/meals', [MealController::class, 'index'])->name('meals.index');
 Route::get('/meals/{meal}/image', [MealController::class, 'image'])->name('meals.image');

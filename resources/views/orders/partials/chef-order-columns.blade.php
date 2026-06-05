@@ -36,14 +36,14 @@
                             <div class="fw-semibold small">{{ $item['meal']->name }}</div>
                             <div class="d-flex justify-content-between align-items-center mt-2 gap-2">
                                 <span class="text-muted small">Qty: {{ $item['quantity'] }}</span>
-                                <span class="fw-bold text-success small text-nowrap">TZS {{ number_format((float) $item['line_total'], 0) }}</span>
+                                <span class="fw-bold text-success small text-nowrap">{{ money($item['line_total'], $checkoutCurrency ?? null) }}</span>
                             </div>
                         </div>
                     @endforeach
                     @if($chefCount > 1 && count($group['items']) > 1)
                         <div class="d-flex justify-content-between align-items-center pt-2 mt-2 border-top small">
                             <span class="text-muted">Chef subtotal</span>
-                            <span class="fw-semibold">TZS {{ number_format($groupSubtotal, 0) }}</span>
+                            <span class="fw-semibold">{{ money($groupSubtotal, $checkoutCurrency ?? null) }}</span>
                         </div>
                     @endif
                 </div>

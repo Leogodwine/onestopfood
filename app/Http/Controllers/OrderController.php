@@ -8,6 +8,7 @@ use App\Models\Meal;
 use App\Models\Order;
 use App\Models\SystemSetting;
 use App\Models\User;
+use App\Services\CurrencyService;
 use App\Services\InvoiceService;
 use App\Services\MultiChefCheckoutService;
 use App\Services\OrderPricingService;
@@ -24,7 +25,8 @@ class OrderController extends Controller
         private readonly OrderPricingService $pricing,
         private readonly MobileMoneyDispatcher $mobileMoney,
         private readonly InvoiceService $invoices,
-        private readonly MultiChefCheckoutService $multiChefCheckout
+        private readonly MultiChefCheckoutService $multiChefCheckout,
+        private readonly CurrencyService $currencies,
     ) {}
 
     public function checkout(Request $request)
@@ -74,6 +76,10 @@ class OrderController extends Controller
         $paymentReference = $request->session()->get('checkout_payment_reference');
         $specialInstructions = $request->session()->get('checkout_special_instructions');
 
+        if (! $request->session()->has('checkout_currency')) {
+            $request->session()->put('checkout_currency', $this->currencies->current());
+        }
+
         return view('orders.checkout', [
             'step' => $step,
             'meals' => $meals,
@@ -93,6 +99,8 @@ class OrderController extends Controller
             'paymentPhone' => $paymentPhone,
             'paymentReference' => $paymentReference,
             'specialInstructions' => $specialInstructions,
+            'checkoutCurrency' => session('checkout_currency', $this->currencies->current()),
+            'currencyOptions' => $this->currencies->supported(),
         ]);
     }
 
@@ -198,6 +206,11 @@ class OrderController extends Controller
                 ? (trim((string) $paymentPhone) ?: null)
                 : (trim(implode(' ', array_filter([$paymentPhone, $paymentReference]))) ?: null);
 
+            $checkoutCurrency = session('checkout_currency', $this->currencies->current());
+            if (! $this->currencies->isSupported($checkoutCurrency)) {
+                $checkoutCurrency = $this->currencies->default();
+            }
+
             $result = $this->multiChefCheckout->createOrdersFromCart(
                 $request->user(),
                 $cart,
@@ -205,7 +218,8 @@ class OrderController extends Controller
                 $deliveryLocation,
                 $specialInstructions,
                 $data['payment_method'],
-                $providerRef
+                $providerRef,
+                $checkoutCurrency
             );
 
             $orders = $result['orders'];
@@ -237,6 +251,7 @@ class OrderController extends Controller
             $request->session()->forget('checkout_payment_phone');
             $request->session()->forget('checkout_payment_reference');
             $request->session()->forget('checkout_special_instructions');
+            $request->session()->forget('checkout_currency');
 
             foreach ($orders as $order) {
                 try {

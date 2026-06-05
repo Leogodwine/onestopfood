@@ -43,9 +43,10 @@
                     <!-- Step 1: Order Summary -->
                     <div class="checkout-section">
                         <h3 class="section-title mb-4">ORDER SUMMARY</h3>
+                        @include('partials.checkout-currency-select')
                         <div class="order-items mb-4">
                             @if(!empty($isMultiChef) && isset($chefGroups))
-                                @include('orders.partials.chef-order-columns', ['chefGroups' => $chefGroups])
+                                @include('orders.partials.chef-order-columns', ['chefGroups' => $chefGroups, 'checkoutCurrency' => $checkoutCurrency ?? null])
                             @else
                             <div class="row g-3">
                             @foreach($items as $item)
@@ -72,7 +73,7 @@
                                                 @endif
                                                 <div class="d-flex justify-content-between align-items-center mt-1 flex-wrap gap-1">
                                                     <span class="text-muted" style="font-size: 0.7rem;">Qty: {{ $item['quantity'] }}</span>
-                                                    <span class="price fw-bold" style="font-size: 0.8rem;">TZS {{ number_format((float)$item['line_total'], 0) }}</span>
+                                                    <span class="price fw-bold" style="font-size: 0.8rem;">{{ money($item['line_total'], $checkoutCurrency ?? null) }}</span>
                                                 </div>
                                             </div>
                                         </div>
@@ -330,14 +331,14 @@
                                     @foreach($items as $item)
                                         <div class="d-flex justify-content-between mb-2">
                                             <span>{{ $item['meal']->name }} x{{ $item['quantity'] }}</span>
-                                            <span>TZS {{ number_format((float)$item['line_total'], 2) }}</span>
+                                            <span>{{ money($item['line_total'], $checkoutCurrency ?? null) }}</span>
                                         </div>
                                     @endforeach
                                 </div>
                                 <hr>
                                 <div class="d-flex justify-content-between">
                                     <strong>Total</strong>
-                                    <strong class="text-success">TZS {{ number_format((float)$total, 2) }}</strong>
+                                    <strong class="text-success">{{ money($total, $checkoutCurrency ?? null) }}</strong>
                                 </div>
                             </div>
                         </div>
@@ -386,6 +387,7 @@
             <div class="col-lg-4">
                 <div class="order-summary-card">
                     <h3 class="section-title mb-3 mb-md-4">ORDER SUMMARY</h3>
+                    @include('partials.checkout-currency-select')
                     <div class="order-items mb-3 mb-md-4">
                         @foreach($items as $item)
                             <div class="order-item-small d-flex mb-2 pb-2 border-bottom">
@@ -405,14 +407,14 @@
                                     <div class="fw-semibold small mb-0">{{ $item['meal']->name }}</div>
                                     <div class="text-muted" style="font-size: 0.75rem;">x{{ $item['quantity'] }}</div>
                                 </div>
-                                <div class="price small">TZS {{ number_format((float)$item['line_total'], 2) }}</div>
+                                <div class="price small">{{ money($item['line_total'], $checkoutCurrency ?? null) }}</div>
                             </div>
                         @endforeach
                     </div>
                     <div class="price-breakdown">
                         <div class="d-flex justify-content-between mb-1 mb-md-2">
                             <span class="text-muted">Subtotal</span>
-                            <span class="price">TZS {{ number_format((float)$subtotal, 2) }}</span>
+                            <span class="price">{{ money($subtotal, $checkoutCurrency ?? null) }}</span>
                         </div>
                         <div class="d-flex justify-content-between mb-1 mb-md-2">
                             <span class="text-muted">
@@ -423,19 +425,19 @@
                             </span>
                             <span class="price">
                                 @if($deliveryFee > 0)
-                                    TZS {{ number_format((float)$deliveryFee, 2) }}
+                                    {{ money($deliveryFee, $checkoutCurrency ?? null) }}
                                 @else
                                     <span class="text-success">Free</span>
                                 @endif
                             </span>
                         </div>
                         @if(!empty($isMultiChef))
-                            <div class="small text-muted mb-2">Separate delivery per chef (TZS {{ number_format((float)($deliveryFeePerChef ?? 0), 0) }} each)</div>
+                            <div class="small text-muted mb-2">Separate delivery per chef ({{ money($deliveryFeePerChef ?? 0, $checkoutCurrency ?? null) }} each)</div>
                         @endif
                         <hr class="my-2 my-md-3">
                         <div class="d-flex justify-content-between align-items-center">
                             <span class="fw-bold fs-6">Total</span>
-                            <span class="price fs-5 text-success">TZS {{ number_format((float)$total, 2) }}</span>
+                            <span class="price fs-5 text-success">{{ money($total, $checkoutCurrency ?? null) }}</span>
                         </div>
                     </div>
                 </div>

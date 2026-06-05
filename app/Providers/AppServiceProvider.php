@@ -8,6 +8,7 @@ use App\Models\Payment;
 use App\Models\SystemSetting;
 use App\Observers\PaymentObserver;
 use App\Services\AdminAccessService;
+use App\Services\CurrencyService;
 use App\Services\SocialAuthService;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Cache;
@@ -45,6 +46,10 @@ class AppServiceProvider extends ServiceProvider
         $socialAuth = app(SocialAuthService::class);
         View::share('googleSignInEnabled', $socialAuth->isConfigured('google'));
         View::share('facebookSignInEnabled', $socialAuth->isConfigured('facebook'));
+
+        $currencyService = app(CurrencyService::class);
+        View::share('displayCurrency', $currencyService->current());
+        View::share('currencyOptions', $currencyService->supported());
 
         View::composer('*', function ($view) {
             $user = auth()->user();

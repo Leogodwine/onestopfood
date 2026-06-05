@@ -67,22 +67,22 @@
                                         <div class="fw-semibold">{{ $item->meal?->name }}</div>
                                     </td>
                                     <td class="text-end">x {{ $item->quantity }}</td>
-                                    <td class="text-end fw-bold">TZS {{ number_format((float)$item->line_total, 2) }}</td>
+                                    <td class="text-end fw-bold">{{ money($item->line_total) }}</td>
                                 </tr>
                             @endforeach
                         </tbody>
                         <tfoot>
                             <tr>
                                 <td colspan="2" class="text-end fw-semibold">Subtotal:</td>
-                                <td class="text-end fw-bold">TZS {{ number_format((float)$order->subtotal, 2) }}</td>
+                                <td class="text-end fw-bold">{{ money($order->subtotal) }}</td>
                             </tr>
                             <tr>
                                 <td colspan="2" class="text-end fw-semibold">Delivery fee:</td>
-                                <td class="text-end fw-bold">TZS {{ number_format((float)$order->delivery_fee, 2) }}</td>
+                                <td class="text-end fw-bold">{{ money($order->delivery_fee) }}</td>
                             </tr>
                             <tr class="border-top">
                                 <td colspan="2" class="text-end"><strong>Total:</strong></td>
-                                <td class="text-end"><strong class="h5 mb-0">TZS {{ number_format((float)$order->total, 2) }}</strong></td>
+                                <td class="text-end"><strong class="h5 mb-0">{{ money($order->total) }}</strong></td>
                             </tr>
                         </tfoot>
                     </table>

@@ -306,7 +306,7 @@
                             <i class="material-icons" aria-hidden="true">local_shipping</i>
                             <div class="hero-stat-content">
                                 <span class="hero-stat-value">Free delivery</span>
-                                <span class="hero-stat-label">On orders over $30</span>
+                                <span class="hero-stat-label">On orders over {{ money(75000) }}</span>
                             </div>
                         </div>
                     </div>
@@ -438,7 +438,7 @@
                         <p class="card-text small">{{ \Illuminate\Support\Str::limit($meal->description ?? '', 80) }}</p>
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
-                                <div class="fw-bold text-primary">${{ number_format((float)$meal->price, 2) }}</div>
+                                <div class="fw-bold text-primary">{{ money($meal->price) }}</div>
                                 <small class="text-muted">Chef: {{ $meal->chef->name }}</small>
                             </div>
                             <form method="POST" action="{{ route('cart.add', $meal) }}" class="d-inline">

@@ -23,7 +23,7 @@
                                 <div class="small fw-medium text-truncate" title="{{ $item['meal']->name }}">{{ $item['meal']->name }}</div>
                                 <div class="d-flex justify-content-between align-items-center mt-1 gap-1 flex-wrap">
                                     <span class="text-muted" style="font-size: 0.7rem;">{{ __('nav.qty') }}: {{ $item['quantity'] }}</span>
-                                    <span class="fw-semibold text-success text-nowrap" style="font-size: 0.75rem;">TZS {{ number_format((float) $item['line_total'], 0) }}</span>
+                                    <span class="fw-semibold text-success text-nowrap" style="font-size: 0.75rem;">{{ money($item['line_total']) }}</span>
                                 </div>
                                 <form method="POST" action="{{ route('cart.remove', $item['meal']) }}" class="mt-1" onsubmit="return confirm(@json(__('common.remove_item_confirm')));">
                                     @csrf
@@ -48,7 +48,7 @@
                 </div>
                 <div class="cart-item-details">
                     <div class="cart-item-qty">{{ __('nav.qty') }}: {{ $item['quantity'] }}</div>
-                    <div class="cart-item-total">TZS {{ number_format((float) $item['line_total'], 2) }}</div>
+                    <div class="cart-item-total">{{ money($item['line_total']) }}</div>
                 </div>
                 <form method="POST" action="{{ route('cart.remove', $item['meal']) }}" class="d-inline" onsubmit="return confirm(@json(__('common.remove_item_confirm')));">
                     @csrf

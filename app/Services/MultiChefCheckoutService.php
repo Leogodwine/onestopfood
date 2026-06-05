@@ -95,7 +95,8 @@ class MultiChefCheckoutService
         Location $deliveryLocation,
         ?string $specialInstructions,
         string $paymentMethod,
-        ?string $providerRef
+        ?string $providerRef,
+        ?string $displayCurrency = null
     ): array {
         $groups = $this->groupCartByChef($cart, $meals);
         $isMultiChef = $groups->count() > 1;
@@ -174,7 +175,7 @@ class MultiChefCheckoutService
 
         $invoices = collect();
         foreach ($orders as $order) {
-            $invoices->push($this->invoices->createForOrder($order, $payment));
+            $invoices->push($this->invoices->createForOrder($order, $payment, $displayCurrency));
         }
 
         return [

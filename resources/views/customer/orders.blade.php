@@ -52,7 +52,7 @@
                                 </td>
                                 <td>{{ $order->chef?->name ?? '—' }}</td>
                                 <td>{{ $order->items->count() }} item(s)</td>
-                                <td>TZS {{ number_format((float)$order->total, 2) }}</td>
+                                <td>{{ money($order->total) }}</td>
                                 <td>
                                     <span class="badge bg-{{ match($order->status) {
                                         'pending' => 'warning',

@@ -40,7 +40,7 @@
             <div class="stat-icon">
                 <i class="bi bi-cash-coin"></i>
             </div>
-            <div class="stat-value">${{ number_format($stats['total_earnings'], 2) }}</div>
+            <div class="stat-value">{{ money($stats['total_earnings']) }}</div>
             <div class="stat-label">Total Earnings</div>
         </div>
     </div>
@@ -69,7 +69,7 @@
     <div class="row g-3">
         <div class="col-md-6">
             <div class="dashboard-summary-box">
-                <div class="dashboard-summary-value">${{ number_format($stats['total_earnings'], 2) }}</div>
+                <div class="dashboard-summary-value">{{ money($stats['total_earnings']) }}</div>
                 <div class="dashboard-summary-label">Total Earnings</div>
             </div>
         </div>

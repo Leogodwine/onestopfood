@@ -67,7 +67,7 @@
             </div>
             <div class="text-center py-4">
                 <h2 class="mb-0" style="color: var(--primary-green); font-weight: 700;">
-                    ${{ number_format($stats['total_earnings'], 2) }}
+                    {{ money($stats['total_earnings']) }}
                 </h2>
                 <p class="text-muted mb-0 mt-2">From completed orders</p>
             </div>
@@ -115,7 +115,7 @@
                 <tr>
                     <td>#{{ $order->id }}</td>
                     <td>{{ $order->customer->name ?? 'N/A' }}</td>
-                    <td>${{ number_format($order->total, 2) }}</td>
+                    <td>{{ money($order->total) }}</td>
                     <td><span class="badge badge-primary">{{ ucfirst($order->status) }}</span></td>
                     <td>{{ $order->created_at->format('M d, Y') }}</td>
                     <td>

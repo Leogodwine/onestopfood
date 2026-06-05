@@ -113,16 +113,16 @@
                     @foreach($order->items as $item)
                     <li class="d-flex justify-content-between">
                         <span>{{ $item->meal?->name ?? 'Meal' }} x {{ $item->quantity }}</span>
-                        <span>TZS {{ number_format((float)$item->line_total, 2) }}</span>
+                        <span>{{ money($item->line_total) }}</span>
                     </li>
                     @endforeach
                 </ul>
             </div>
 
             <div class="small mb-2">
-                Subtotal: TZS {{ number_format((float)$order->subtotal, 2) }}<br>
-                Delivery fee: TZS {{ number_format((float)$order->delivery_fee, 2) }}<br>
-                <strong>Total: TZS {{ number_format((float)$order->total, 2) }}</strong>
+                Subtotal: {{ money($order->subtotal) }}<br>
+                Delivery fee: {{ money($order->delivery_fee) }}<br>
+                <strong>Total: {{ money($order->total) }}</strong>
             </div>
 
             <div class="row small g-2 mb-2">

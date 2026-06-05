@@ -1,8 +1,6 @@
 {{--
     Heritage Stories grid (home + meals). Expects $heritageMeals collection with chef.chefProfile, average_rating.
-    Optional: $heritageCurrency (default '$') — use 'TZS' on meals page.
 --}}
-@php $heritageCurrency = $heritageCurrency ?? '$'; @endphp
 @if(isset($heritageMeals) && $heritageMeals->isNotEmpty())
 <section class="container mb-5" id="heritage-stories">
     <div class="mb-4 d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
@@ -72,7 +70,7 @@
                     </div>
                     <div class="card-body">
                         <h6 class="card-title mb-1">{{ $meal->name }}</h6>
-                        <div class="fw-bold text-primary mb-1">{{ $heritageCurrency }} {{ number_format((float)$meal->price, 2) }}</div>
+                        <div class="fw-bold text-primary mb-1">{{ money($meal->price) }}</div>
                         <p class="card-text small text-muted mb-2">{{ \Illuminate\Support\Str::limit($meal->description ?? '', 90) }}</p>
                         @if($meal->origin)
                             <p class="small text-primary fw-semibold mb-1">{{ $meal->origin }}</p>

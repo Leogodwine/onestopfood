@@ -1547,7 +1547,7 @@
                         <li class="cart-dropdown-footer">
                             <div class="cart-subtotal">
                                 <span class="cart-subtotal-label">{{ __('nav.subtotal') }}</span>
-                                <span class="cart-subtotal-amount">TZS {{ number_format((float)$cartSubtotal, 2) }}</span>
+                                <span class="cart-subtotal-amount">{{ money($cartSubtotal) }}</span>
                             </div>
                             <div class="cart-dropdown-actions">
                                 <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#cartModal">
@@ -1652,7 +1652,7 @@
                             <li class="cart-dropdown-footer">
                                 <div class="cart-subtotal">
                                     <span class="cart-subtotal-label">{{ __('nav.subtotal') }}</span>
-                                    <span class="cart-subtotal-amount">TZS {{ number_format((float)$cartSubtotal, 2) }}</span>
+                                    <span class="cart-subtotal-amount">{{ money($cartSubtotal) }}</span>
                                 </div>
                                 <div class="cart-dropdown-actions">
                                     <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#cartModal" id="viewFullCartBtn">
@@ -1754,9 +1754,9 @@
                                     <tr>
                                         <td>{{ $item['meal']->name }}</td>
                                         <td class="text-muted small">{{ $item['meal']->chef?->name }}</td>
-                                        <td class="text-end">TZS {{ number_format((float)$item['meal']->price, 2) }}</td>
+                                        <td class="text-end">{{ money($item['meal']->price) }}</td>
                                         <td class="text-end">{{ $item['quantity'] }}</td>
-                                        <td class="text-end fw-bold">TZS {{ number_format((float)$item['line_total'], 2) }}</td>
+                                        <td class="text-end fw-bold">{{ money($item['line_total']) }}</td>
                                         <td class="text-end">
                                             <form method="POST" action="{{ route('cart.remove', $item['meal']) }}" class="d-inline">
                                                 @csrf
@@ -1771,7 +1771,7 @@
                     <div class="d-flex justify-content-end mt-3 pt-3 border-top">
                         <div class="text-end">
                             <div class="text-muted small">{{ __('nav.subtotal') }}</div>
-                            <div class="h5 mb-0">TZS {{ number_format((float)$cartSubtotal, 2) }}</div>
+                            <div class="h5 mb-0">{{ money($cartSubtotal) }}</div>
                         </div>
                     </div>
                 @endif
