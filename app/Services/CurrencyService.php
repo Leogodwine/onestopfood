@@ -4,6 +4,19 @@ namespace App\Services;
 
 class CurrencyService
 {
+    /** @return array<string, array{label: string, symbol: string, decimals: int, rate: float}> */
+    private function fallbackCurrencies(): array
+    {
+        return [
+            'TZS' => [
+                'label' => 'Tanzanian Shilling',
+                'symbol' => 'TZS',
+                'decimals' => 0,
+                'rate' => 1,
+            ],
+        ];
+    }
+
     public function base(): string
     {
         return (string) config('currency.base', 'TZS');
@@ -17,7 +30,11 @@ class CurrencyService
     /** @return array<string, array{label: string, symbol: string, decimals: int, rate: float}> */
     public function supported(): array
     {
-        return config('currency.currencies', []);
+        $currencies = config('currency.currencies');
+
+        return is_array($currencies) && $currencies !== []
+            ? $currencies
+            : $this->fallbackCurrencies();
     }
 
     public function isSupported(string $code): bool
@@ -41,8 +58,11 @@ class CurrencyService
     public function meta(string $code): array
     {
         $code = strtoupper($code);
+        $supported = $this->supported();
 
-        return $this->supported()[$code] ?? $this->supported()[$this->default()];
+        return $supported[$code]
+            ?? $supported[$this->default()]
+            ?? $this->fallbackCurrencies()['TZS'];
     }
 
     /** TZS per 1 unit of foreign currency */
