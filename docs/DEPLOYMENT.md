@@ -94,6 +94,36 @@ Set redirect URIs to your live domain, e.g.:
 - `https://www.your-domain.com/auth/google/callback`
 - `https://www.your-domain.com/auth/facebook/callback`
 
+## Maintenance mode
+
+Admins can enable maintenance from **Admin → System Monitoring**. Visitors see a “We will be back soon” page (HTTP 503).
+
+### Before you enable maintenance
+
+Set a fixed bypass path in `.env` so you can always reach the admin panel:
+
+```env
+APP_MAINTENANCE_SECRET=admin-bypass-change-me
+```
+
+After enabling maintenance, visit once:
+
+`https://www.your-domain.com/admin-bypass-change-me`
+
+That sets a cookie so you can browse, log in, and open **System Monitoring → Disable Maintenance Mode** to bring the site back for everyone.
+
+If you did not set a secret, the bypass URL is shown on the System Monitoring page while you are still logged in, and in the success message when maintenance is turned on.
+
+### If you are locked out (503 everywhere)
+
+From the server project directory:
+
+```bash
+php artisan up
+```
+
+Or delete `storage/framework/down`. Either action turns maintenance off immediately.
+
 ## Security behavior in production
 
 | Feature | Production behavior |

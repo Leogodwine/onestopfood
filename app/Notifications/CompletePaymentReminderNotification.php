@@ -22,17 +22,25 @@ class CompletePaymentReminderNotification extends Notification implements Should
 
     public function toArray(object $notifiable): array
     {
-        $orders = $this->payment->batchOrders()->pluck('id');
-        $orderList = $orders->map(fn ($id) => '#'.$id)->join(', ');
+        $orders = $this->payment->batchOrders()->get();
+        $orderList = $orders->map(fn ($order) => '#'.$order->id)->join(', ');
+        $primaryOrder = $this->payment->order ?? $orders->first();
 
         return [
             'type' => 'payment_reminder',
+            'category' => 'payments',
             'payment_id' => $this->payment->id,
-            'order_ids' => $orders->all(),
+            'order_ids' => $orders->pluck('id')->all(),
             'message' => __('payments.reminder_message', [
                 'amount' => number_format((float) $this->payment->amount, 0),
                 'orders' => $orderList,
             ]),
+            'body' => __('notifications.payment.reminder_body', [
+                'amount' => number_format((float) $this->payment->amount, 0),
+                'orders' => $orderList,
+            ]),
+            'url' => $primaryOrder ? route('orders.show', $primaryOrder) : route('notifications.index'),
+            'channels_sent' => ['in_app'],
         ];
     }
 }

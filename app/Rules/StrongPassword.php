@@ -18,7 +18,7 @@ class StrongPassword implements ValidationRule
         );
 
         if ($validator->fails()) {
-            $fail(__('auth.password_weak_help'));
+            $fail(__('auth.password_hint'));
         }
     }
 }

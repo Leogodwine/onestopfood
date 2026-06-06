@@ -13,13 +13,6 @@
     <p class="text-muted mb-0 page-header-subtitle">Your account information</p>
 </div>
 
-@if(session('status'))
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
-        {{ session('status') }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-@endif
-
 <div class="row g-3 g-lg-4 profile-edit-row">
     <div class="col-lg-5 col-xl-4">
         <div class="dashboard-card h-100 profile-edit-card">

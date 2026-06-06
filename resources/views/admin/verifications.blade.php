@@ -33,8 +33,9 @@
             <i class="bi bi-filter"></i> Filters
         </h5>
     </div>
-    <form method="GET" action="{{ route('admin.verifications.index') }}" class="dashboard-filter-form row g-2 align-items-end">
-        <div class="col-6 col-lg-3">
+    <form method="GET" action="{{ route('admin.verifications.index') }}" class="dashboard-filter-form dashboard-filter-form--inline dashboard-filter-form--wrap-sm">
+        <div class="dashboard-filter-fields">
+        <div class="dashboard-filter-field">
             <label class="form-label dashboard-filter-label" for="verification-status">Status</label>
             <select id="verification-status" name="status" class="form-select">
                 <option value="">All</option>
@@ -43,7 +44,7 @@
                 <option value="rejected" @selected($status === 'rejected')>Rejected</option>
             </select>
         </div>
-        <div class="col-6 col-lg-3">
+        <div class="dashboard-filter-field">
             <label class="form-label dashboard-filter-label" for="verification-role">Role</label>
             <select id="verification-role" name="role" class="form-select">
                 <option value="">All</option>
@@ -51,11 +52,12 @@
                 <option value="traveler" @selected($role === 'traveler')>Traveler</option>
             </select>
         </div>
-        <div class="col-12 col-lg-3">
+        <div class="dashboard-filter-field dashboard-filter-field--grow">
             <label class="form-label dashboard-filter-label" for="verification-type">Type</label>
             <input type="text" id="verification-type" name="type" value="{{ $type }}" class="form-control" placeholder="e.g. selfie, license">
         </div>
-        <div class="col-12 col-lg-3 dashboard-filter-actions">
+        </div>
+        <div class="dashboard-filter-actions dashboard-filter-actions--end">
             <button type="submit" class="btn btn-primary">
                 <i class="bi bi-funnel"></i> Apply
             </button>

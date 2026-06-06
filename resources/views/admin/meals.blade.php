@@ -10,12 +10,13 @@
     <div class="card-header">
         <h5 class="card-title mb-0"><i class="bi bi-filter"></i> Filters</h5>
     </div>
-    <form method="GET" action="{{ route('admin.meals.index') }}" class="dashboard-filter-form row g-2 align-items-end">
-        <div class="col-12 col-lg-6">
+    <form method="GET" action="{{ route('admin.meals.index') }}" class="dashboard-filter-form dashboard-filter-form--inline dashboard-filter-form--wrap-sm">
+        <div class="dashboard-filter-fields">
+        <div class="dashboard-filter-field dashboard-filter-field--grow">
             <label class="form-label dashboard-filter-label" for="meal-search">Search</label>
             <input type="text" id="meal-search" name="search" value="{{ $search }}" class="form-control" placeholder="Meal name, category, origin">
         </div>
-        <div class="col-6 col-lg-3">
+        <div class="dashboard-filter-field">
             <label class="form-label dashboard-filter-label" for="meal-availability">Availability</label>
             <select id="meal-availability" name="availability" class="form-select">
                 <option value="" @selected($availability === '')>All</option>
@@ -23,7 +24,8 @@
                 <option value="unavailable" @selected($availability === 'unavailable')>Unavailable</option>
             </select>
         </div>
-        <div class="col-6 col-lg-3 dashboard-filter-actions">
+        </div>
+        <div class="dashboard-filter-actions dashboard-filter-actions--end">
             <button type="submit" class="btn btn-primary">
                 <i class="bi bi-funnel"></i> Apply
             </button>
@@ -31,24 +33,24 @@
                 Reset
             </a>
         </div>
-        <div class="col-12 d-flex justify-content-end">
-            <div class="dropdown">
-                <button class="btn btn-sm btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                    Per page: {{ (int)$perPage }}
-                </button>
-                <ul class="dropdown-menu dropdown-menu-end">
-                    @foreach([10, 20, 50, 100] as $size)
-                        <li>
-                            <a class="dropdown-item @if((int)$perPage === $size) active @endif"
-                               href="{{ route('admin.meals.index', array_filter(['search' => $search ?: null, 'availability' => $availability ?: null, 'per_page' => $size])) }}">
-                                {{ $size }} per page
-                            </a>
-                        </li>
-                    @endforeach
-                </ul>
-            </div>
-        </div>
     </form>
+    <div class="dashboard-filter-toolbar d-flex justify-content-end px-3 pb-2">
+        <div class="dropdown">
+            <button class="btn btn-sm btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                Per page: {{ (int)$perPage }}
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end">
+                @foreach([10, 20, 50, 100] as $size)
+                    <li>
+                        <a class="dropdown-item @if((int)$perPage === $size) active @endif"
+                           href="{{ route('admin.meals.index', array_filter(['search' => $search ?: null, 'availability' => $availability ?: null, 'per_page' => $size])) }}">
+                            {{ $size }} per page
+                        </a>
+                    </li>
+                @endforeach
+            </ul>
+        </div>
+    </div>
 </div>
 
 <div class="dashboard-card">

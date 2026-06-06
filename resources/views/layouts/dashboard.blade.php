@@ -435,6 +435,7 @@
             display: flex;
             align-items: center;
             gap: 16px;
+            position: relative;
         }
 
         /* Floating actions: language switcher above WhatsApp */
@@ -581,6 +582,28 @@
         }
         .profile-dropdown .dropdown-menu {
             min-width: 180px;
+        }
+
+        .dashboard-nav-icon {
+            transition: background-color 0.2s ease, color 0.2s ease;
+            text-decoration: none;
+        }
+        .dashboard-nav-icon:hover {
+            background: var(--light-gray) !important;
+            color: var(--text-primary, #212529) !important;
+        }
+        .dashboard-nav-icon:hover i {
+            color: var(--text-primary, #212529) !important;
+        }
+        .top-navbar--admin-blue .dashboard-nav-icon i {
+            color: rgba(255, 255, 255, 0.9) !important;
+        }
+        .top-navbar--admin-blue .dashboard-nav-icon:hover {
+            background: rgba(255, 255, 255, 0.12) !important;
+            color: #fff !important;
+        }
+        .top-navbar--admin-blue .dashboard-nav-icon:hover i {
+            color: #fff !important;
         }
 
         .dashboard-cart-icon {
@@ -1189,33 +1212,38 @@
             padding-inline: 8px;
         }
 
-        /* Top-right cart added toast (aligned below top nav / Sign In) */
-        .cart-toast {
-            position: fixed;
-            top: 4.5rem;
-            right: 1rem;
-            z-index: 9999;
-            padding: 0.75rem 1.25rem;
-            background: var(--primary-green, #28a745);
-            color: #fff;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            font-size: 0.9375rem;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            opacity: 0;
-            transform: translateX(120%);
-            transition: opacity 0.3s ease, transform 0.3s ease;
-        }
-        .cart-toast.show {
-            opacity: 1;
-            transform: translateX(0);
-        }
-        .cart-toast i { font-size: 1.25rem; }
     </style>
-    <link rel="stylesheet" href="{{ asset('css/mobile-responsive.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/mobile-responsive.css') }}?v={{ filemtime(public_path('css/mobile-responsive.css')) }}">
+    <style>
+        /* Filter bar: fields + Apply/Reset from the start (left) */
+        .dashboard-filter-form.dashboard-filter-form--inline {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            align-items: flex-end;
+            justify-content: flex-start;
+            width: 100%;
+            gap: 0.375rem;
+        }
+        .dashboard-filter-form--inline .dashboard-filter-fields {
+            display: flex;
+            flex: 0 1 auto;
+            flex-wrap: wrap;
+            align-items: flex-end;
+            justify-content: flex-start;
+            gap: 0.375rem;
+            min-width: 0;
+        }
+        .dashboard-filter-form--inline .dashboard-filter-actions {
+            flex: 0 0 auto;
+            margin-top: 0;
+            margin-left: 0;
+            gap: 0.375rem;
+        }
+        .dashboard-filter-form--inline .dashboard-filter-actions .btn {
+            flex: 0 0 auto;
+        }
+    </style>
     @php
         $isApproved = auth()->check() && (auth()->user()->status === 'approved' || auth()->user()->isSelfDeactivated() || auth()->user()->role === 'admin' || auth()->user()->role === 'customer');
     @endphp
@@ -1436,6 +1464,18 @@
                             @endif
                         </button>
                     @endif
+                    @php $dashboardUnreadNotifications = auth()->user()->unreadNotifications()->count(); @endphp
+                    <a href="{{ route('notifications.index') }}"
+                       class="dashboard-nav-icon dashboard-notification-icon position-relative border-0 bg-transparent p-2 rounded-circle d-flex align-items-center justify-content-center"
+                       title="{{ __('dashboard.notifications') }}"
+                       aria-label="{{ __('dashboard.notifications') }}">
+                        <i class="bi bi-bell" style="font-size: 1.25rem; color: var(--text-secondary, #6c757d);"></i>
+                        @if($dashboardUnreadNotifications > 0)
+                            <span class="position-absolute top-0 end-0 translate-middle badge rounded-pill bg-danger" style="font-size: 0.65rem; min-width: 1.1rem;">
+                                {{ $dashboardUnreadNotifications > 99 ? '99+' : $dashboardUnreadNotifications }}
+                            </span>
+                        @endif
+                    </a>
                     <div class="dropdown profile-dropdown" id="profileDropdown">
                         <a href="#" class="user-info text-decoration-none d-flex align-items-center gap-2 dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" title="Profile menu">
                             <div class="user-avatar">
@@ -1480,6 +1520,7 @@
                             </li>
                         </ul>
                     </div>
+                    <div id="appToastStack" class="app-toast-stack app-toast-stack--profile" aria-live="polite" aria-atomic="true"></div>
                 @endauth
             </div>
         </div>
@@ -1500,14 +1541,6 @@
                     </form>
                 </div>
             @endif
-            @if (session('status'))
-                <div class="alert alert-success alert-dismissible fade show" role="alert">
-                    {{ session('status') }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-            @endif
-
-
             @yield('content')
         </div>
     </div>
@@ -1577,40 +1610,12 @@
     @endif
     @endauth
 
-    @php $cartAddedQty = session()->pull('cart_added_qty'); @endphp
-    @if($cartAddedQty)
-    <div id="cartAddedToast" class="cart-toast" role="alert" aria-live="polite">
-        <i class="bi bi-cart-check-fill"></i>
-        <span>
-            @if($cartAddedQty == 1)1 item added to cart
-            @elseif($cartAddedQty == 2)2 items added to cart
-            @elseif($cartAddedQty == 3)3 items added to cart
-            @else{{ $cartAddedQty }} items added to cart
-            @endif
-        </span>
-    </div>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            var toast = document.getElementById('cartAddedToast');
-            if (toast) {
-                requestAnimationFrame(function() { toast.classList.add('show'); });
-                setTimeout(function() {
-                    toast.classList.remove('show');
-                    setTimeout(function() { toast.remove(); }, 350);
-                }, 4000);
-                toast.addEventListener('click', function() {
-                    toast.classList.remove('show');
-                    setTimeout(function() { toast.remove(); }, 350);
-                });
-            }
-        });
-    </script>
-    @endif
-
+    @include('partials.app-toast')
     @include('partials.floating-actions', ['brand' => $brand])
 
     <!-- Bootstrap 5 JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ asset('js/app-toast.js') }}"></script>
     <script src="{{ asset('js/mobile-responsive.js') }}"></script>
     <script>
         (function() {

@@ -3,25 +3,33 @@
 namespace App\Observers;
 
 use App\Models\Payment;
+use App\Notifications\PaymentUpdateNotification;
+use Illuminate\Support\Facades\Log;
 
 class PaymentObserver
 {
-    public function created(Payment $payment): void
-    {
-        $this->syncInvoices($payment);
-    }
-
     public function updated(Payment $payment): void
     {
-        $this->syncInvoices($payment);
-    }
+        if (! $payment->wasChanged('status')) {
+            return;
+        }
 
-    private function syncInvoices(Payment $payment): void
-    {
-        $orders = $payment->batchOrders()->with('invoice')->get();
+        if (! in_array($payment->status, ['paid', 'failed'], true)) {
+            return;
+        }
 
-        foreach ($orders as $order) {
-            $order->invoice?->syncFromPayment($payment);
+        $customer = $payment->order?->customer;
+        if (! $customer) {
+            return;
+        }
+
+        try {
+            $customer->notify(new PaymentUpdateNotification($payment));
+        } catch (\Throwable $e) {
+            Log::warning('Payment inbox notification failed', [
+                'payment_id' => $payment->id,
+                'error' => $e->getMessage(),
+            ]);
         }
     }
 }

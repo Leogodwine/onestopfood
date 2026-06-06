@@ -12,17 +12,19 @@ class AccountLifecycleNotifier
 {
     public function __construct(
         private readonly SmsService $sms,
+        private readonly UserInboxService $inbox,
     ) {}
 
     public function accountCreated(User $user): void
     {
-        $context = AccountEventNotification::contextForUser($user);
+        $context = $this->inboxContext($user, 'account_created');
         $user->notify(new AccountEventNotification('account_created', $context));
-        $this->sms->send($user->phone, $this->smsText('account_created', $user));
+        $this->sms->send($user->phone, $context['sms_text']);
 
         if (in_array($user->role, [User::ROLE_CHEF, User::ROLE_TRAVELER], true)) {
-            $user->notify(new AccountEventNotification('pending_approval', $context));
-            $this->sms->send($user->phone, $this->smsText('pending_approval', $user));
+            $pendingContext = $this->inboxContext($user, 'pending_approval');
+            $user->notify(new AccountEventNotification('pending_approval', $pendingContext));
+            $this->sms->send($user->phone, $pendingContext['sms_text']);
         }
 
         $this->notifyAdmins('admin_new_account', $user, [
@@ -33,10 +35,11 @@ class AccountLifecycleNotifier
 
     public function verificationSubmitted(User $user): void
     {
-        $context = AccountEventNotification::contextForUser($user);
+        $context = $this->inboxContext($user, 'verification_submitted');
         $user->notify(new AccountEventNotification('verification_submitted', $context));
-        $user->notify(new AccountEventNotification('pending_approval', $context));
-        $this->sms->send($user->phone, $this->smsText('verification_submitted', $user));
+        $pendingContext = $this->inboxContext($user, 'pending_approval');
+        $user->notify(new AccountEventNotification('pending_approval', $pendingContext));
+        $this->sms->send($user->phone, $context['sms_text']);
 
         $this->notifyAdmins('admin_verification_submitted', $user, [
             'admin_url' => route('admin.users.show', $user),
@@ -45,18 +48,16 @@ class AccountLifecycleNotifier
 
     public function accountApproved(User $user): void
     {
-        $context = AccountEventNotification::contextForUser($user);
+        $context = $this->inboxContext($user, 'account_approved');
         $user->notify(new AccountEventNotification('account_approved', $context));
-        $this->sms->send($user->phone, $this->smsText('account_approved', $user));
+        $this->sms->send($user->phone, $context['sms_text']);
     }
 
     public function accountRejected(User $user, ?string $reason = null): void
     {
-        $context = array_merge(AccountEventNotification::contextForUser($user), [
-            'reason' => $reason,
-        ]);
+        $context = $this->inboxContext($user, 'account_rejected', ['reason' => $reason]);
         $user->notify(new AccountEventNotification('account_rejected', $context));
-        $this->sms->send($user->phone, $this->smsText('account_rejected', $user));
+        $this->sms->send($user->phone, $context['sms_text']);
     }
 
     public function documentReviewed(UserVerificationDocument $document, string $status): void
@@ -66,18 +67,18 @@ class AccountLifecycleNotifier
             return;
         }
 
-        $context = AccountEventNotification::contextForDocument($document);
         $event = $status === 'approved' ? 'document_approved' : 'document_rejected';
+        $context = $this->inboxContext($user, $event, AccountEventNotification::contextForDocument($document));
         $user->notify(new AccountEventNotification($event, $context));
-        $this->sms->send($user->phone, $this->smsText($event, $user, $context));
+        $this->sms->send($user->phone, $context['sms_text']);
 
         if ($status === 'approved') {
             $pending = $user->verificationDocuments()->where('status', 'pending')->count();
             $rejected = $user->verificationDocuments()->where('status', 'rejected')->count();
             if ($pending === 0 && $rejected === 0) {
-                $allContext = AccountEventNotification::contextForUser($user);
+                $allContext = $this->inboxContext($user, 'all_documents_verified');
                 $user->notify(new AccountEventNotification('all_documents_verified', $allContext));
-                $this->sms->send($user->phone, $this->smsText('all_documents_verified', $user));
+                $this->sms->send($user->phone, $allContext['sms_text']);
             }
         }
     }
@@ -89,28 +90,28 @@ class AccountLifecycleNotifier
 
     public function accountSelfDeactivated(User $user): void
     {
-        $context = AccountEventNotification::contextForUser($user);
+        $context = $this->inboxContext($user, 'account_self_deactivated');
         $user->notify(new AccountEventNotification('account_self_deactivated', $context));
-        $this->sms->send($user->phone, $this->smsText('account_self_deactivated', $user));
+        $this->sms->send($user->phone, $context['sms_text']);
     }
 
     public function accountSelfReactivated(User $user): void
     {
-        $context = AccountEventNotification::contextForUser($user);
+        $context = $this->inboxContext($user, 'account_self_reactivated');
         $user->notify(new AccountEventNotification('account_self_reactivated', $context));
-        $this->sms->send($user->phone, $this->smsText('account_self_reactivated', $user));
+        $this->sms->send($user->phone, $context['sms_text']);
     }
 
     public function deletionRequested(User $user, \App\Models\AccountActionRequest $request): void
     {
-        $context = array_merge(AccountEventNotification::contextForUser($user), [
+        $context = $this->inboxContext($user, 'deletion_requested_user', [
             'reason' => $request->reason,
             'request_id' => $request->id,
             'admin_url' => route('admin.users.show', $user).'#account-requests',
         ]);
 
         $user->notify(new AccountEventNotification('deletion_requested_user', $context));
-        $this->sms->send($user->phone, $this->smsText('deletion_requested_user', $user));
+        $this->sms->send($user->phone, $context['sms_text']);
 
         $this->notifyAdmins('admin_deletion_requested', $user, $context);
         $this->smsAdminsAlert($this->smsText('admin_deletion_requested', $user, $context));
@@ -118,27 +119,40 @@ class AccountLifecycleNotifier
 
     public function deletionApproved(User $user, \App\Models\AccountActionRequest $request, ?string $adminNotes = null): void
     {
-        $context = array_merge(AccountEventNotification::contextForUser($user), [
+        $context = $this->inboxContext($user, 'deletion_approved', [
             'admin_notes' => $adminNotes,
             'request_id' => $request->id,
         ]);
         $user->notify(new AccountEventNotification('deletion_approved', $context));
-        $this->sms->send($user->phone, $this->smsText('deletion_approved', $user));
+        $this->sms->send($user->phone, $context['sms_text']);
     }
 
     public function deletionRejected(User $user, \App\Models\AccountActionRequest $request, ?string $adminNotes = null): void
     {
-        $context = array_merge(AccountEventNotification::contextForUser($user), [
+        $context = $this->inboxContext($user, 'deletion_rejected', [
             'admin_notes' => $adminNotes,
             'request_id' => $request->id,
         ]);
         $user->notify(new AccountEventNotification('deletion_rejected', $context));
-        $this->sms->send($user->phone, $this->smsText('deletion_rejected', $user, $context));
+        $this->sms->send($user->phone, $context['sms_text']);
+    }
+
+    /** @param  array<string, mixed>  $extra */
+    private function inboxContext(User $user, string $event, array $extra = []): array
+    {
+        $smsText = $this->smsText($event, $user, $extra);
+
+        return array_merge(AccountEventNotification::contextForUser($user), $extra, [
+            'sms_text' => $smsText,
+            'channels_sent' => $this->inbox->channelsFor($user, filled($user->phone)),
+        ]);
     }
 
     private function notifyAdmins(string $event, User $subject, array $extra = []): void
     {
-        $context = array_merge(AccountEventNotification::contextForUser($subject), $extra);
+        $context = array_merge(AccountEventNotification::contextForUser($subject), $extra, [
+            'channels_sent' => ['in_app', 'email'],
+        ]);
 
         User::query()
             ->where('role', User::ROLE_ADMIN)

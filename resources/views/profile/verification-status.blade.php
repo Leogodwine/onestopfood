@@ -16,13 +16,6 @@
     <p class="text-muted mb-0 page-header-subtitle">Track your personal details, uploaded documents, and approval steps on OneStopFood.</p>
 </div>
 
-@if(session('success'))
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
-        {{ session('success') }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-@endif
-
 <div class="row g-4">
     <div class="col-lg-5">
         <div class="dashboard-card h-100">

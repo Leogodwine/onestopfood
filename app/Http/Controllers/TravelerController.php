@@ -5,11 +5,16 @@ namespace App\Http\Controllers;
 use App\Models\Delivery;
 use App\Models\TravelerProfile;
 use App\Models\User;
+use App\Services\UserInboxService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class TravelerController extends Controller
 {
+    public function __construct(
+        private readonly UserInboxService $inbox,
+    ) {}
+
     public function toggleOnline(Request $request)
     {
         $profile = TravelerProfile::firstOrCreate(
@@ -69,6 +74,8 @@ class TravelerController extends Controller
 
         $delivery->order->update(['status' => 'out_for_delivery']);
 
+        $this->inbox->deliveryAssignedToTraveler($delivery->order->fresh(), $request->user());
+
         return back()->with('status', 'Delivery accepted');
     }
 
@@ -87,12 +94,15 @@ class TravelerController extends Controller
 
             if ($data['status'] === 'picked_up') {
                 $delivery->order->update(['status' => 'out_for_delivery']);
+                $this->inbox->deliveryPickedUp($delivery->order->fresh());
             } elseif ($data['status'] === 'delivered') {
                 $delivery->order->update(['status' => 'delivered']);
 
                 // Calculate traveler earning (simplified - could be based on distance)
                 $earning = max(500, $delivery->order->delivery_fee * 0.8); // 80% of delivery fee, min 500
                 $delivery->update(['traveler_earning' => $earning]);
+
+                $this->inbox->orderDelivered($delivery->order->fresh());
             }
         });
 

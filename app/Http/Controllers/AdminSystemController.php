@@ -30,9 +30,14 @@ class AdminSystemController extends Controller
         ]);
 
         if ($data['action'] === 'enable') {
-            $this->monitor->enableMaintenance($data['message'] ?? null);
-            $this->logAdminAction('maintenance_enable', null, $data['message'] ?? null);
+            $bypassPath = $this->monitor->enableMaintenance($data['message'] ?? null);
+            $this->logAdminAction('maintenance_enable', null, $data['message'] ?? null, [
+                'bypass_path' => $bypassPath,
+            ]);
             $message = 'Maintenance mode enabled. Visitors will see the maintenance page.';
+            if ($bypassPath) {
+                $message .= ' Admin bypass URL: '.url($bypassPath);
+            }
         } else {
             $this->monitor->disableMaintenance();
             $this->logAdminAction('maintenance_disable');

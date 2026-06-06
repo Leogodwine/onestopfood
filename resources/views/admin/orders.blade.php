@@ -25,6 +25,7 @@
         @if($perPage)
             <input type="hidden" name="per_page" value="{{ $perPage }}">
         @endif
+        <div class="dashboard-filter-fields">
         <div class="dashboard-filter-field dashboard-filter-field--narrow">
             <label class="form-label dashboard-filter-label" for="filter-order-id">Order ID</label>
             <input type="text" id="filter-order-id" name="order_id" value="{{ $orderId }}" class="form-control" placeholder="#123" inputmode="numeric">
@@ -45,6 +46,7 @@
         <div class="dashboard-filter-field dashboard-filter-field--date">
             <label class="form-label dashboard-filter-label" for="filter-to">To</label>
             <input type="date" id="filter-to" name="to" value="{{ $to }}" class="form-control">
+        </div>
         </div>
         <div class="dashboard-filter-actions dashboard-filter-actions--end">
             <button type="submit" class="btn btn-primary">

@@ -10,8 +10,9 @@
     <div class="card-header">
         <h5 class="card-title mb-0"><i class="bi bi-filter"></i> Filters</h5>
     </div>
-    <form method="GET" action="{{ route('admin.disputes.index') }}" class="dashboard-filter-form row g-2 align-items-end">
-        <div class="col-12 col-lg-6">
+    <form method="GET" action="{{ route('admin.disputes.index') }}" class="dashboard-filter-form dashboard-filter-form--inline dashboard-filter-form--wrap-sm">
+        <div class="dashboard-filter-fields">
+        <div class="dashboard-filter-field">
             <label class="form-label dashboard-filter-label" for="dispute-status">Status</label>
             <select id="dispute-status" name="status" class="form-select">
                 <option value="">All</option>
@@ -20,7 +21,8 @@
                 @endforeach
             </select>
         </div>
-        <div class="col-12 col-lg-6 dashboard-filter-actions">
+        </div>
+        <div class="dashboard-filter-actions dashboard-filter-actions--end">
             <button type="submit" class="btn btn-primary">
                 <i class="bi bi-funnel"></i> Apply
             </button>

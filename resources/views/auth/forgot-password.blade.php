@@ -32,12 +32,6 @@
                         <p class="login-portal-sub">Enter your email to receive a reset link</p>
                     </div>
 
-                    @if (session('status'))
-                        <div class="alert alert-success small mb-3">
-                            {{ session('status') }}
-                        </div>
-                    @endif
-
                     <form method="POST" action="{{ route('password.email') }}" class="login-portal-form">
                         @csrf
 

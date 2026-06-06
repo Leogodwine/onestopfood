@@ -115,18 +115,11 @@
                     </div>
                 @endunless
 
-                <div class="mb-2">
-                    <p class="small text-muted mb-2 password-generate-row d-flex flex-wrap align-items-center gap-2">
-                        <span>{{ __('auth.password_own_or_generate') }}</span>
-                        <button type="button"
-                                class="btn btn-outline-success btn-sm js-generate-password"
-                                data-password="#profile_password"
-                                data-confirm="#profile_password_confirmation">
-                            <i class="bi bi-stars"></i> {{ __('auth.generate_password') }}
-                        </button>
-                    </p>
-                    <span class="small text-success d-none js-generate-status">{{ __('auth.password_generated') }}</span>
-                </div>
+                @php
+                    $profilePasswordError = $errors->has('password') && $errors->first('password') !== __('auth.password_confirmed')
+                        ? $errors->first('password')
+                        : null;
+                @endphp
 
                 <div class="mb-3">
                     @include('auth.partials.password-input', [
@@ -136,12 +129,16 @@
                         'size' => 'sm',
                         'required' => true,
                         'withHint' => true,
-                        'invalid' => $errors->has('password'),
-                        'errorMessage' => $errors->has('password') ? $errors->first('password') : null,
+                        'withChoice' => true,
+                        'weakErrorFullWidth' => true,
+                        'hintId' => 'profilePasswordWeakError',
+                        'confirmSelector' => '#profile_password_confirmation',
+                        'invalid' => (bool) $profilePasswordError,
+                        'errorMessage' => $profilePasswordError,
                     ])
                 </div>
 
-                <div class="mb-4">
+                <div class="mb-3">
                     <label class="form-label" for="profile_password_confirmation">{{ __('auth.password_confirm_label') }}</label>
                     <div class="input-group password-input-group">
                         <input
@@ -168,6 +165,14 @@
                     @error('password_confirmation')
                         <div class="invalid-feedback d-block">{{ $message }}</div>
                     @enderror
+                </div>
+
+                <div class="password-weak-error-row mb-4">
+                    @include('auth.partials.password-weak-error', [
+                        'hintId' => 'profilePasswordWeakError',
+                        'visible' => (bool) $profilePasswordError,
+                        'message' => __('auth.password_hint'),
+                    ])
                 </div>
 
                 <div class="d-flex flex-wrap justify-content-end">

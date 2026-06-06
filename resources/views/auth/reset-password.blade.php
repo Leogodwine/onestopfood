@@ -48,18 +48,11 @@
                             @enderror
                         </div>
 
-                        <div class="mb-2">
-                            <p class="small text-muted mb-2 password-generate-row">
-                                <span>{{ __('auth.password_own_or_generate') }}</span>
-                                <button type="button"
-                                        class="btn btn-outline-success btn-sm js-generate-password"
-                                        data-password="#reset_password"
-                                        data-confirm="#reset_password_confirmation">
-                                    <i class="bi bi-stars"></i> {{ __('auth.generate_password') }}
-                                </button>
-                            </p>
-                            <span class="small text-success d-none js-generate-status">{{ __('auth.password_generated') }}</span>
-                        </div>
+                        @php
+                            $resetPasswordError = $errors->has('password') && $errors->first('password') !== __('auth.password_confirmed')
+                                ? $errors->first('password')
+                                : null;
+                        @endphp
 
                         <div class="mb-3">
                             @include('auth.partials.password-input', [
@@ -69,12 +62,16 @@
                                 'labelIcon' => null,
                                 'size' => 'lg',
                                 'withHint' => true,
-                                'invalid' => $errors->has('password'),
-                                'errorMessage' => $errors->has('password') ? $errors->first('password') : null,
+                                'withChoice' => true,
+                                'weakErrorFullWidth' => true,
+                                'hintId' => 'resetPasswordWeakError',
+                                'confirmSelector' => '#reset_password_confirmation',
+                                'invalid' => (bool) $resetPasswordError,
+                                'errorMessage' => $resetPasswordError,
                             ])
                         </div>
 
-                        <div class="mb-4">
+                        <div class="mb-3">
                             <label class="form-label" for="reset_password_confirmation">{{ __('auth.password_confirm_label') }}</label>
                             <div class="input-group password-input-group input-group-lg">
                                 <input type="password"
@@ -96,6 +93,14 @@
                                     <i class="bi bi-eye"></i>
                                 </button>
                             </div>
+                        </div>
+
+                        <div class="password-weak-error-row mb-4">
+                            @include('auth.partials.password-weak-error', [
+                                'hintId' => 'resetPasswordWeakError',
+                                'visible' => (bool) $resetPasswordError,
+                                'message' => __('auth.password_hint'),
+                            ])
                         </div>
 
                         <button type="submit" class="btn btn-success btn-lg w-100 login-portal-btn">

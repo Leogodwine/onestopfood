@@ -12,9 +12,6 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                @if(session('status') && request()->boolean('assign'))
-                    <div class="alert alert-success py-2 small">{{ session('status') }}</div>
-                @endif
                 @error('error')
                     <div class="alert alert-danger py-2 small">{{ $message }}</div>
                 @enderror

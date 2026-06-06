@@ -37,14 +37,15 @@
     <div class="card-header py-2">
         <h5 class="card-title mb-0"><i class="bi bi-filter"></i> Filters</h5>
     </div>
-    <form id="admin-users-filter-form" method="GET" action="{{ route('admin.users.index') }}" class="dashboard-filter-form dashboard-filter-form--inline">
+    <form id="admin-users-filter-form" method="GET" action="{{ route('admin.users.index') }}" class="dashboard-filter-form dashboard-filter-form--inline dashboard-filter-form--wrap-sm">
         @if($filter !== '')
             <input type="hidden" name="filter" value="{{ $filter }}">
         @endif
         @if($perPage)
             <input type="hidden" name="per_page" value="{{ $perPage }}">
         @endif
-        <div class="dashboard-filter-field">
+        <div class="dashboard-filter-fields">
+        <div class="dashboard-filter-field dashboard-filter-field--grow">
             <label class="form-label dashboard-filter-label" for="user-search">Search</label>
             <input type="text" id="user-search" name="search" value="{{ $search }}" class="form-control" placeholder="Name, email, phone, ID">
         </div>
@@ -67,6 +68,7 @@
                 <option value="rejected" @selected($status === 'rejected')>Rejected</option>
                 <option value="suspended" @selected($status === 'suspended')>Suspended</option>
             </select>
+        </div>
         </div>
         <div class="dashboard-filter-actions dashboard-filter-actions--end">
             <button type="submit" class="btn btn-primary">

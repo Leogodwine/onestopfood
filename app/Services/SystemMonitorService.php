@@ -20,6 +20,7 @@ class SystemMonitorService
             'laravel_version' => app()->version(),
             'php_version' => PHP_VERSION,
             'maintenance_mode' => app()->isDownForMaintenance(),
+            'maintenance_bypass_url' => $this->maintenanceBypassUrl(),
             'debug_mode' => (bool) config('app.debug'),
             'cache_driver' => config('cache.default'),
             'queue_driver' => config('queue.default'),
@@ -70,20 +71,93 @@ class SystemMonitorService
         };
     }
 
-    public function enableMaintenance(?string $message = null): void
+    public function enableMaintenance(?string $message = null): ?string
     {
         $options = ['--retry' => 60];
 
-        if ($message) {
-            $options['--message'] = $message;
+        $secret = config('app.maintenance.secret');
+        if ($secret) {
+            $options['--secret'] = $secret;
+        } else {
+            $options['--with-secret'] = true;
         }
 
         Artisan::call('down', $options);
+
+        if ($message) {
+            $this->storeMaintenanceMessage($message);
+        }
+
+        return $this->maintenanceBypassPath();
     }
 
     public function disableMaintenance(): void
     {
         Artisan::call('up');
+    }
+
+    public function maintenanceBypassPath(): ?string
+    {
+        $path = storage_path('framework/down');
+
+        if (! File::exists($path)) {
+            return null;
+        }
+
+        $data = json_decode(File::get($path), true);
+
+        if (! is_array($data) || empty($data['secret'])) {
+            return null;
+        }
+
+        return (string) $data['secret'];
+    }
+
+    public function maintenanceBypassUrl(): ?string
+    {
+        $path = $this->maintenanceBypassPath();
+
+        if (! $path) {
+            return null;
+        }
+
+        return rtrim((string) config('app.url'), '/').'/'.ltrim($path, '/');
+    }
+
+    public function maintenanceMessage(): ?string
+    {
+        $path = storage_path('framework/down');
+
+        if (! File::exists($path)) {
+            return null;
+        }
+
+        $data = json_decode(File::get($path), true);
+
+        if (! is_array($data) || empty($data['message'])) {
+            return null;
+        }
+
+        return (string) $data['message'];
+    }
+
+    private function storeMaintenanceMessage(string $message): void
+    {
+        $path = storage_path('framework/down');
+
+        if (! File::exists($path)) {
+            return;
+        }
+
+        $data = json_decode(File::get($path), true);
+
+        if (! is_array($data)) {
+            return;
+        }
+
+        $data['message'] = $message;
+
+        File::put($path, json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
     }
 
     private function databaseConnected(): bool

@@ -86,19 +86,6 @@
                             </div>
                         </div>
 
-                        <div class="col-12">
-                            <p class="small text-muted mb-2 password-generate-row">
-                                <span>{{ __('auth.password_own_or_generate') }}</span>
-                                <button type="button"
-                                        class="btn btn-outline-success btn-sm js-generate-password"
-                                        data-password="#register_password"
-                                        data-confirm="#register_password_confirmation">
-                                    <i class="bi bi-stars"></i> {{ __('auth.generate_password') }}
-                                </button>
-                            </p>
-                            <span class="small text-success d-none js-generate-status" id="register_password_generated">{{ __('auth.password_generated') }}</span>
-                        </div>
-
                         <div class="col-md-6">
                             @php
                                 $registerPasswordErrors = $errors->register->get('password', []);
@@ -116,6 +103,10 @@
                                 'labelIcon' => 'bi-lock',
                                 'size' => 'sm',
                                 'withHint' => true,
+                                'withChoice' => true,
+                                'weakErrorFullWidth' => true,
+                                'hintId' => 'registerPasswordWeakError',
+                                'confirmSelector' => '#register_password_confirmation',
                                 'invalid' => (bool) $registerPasswordError,
                                 'errorMessage' => $registerPasswordError,
                             ])
@@ -150,6 +141,14 @@
                             @if($registerConfirmError)
                                 <p class="password-field-error text-danger small mb-0 mt-1">{{ $registerConfirmError }}</p>
                             @endif
+                        </div>
+
+                        <div class="col-12 password-weak-error-row">
+                            @include('auth.partials.password-weak-error', [
+                                'hintId' => 'registerPasswordWeakError',
+                                'visible' => (bool) $registerPasswordError,
+                                'message' => __('auth.password_hint'),
+                            ])
                         </div>
                     </div>
 

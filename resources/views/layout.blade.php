@@ -1074,33 +1074,6 @@
         .cart-signin-material i {
             font-size: 1.1rem;
         }
-        /* Top-right cart added toast */
-        .cart-toast {
-            position: fixed;
-            top: 4.5rem;
-            right: 1rem;
-            z-index: 9999;
-            padding: 0.75rem 1.25rem;
-            background: #22c55e;
-            color: #fff;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            font-size: 0.9375rem;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            opacity: 0;
-            transform: translateX(120%);
-            transition: opacity 0.3s ease, transform 0.3s ease;
-        }
-        .cart-toast.show {
-            opacity: 1;
-            transform: translateX(0);
-        }
-        .cart-toast i {
-            font-size: 1.25rem;
-        }
         .meal-card {
             border: none;
             overflow: hidden;
@@ -1703,13 +1676,6 @@
     </div>
 </nav>
 
-@if (session('status') && session('status') !== 'Added to cart')
-    <div class="alert alert-success alert-dismissible fade show m-0" role="alert">
-        {{ session('status') }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
-@endif
-
 @if ($errors->getBag('default')->any() && !request()->routeIs('login', 'login.2fa.show', 'password.request', 'password.reset'))
     <div class="alert alert-danger alert-dismissible fade show m-0">
         <ul class="mb-0">
@@ -1903,41 +1869,12 @@
 </footer>
 @endunless
 
+@include('partials.app-toast')
 @include('partials.floating-actions', ['brand' => $brand, 'supportPhone' => $supportPhone ?? null])
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="{{ asset('js/app-toast.js') }}"></script>
 <script src="{{ asset('js/mobile-responsive.js') }}"></script>
-@php
-    $cartAddedQty = session()->pull('cart_added_qty');
-@endphp
-@if($cartAddedQty)
-<div id="cartAddedToast" class="cart-toast" role="alert" aria-live="polite">
-    <i class="bi bi-cart-check-fill"></i>
-    <span>
-        @if($cartAddedQty == 1)1 item added to cart
-        @elseif($cartAddedQty == 2)2 items added to cart
-        @elseif($cartAddedQty == 3)3 items added to cart
-        @else{{ $cartAddedQty }} items added to cart
-        @endif
-    </span>
-</div>
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        var toast = document.getElementById('cartAddedToast');
-        if (toast) {
-            requestAnimationFrame(function() { toast.classList.add('show'); });
-            setTimeout(function() {
-                toast.classList.remove('show');
-                setTimeout(function() { toast.remove(); }, 350);
-            }, 4000);
-            toast.addEventListener('click', function() {
-                toast.classList.remove('show');
-                setTimeout(function() { toast.remove(); }, 350);
-            });
-        }
-    });
-</script>
-@endif
 <script>
     // Navbar search: icon toggles to input
     (function() {

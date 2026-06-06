@@ -121,6 +121,8 @@ return [
     'maintenance' => [
         'driver' => env('APP_MAINTENANCE_DRIVER', 'file'),
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
+        // Secret path admins visit to bypass maintenance (e.g. /admin-bypass-2026). Leave empty to auto-generate on enable.
+        'secret' => env('APP_MAINTENANCE_SECRET'),
     ],
 
     /*

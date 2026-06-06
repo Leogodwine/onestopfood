@@ -91,6 +91,15 @@
 
                 <h6 class="mb-3">Maintenance Mode</h6>
                 @if($overview['maintenance_mode'])
+                    @if($overview['maintenance_bypass_url'])
+                        <div class="alert alert-info small mb-3">
+                            <strong>Admin access during maintenance:</strong> open this URL once in your browser (sets a bypass cookie), then sign in normally.
+                            <div class="mt-2">
+                                <a href="{{ $overview['maintenance_bypass_url'] }}" class="text-break" target="_blank" rel="noopener">{{ $overview['maintenance_bypass_url'] }}</a>
+                            </div>
+                            <p class="mb-0 mt-2 text-muted">Save this link before enabling maintenance, or set <code>APP_MAINTENANCE_SECRET</code> in <code>.env</code> for a fixed bypass path.</p>
+                        </div>
+                    @endif
                     <form method="POST" action="{{ route('admin.system.maintenance') }}" class="d-flex gap-2">
                         @csrf
                         <input type="hidden" name="action" value="disable">
@@ -98,6 +107,7 @@
                             <i class="bi bi-play-circle"></i> Disable Maintenance Mode
                         </button>
                     </form>
+                    <p class="text-muted small mt-3 mb-0">Disabling maintenance makes the site visible to all users again.</p>
                 @else
                     <form method="POST" action="{{ route('admin.system.maintenance') }}">
                         @csrf

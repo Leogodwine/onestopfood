@@ -8,6 +8,7 @@ use App\Models\AdminAction;
 use App\Notifications\DeliveryAssignedNotification;
 use App\Services\DeliveryAssignmentService;
 use App\Services\InvoiceService;
+use App\Services\UserInboxService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -16,6 +17,7 @@ class AdminOrderController extends Controller
     public function __construct(
         private readonly DeliveryAssignmentService $assignment,
         private readonly InvoiceService $invoiceService,
+        private readonly UserInboxService $inbox,
     ) {}
 
     public function index(Request $request)
@@ -107,6 +109,8 @@ class AdminOrderController extends Controller
             'new_status' => $order->status,
         ]);
 
+        $this->inbox->orderStatusChanged($order->fresh(), $order->status);
+
         return back()->with('status', 'Order status updated.');
     }
 
@@ -122,6 +126,11 @@ class AdminOrderController extends Controller
 
         $this->logAdminAction('order_admin_cancel', $order, $data['reason'], [
             'old_status' => $oldStatus,
+        ]);
+
+        $this->inbox->orderStatusChanged($order->fresh(), 'cancelled', null, [
+            'message' => __('notifications.order.admin_cancelled', ['id' => $order->id]),
+            'body' => __('notifications.order.admin_cancelled_body', ['id' => $order->id, 'reason' => $data['reason']]),
         ]);
 
         return back()->with('status', 'Order cancelled. Refund processing should be triggered separately via the finance dashboard.');

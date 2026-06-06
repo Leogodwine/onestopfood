@@ -7,13 +7,15 @@ use App\Models\OrderChef;
 use App\Models\User;
 use App\Notifications\DeliveryAssignedNotification;
 use App\Services\DeliveryAssignmentService;
+use App\Services\UserInboxService;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
 class ChefOrderController extends Controller
 {
     public function __construct(
-        private readonly DeliveryAssignmentService $assignment
+        private readonly DeliveryAssignmentService $assignment,
+        private readonly UserInboxService $inbox,
     ) {}
 
     public function index(Request $request)
@@ -123,6 +125,8 @@ class ChefOrderController extends Controller
             report($e);
         }
 
+        $this->inbox->deliveryAssignedToTraveler($order->fresh(), $traveler);
+
         return back()->with('status', 'Delivery '.($hadTraveler ? 'reassigned' : 'assigned').' to '.$traveler->name.'.');
     }
 
@@ -164,6 +168,8 @@ class ChefOrderController extends Controller
             $order->update(['status' => 'accepted']);
         }
 
+        $this->inbox->orderAccepted($order->fresh(), $request->user());
+
         return back()->with('status', 'Order accepted');
     }
 
@@ -190,6 +196,8 @@ class ChefOrderController extends Controller
         if ($payment && $payment->isPaid()) {
             $payment->update(['status' => 'refunded']);
         }
+
+        $this->inbox->orderRejected($order->fresh(), $request->user());
 
         return back()->with('status', 'Order rejected');
     }
@@ -219,6 +227,8 @@ class ChefOrderController extends Controller
         } else {
             $order->update(['status' => $data['status']]);
         }
+
+        $this->inbox->orderStatusChanged($order->fresh(), $data['status'], $request->user());
 
         return back()->with('status', 'Order status updated');
     }

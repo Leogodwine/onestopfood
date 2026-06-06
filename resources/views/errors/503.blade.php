@@ -9,5 +9,10 @@
 @section('heading', 'We will be back soon')
 
 @section('message')
-        {{ optional($exception)->getMessage() ?: 'The site is temporarily unavailable while we perform maintenance. Please check back shortly.' }}
+        @php
+            $maintenanceMessage = app()->isDownForMaintenance()
+                ? app(\App\Services\SystemMonitorService::class)->maintenanceMessage()
+                : null;
+        @endphp
+        {{ $maintenanceMessage ?: 'The site is temporarily unavailable while we perform maintenance. Please check back shortly.' }}
 @endsection

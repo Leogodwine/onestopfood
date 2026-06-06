@@ -10,16 +10,18 @@
     <div class="card-header">
         <h5 class="card-title mb-0"><i class="bi bi-filter"></i> Date Range</h5>
     </div>
-    <form method="GET" action="{{ route('admin.analytics.index') }}" class="dashboard-filter-form row g-2 align-items-end">
-        <div class="col-6 col-md-4 col-lg-3">
+    <form method="GET" action="{{ route('admin.analytics.index') }}" class="dashboard-filter-form dashboard-filter-form--inline dashboard-filter-form--wrap-sm">
+        <div class="dashboard-filter-fields">
+        <div class="dashboard-filter-field dashboard-filter-field--date">
             <label class="form-label dashboard-filter-label" for="analytics-from">From</label>
             <input type="date" id="analytics-from" name="from" value="{{ $from }}" class="form-control">
         </div>
-        <div class="col-6 col-md-4 col-lg-3">
+        <div class="dashboard-filter-field dashboard-filter-field--date">
             <label class="form-label dashboard-filter-label" for="analytics-to">To</label>
             <input type="date" id="analytics-to" name="to" value="{{ $to }}" class="form-control">
         </div>
-        <div class="col-12 col-md-4 col-lg-3 dashboard-filter-actions">
+        </div>
+        <div class="dashboard-filter-actions dashboard-filter-actions--end">
             <button type="submit" class="btn btn-primary">
                 <i class="bi bi-funnel"></i> Apply
             </button>

@@ -32,7 +32,7 @@ class PasswordRules
      */
     public static function validationMessages(): array
     {
-        $weakHelp = __('auth.password_weak_help');
+        $weakHelp = __('auth.password_hint');
 
         return [
             'password.min' => $weakHelp,

@@ -54,12 +54,41 @@ class AccountEventNotification extends Notification implements ShouldQueue
         return [
             'type' => $this->event,
             'event' => $this->event,
+            'category' => $this->category(),
             'message' => $copy['message'],
+            'body' => $copy['body'],
+            'sms_text' => $this->context['sms_text'] ?? null,
             'user_id' => $this->context['user_id'] ?? null,
             'document_id' => $this->context['document_id'] ?? null,
             'document_type' => $this->context['document_type'] ?? null,
             'url' => $copy['action_url'] ?? null,
+            'channels_sent' => $this->context['channels_sent'] ?? $this->defaultChannels($notifiable),
         ];
+    }
+
+    /** @return array<int, string> */
+    private function defaultChannels(object $notifiable): array
+    {
+        $channels = ['in_app'];
+
+        if (filled($notifiable->email ?? null)) {
+            $channels[] = 'email';
+        }
+
+        return $channels;
+    }
+
+    private function category(): string
+    {
+        if (str_starts_with($this->event, 'admin_')) {
+            return 'admin';
+        }
+
+        if (str_starts_with($this->event, 'deletion_') || str_starts_with($this->event, 'account_') || str_starts_with($this->event, 'document_') || in_array($this->event, ['verification_submitted', 'pending_approval', 'all_documents_verified'], true)) {
+            return 'account';
+        }
+
+        return 'general';
     }
 
     /** @return array{subject: string, headline: string, body: string, message: string, action_url?: string, action_label?: string} */

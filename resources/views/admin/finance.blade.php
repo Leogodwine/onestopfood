@@ -40,8 +40,9 @@
     <div class="card-header">
         <h5 class="card-title mb-0"><i class="bi bi-filter"></i> Filters</h5>
     </div>
-    <form method="GET" action="{{ route('admin.finance.index') }}" class="dashboard-filter-form row g-2 align-items-end">
-        <div class="col-12 col-sm-6 col-lg-3">
+    <form method="GET" action="{{ route('admin.finance.index') }}" class="dashboard-filter-form dashboard-filter-form--inline dashboard-filter-form--wrap-sm">
+        <div class="dashboard-filter-fields">
+        <div class="dashboard-filter-field">
             <label class="form-label dashboard-filter-label" for="finance-status">Status</label>
             <select id="finance-status" name="status" class="form-select">
                 <option value="">All</option>
@@ -50,15 +51,16 @@
                 @endforeach
             </select>
         </div>
-        <div class="col-6 col-lg-3">
+        <div class="dashboard-filter-field dashboard-filter-field--date">
             <label class="form-label dashboard-filter-label" for="finance-from">From</label>
             <input type="date" id="finance-from" name="from" value="{{ $from }}" class="form-control">
         </div>
-        <div class="col-6 col-lg-3">
+        <div class="dashboard-filter-field dashboard-filter-field--date">
             <label class="form-label dashboard-filter-label" for="finance-to">To</label>
             <input type="date" id="finance-to" name="to" value="{{ $to }}" class="form-control">
         </div>
-        <div class="col-12 col-lg-3 dashboard-filter-actions">
+        </div>
+        <div class="dashboard-filter-actions dashboard-filter-actions--end">
             <button type="submit" class="btn btn-primary">
                 <i class="bi bi-funnel"></i> Apply
             </button>
