@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Support\PhoneNumber;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 use App\Models\User;
 use App\Models\ChefProfile;
 use App\Models\TravelerProfile;
@@ -44,6 +46,13 @@ class VerificationController extends Controller
         
         $isFinalSubmission = $request->has('tos_agreement');
 
+        PhoneNumber::mergeIntoRequest(
+            $request,
+            'emergency_contact_phone',
+            'emergency_contact_phone_country_code',
+            'emergency_contact_phone_number'
+        );
+
         // Base validation rules
         $rules = [
             'dob' => ['nullable', 'date', 'before:-18 years'],
@@ -51,6 +60,8 @@ class VerificationController extends Controller
             'nationality' => ['nullable', 'string', 'max:255'],
             'gender' => ['nullable', 'in:male,female,other'],
             'selfie' => ['nullable', 'image', 'max:10240'],
+            'emergency_contact_phone_country_code' => ['nullable', 'string', Rule::in(array_keys(PhoneNumber::countries()))],
+            'emergency_contact_phone_number' => PhoneNumber::nationalNumberRules('emergency_contact_phone_country_code', false),
             'emergency_contact_phone' => ['nullable', 'string', 'max:30'],
             'street_address' => ['nullable', 'string', 'max:500'],
             'city' => ['nullable', 'string', 'max:255'],
@@ -109,7 +120,11 @@ class VerificationController extends Controller
             }
         }
 
-        $request->validate($rules);
+        $request->validate($rules, PhoneNumber::validationMessages(
+            'emergency_contact_phone_country_code',
+            'emergency_contact_phone_number',
+            'emergency_contact_phone'
+        ));
 
         $profile = null;
         if ($user->role === User::ROLE_CHEF) {
@@ -118,7 +133,12 @@ class VerificationController extends Controller
             $profile = $user->travelerProfile ?? new TravelerProfile(['user_id' => $user->id]);
         }
 
-        $input = $request->except(['_token', 'active_tab']);
+        $input = $request->except([
+            '_token',
+            'active_tab',
+            'emergency_contact_phone_country_code',
+            'emergency_contact_phone_number',
+        ]);
         
         // We track all raw file input names in the form
         $fileInputNames = [
@@ -235,7 +255,10 @@ class VerificationController extends Controller
                 $user->status = User::STATUS_PENDING;
                 $user->save();
             }
-            return redirect()->route('dashboard')->with('success', 'Your verification details have been submitted for review.');
+
+            app(\App\Services\AccountLifecycleNotifier::class)->verificationSubmitted($user->fresh());
+
+            return redirect()->route('verification.status')->with('success', 'Your verification details have been submitted for review.');
         }
 
         return back()->with('success', 'Progress saved.')->with('active_tab', $request->input('active_tab', '#tab-identity'));

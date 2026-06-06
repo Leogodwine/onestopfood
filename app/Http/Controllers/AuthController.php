@@ -43,9 +43,13 @@ class AuthController extends Controller
                 ->withErrors(['email' => 'This email is already linked to a social account.'.$intentHint], 'register');
         }
 
+        \App\Support\PhoneNumber::mergeIntoRequest($request);
+
         $data = $request->validateWithBag('register', [
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255', 'unique:users,email'],
+            'phone_country_code' => ['required', 'string', Rule::in(array_keys(\App\Support\PhoneNumber::countries()))],
+            'phone_number' => \App\Support\PhoneNumber::nationalNumberRules('phone_country_code'),
             'phone' => ['required', 'string', 'max:30', 'unique:users,phone'],
             'role' => ['required', Rule::in([User::ROLE_CUSTOMER, User::ROLE_CHEF, User::ROLE_TRAVELER])],
             'password' => PasswordRules::forRegistration(),
@@ -55,7 +59,7 @@ class AuthController extends Controller
             'specialties' => ['nullable', 'string', 'max:500'],
             'heritage_story' => ['nullable', 'string'],
             'bio' => ['nullable', 'string'],
-        ], PasswordRules::registerMessages());
+        ], array_merge(PasswordRules::registerMessages(), \App\Support\PhoneNumber::validationMessages()));
 
         $status = in_array($data['role'], [User::ROLE_CHEF, User::ROLE_TRAVELER], true)
             ? User::STATUS_PENDING
@@ -92,6 +96,8 @@ class AuthController extends Controller
 
         Auth::login($user);
         $this->syncUserLocale($user);
+
+        app(\App\Services\AccountLifecycleNotifier::class)->accountCreated($user->fresh());
 
         if (in_array($data['role'], [User::ROLE_CHEF, User::ROLE_TRAVELER])) {
             return redirect()->route('verification.show');
@@ -217,12 +223,12 @@ class AuthController extends Controller
                 ->onlyInput('email');
         }
 
-        // Block login if admin account is locked / suspended
-        if ($user->role === User::ROLE_ADMIN && $user->status === User::STATUS_SUSPENDED) {
+        // Block login if account is admin-suspended (self-deactivated may sign in to reactivate)
+        if ($user->status === User::STATUS_SUSPENDED && $user->suspended_by !== User::SUSPENDED_BY_SELF) {
             LoginActivity::create([
                 'user_id' => $user->id,
                 'email' => $user->email,
-                'is_admin' => true,
+                'is_admin' => $user->role === User::ROLE_ADMIN,
                 'successful' => false,
                 'ip_address' => $ip,
                 'user_agent' => $userAgent,
@@ -230,8 +236,12 @@ class AuthController extends Controller
                 'reason' => 'locked',
             ]);
 
+            $message = $user->role === User::ROLE_ADMIN
+                ? 'Your account has been locked due to multiple failed login attempts. Please contact a super admin.'
+                : __('account.admin_suspended_desc');
+
             return back()
-                ->withErrors(['email' => 'Your account has been locked due to multiple failed login attempts. Please contact a super admin.'])
+                ->withErrors(['email' => $message])
                 ->onlyInput('email');
         }
 
@@ -300,6 +310,11 @@ class AuthController extends Controller
         ]);
 
         // Redirect to intended URL (set by auth middleware) or dashboard
+        if ($user->isSelfDeactivated()) {
+            return redirect()->route('account.settings')
+                ->with('status', __('account.reactivate_desc'));
+        }
+
         return redirect()->intended(route('dashboard'));
     }
 

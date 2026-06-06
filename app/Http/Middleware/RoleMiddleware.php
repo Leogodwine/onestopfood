@@ -25,6 +25,7 @@ class RoleMiddleware
         // Some installs may have legacy admin rows with NULL/empty status.
         // Treat admin as approved unless explicitly suspended/rejected/pending.
         $isApproved = ($user->status === User::STATUS_APPROVED)
+            || $user->isSelfDeactivated()
             || ($user->role === User::ROLE_ADMIN && ($user->status === null || $user->status === ''));
 
         if (!$hasRequiredRole || !$isApproved) {

@@ -21,7 +21,7 @@
         <div class="dashboard-card">
             <div class="card-body text-center">
                 @if($meal->image_url)
-                    <img src="{{ $meal->image_url }}" alt="{{ $meal->name }}" class="img-fluid rounded mb-3" style="max-height: 280px; object-fit: cover;">
+                    <img src="{{ $meal->image_url }}" alt="{{ $meal->name }}" class="img-fluid rounded mb-3 meal-upload-preview" style="max-width: 480px;">
                 @else
                     <div class="bg-body-secondary rounded d-flex align-items-center justify-content-center mb-3" style="height: 200px;">
                         <i class="bi bi-image text-muted" style="font-size: 2.5rem;"></i>

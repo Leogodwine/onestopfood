@@ -137,9 +137,13 @@ class AdminController extends Controller
             $allowedRoles[] = User::ROLE_ADMIN;
         }
 
+        \App\Support\PhoneNumber::mergeIntoRequest($request);
+
         $rules = [
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255', 'unique:users,email'],
+            'phone_country_code' => ['required', 'string', Rule::in(array_keys(\App\Support\PhoneNumber::countries()))],
+            'phone_number' => \App\Support\PhoneNumber::nationalNumberRules('phone_country_code'),
             'phone' => ['required', 'string', 'max:30', 'unique:users,phone'],
             'role' => ['required', Rule::in($allowedRoles)],
             'status' => ['nullable', Rule::in([User::STATUS_PENDING, User::STATUS_APPROVED])],
@@ -150,7 +154,10 @@ class AdminController extends Controller
             $rules['admin_title'] = ['nullable', Rule::in(array_keys($access->titles()))];
         }
 
-        $data = $request->validateWithBag('create_user', $rules, PasswordRules::validationMessages());
+        $data = $request->validateWithBag('create_user', $rules, array_merge(
+            PasswordRules::validationMessages(),
+            \App\Support\PhoneNumber::validationMessages()
+        ));
 
         if ($data['role'] === User::ROLE_ADMIN && ! $admin->adminCan('users.create_admin')) {
             abort(403, 'Only system administrators can create admin accounts.');
@@ -203,7 +210,7 @@ class AdminController extends Controller
 
     public function showUser(User $user)
     {
-        $user->load(['chefProfile', 'travelerProfile', 'locations', 'socialAccounts']);
+        $user->load(['chefProfile', 'travelerProfile', 'locations', 'socialAccounts', 'accountActionRequests']);
         $documents = UserVerificationDocument::query()
             ->where('user_id', $user->id)
             ->latest()
@@ -217,6 +224,10 @@ class AdminController extends Controller
             'accountDependencies' => $guard->dependencies($user),
             'canHardDelete' => $guard->canHardDelete($user),
             'dependencyMessage' => $guard->dependencyMessage($user),
+            'pendingDeletionRequest' => $user->accountActionRequests
+                ->where('action', \App\Models\AccountActionRequest::ACTION_DELETION)
+                ->where('status', \App\Models\AccountActionRequest::STATUS_PENDING)
+                ->first(),
         ]);
     }
 
@@ -231,6 +242,7 @@ class AdminController extends Controller
             'approved_at' => now(),
         ]);
         $this->logAdminAction('approve_user', $user);
+        app(\App\Services\AccountLifecycleNotifier::class)->accountApproved($user->fresh());
 
         return back()->with('status', 'User approved successfully');
     }
@@ -249,15 +261,14 @@ class AdminController extends Controller
             'status' => User::STATUS_REJECTED,
         ]);
         $this->logAdminAction('reject_user', $user, $request->input('reason'));
+        app(\App\Services\AccountLifecycleNotifier::class)->accountRejected($user->fresh(), $request->input('reason'));
 
         return back()->with('status', 'User rejected');
     }
 
     public function suspend(User $user)
     {
-        $user->update([
-            'status' => User::STATUS_SUSPENDED,
-        ]);
+        app(UserAccountGuardService::class)->suspend($user, null, User::SUSPENDED_BY_ADMIN);
         $this->logAdminAction('suspend_user', $user);
 
         return back()->with('status', 'User suspended');
@@ -267,10 +278,54 @@ class AdminController extends Controller
     {
         $user->update([
             'status' => User::STATUS_APPROVED,
+            'suspended_by' => null,
+            'deactivated_at' => null,
         ]);
         $this->logAdminAction('unsuspend_user', $user);
 
         return back()->with('status', 'User unsuspended');
+    }
+
+    public function approveDeletionRequest(Request $request, \App\Models\AccountActionRequest $accountActionRequest)
+    {
+        if (! $request->user()->adminCan('users.manage')) {
+            abort(403);
+        }
+
+        $data = $request->validate([
+            'admin_notes' => ['nullable', 'string', 'max:2000'],
+        ]);
+
+        try {
+            app(UserAccountGuardService::class)->approveDeletionRequest(
+                $accountActionRequest,
+                $request->user(),
+                $data['admin_notes'] ?? null,
+            );
+        } catch (\RuntimeException $e) {
+            return back()->withErrors(['deletion' => $e->getMessage()]);
+        }
+
+        return back()->with('status', 'Account permanently deleted.');
+    }
+
+    public function rejectDeletionRequest(Request $request, \App\Models\AccountActionRequest $accountActionRequest)
+    {
+        if (! $request->user()->adminCan('users.manage')) {
+            abort(403);
+        }
+
+        $data = $request->validate([
+            'admin_notes' => ['nullable', 'string', 'max:2000'],
+        ]);
+
+        app(UserAccountGuardService::class)->rejectDeletionRequest(
+            $accountActionRequest,
+            $request->user(),
+            $data['admin_notes'] ?? null,
+        );
+
+        return back()->with('status', 'Deletion request rejected.');
     }
 
     public function bulkUpdate(Request $request)
@@ -303,6 +358,7 @@ class AdminController extends Controller
                             'status' => User::STATUS_APPROVED,
                             'approved_at' => now(),
                         ]);
+                        app(\App\Services\AccountLifecycleNotifier::class)->accountApproved($user->fresh());
                         $affected++;
                         $this->logAdminAction('bulk_approve_user', $user, $data['reason'] ?? null);
                     }

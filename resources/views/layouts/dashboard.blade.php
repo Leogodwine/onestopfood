@@ -915,6 +915,27 @@
             border-left: 4px solid #dc3545;
         }
 
+        .alert-warning {
+            background-color: #fff3cd;
+            color: #856404;
+            border-left: 4px solid #ffc107;
+        }
+
+        .alert-info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border-left: 4px solid #17a2b8;
+        }
+
+        .alert ol {
+            margin-bottom: 0;
+            padding-left: 1.25rem;
+        }
+
+        .alert ol li + li {
+            margin-top: 0.5rem;
+        }
+
         /* Hamburger menu button */
         .hamburger-btn {
             display: inline-flex;
@@ -1196,7 +1217,7 @@
     </style>
     <link rel="stylesheet" href="{{ asset('css/mobile-responsive.css') }}">
     @php
-        $isApproved = auth()->check() && (auth()->user()->status === 'approved' || auth()->user()->role === 'admin' || auth()->user()->role === 'customer');
+        $isApproved = auth()->check() && (auth()->user()->status === 'approved' || auth()->user()->isSelfDeactivated() || auth()->user()->role === 'admin' || auth()->user()->role === 'customer');
     @endphp
 </head>
 <body class="@if(!$isApproved) sidebar-collapsed @endif">
@@ -1375,7 +1396,7 @@
                     </button>
                 @endif
                 @php
-                    $isApproved = auth()->user()->status === 'approved' || auth()->user()->role === 'admin' || auth()->user()->role === 'customer';
+                    $isApproved = auth()->user()->status === 'approved' || auth()->user()->isSelfDeactivated() || auth()->user()->role === 'admin' || auth()->user()->role === 'customer';
                 @endphp
                 <a class="navbar-brand d-flex align-items-center gap-2 text-decoration-none" href="{{ $isApproved ? route('dashboard') : '#' }}">
                     <i class="bi bi-speedometer2" style="font-size: 1.25rem; color: var(--primary-green);"></i>
@@ -1441,6 +1462,13 @@
                                     <i class="bi bi-person-circle"></i> {{ __('dashboard.profile') }}
                                 </a>
                             </li>
+                            @if(in_array(auth()->user()->role, ['customer', 'chef', 'traveler'], true))
+                            <li>
+                                <a class="dropdown-item d-flex align-items-center gap-2 py-2" href="{{ route('account.settings') }}">
+                                    <i class="bi bi-gear"></i> {{ __('account.settings_title') }}
+                                </a>
+                            </li>
+                            @endif
                             <li><hr class="dropdown-divider my-1"></li>
                             <li>
                                 <form method="POST" action="{{ route('logout') }}" class="m-0">

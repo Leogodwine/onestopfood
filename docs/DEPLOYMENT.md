@@ -35,6 +35,8 @@ Never commit `.env`. Set strong `ADMIN_SEED_PASSWORD` / `SEED_USER_PASSWORD` if 
 composer install --no-dev --optimize-autoloader
 php artisan migrate --force
 php artisan storage:link
+php artisan route:clear
+php artisan view:clear
 php artisan config:cache
 php artisan route:cache
 php artisan view:cache

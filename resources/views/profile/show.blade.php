@@ -3,7 +3,7 @@
 @section('content')
 <div class="page-header page-header-split">
     <div class="d-flex justify-content-between align-items-center page-header-top">
-        <h2 class="mb-0">Profile</h2>
+        <h2 class="mb-0">{{ __('dashboard.profile') }}</h2>
         <div class="page-header-actions">
             <a href="{{ route('profile.edit') }}" class="btn btn-sm btn-primary page-header-action-btn">
                 <i class="bi bi-pencil"></i> Edit
@@ -13,11 +13,21 @@
     <p class="text-muted mb-0 page-header-subtitle">Your account information</p>
 </div>
 
-<div class="row justify-content-center">
-    <div class="col-md-8 col-lg-6">
-        <div class="dashboard-card">
-            <div class="card-body text-center py-4">
-                <div class="mb-4">
+@if(session('status'))
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        {{ session('status') }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+@endif
+
+<div class="row g-3 g-lg-4 profile-edit-row">
+    <div class="col-lg-5 col-xl-4">
+        <div class="dashboard-card h-100 profile-edit-card">
+            <div class="card-header">
+                <h5 class="card-title mb-0"><i class="bi bi-person-circle"></i> {{ __('dashboard.profile') }}</h5>
+            </div>
+            <div class="text-center py-2">
+                <div class="mb-3 profile-avatar-block">
                     @if($user->avatar_url)
                         <img src="{{ $user->avatar_url }}" alt="Profile picture" class="rounded-circle border" style="width: 120px; height: 120px; object-fit: cover;">
                     @else
@@ -27,8 +37,8 @@
                     @endif
                 </div>
                 <h4 class="mb-1">{{ $user->name }}</h4>
-                <p class="text-muted mb-0">{{ $user->email }}</p>
-                <p class="mt-2 mb-0">
+                <p class="text-muted mb-2">{{ $user->email }}</p>
+                <p class="mb-0">
                     <span class="badge bg-secondary text-capitalize">{{ $user->role }}</span>
                 </p>
                 @if($user->phone)
@@ -36,12 +46,44 @@
                         <i class="bi bi-telephone"></i> {{ $user->phone }}
                     </p>
                 @endif
-                <div class="mt-4 pt-3 border-top">
+                <div class="mt-4 d-flex flex-wrap justify-content-center gap-2">
                     <a href="{{ route('profile.edit') }}" class="btn btn-outline-primary">
                         <i class="bi bi-pencil"></i> Edit Profile
                     </a>
+                    @if(in_array($user->role, ['chef', 'traveler'], true))
+                        <a href="{{ route('verification.status') }}" class="btn btn-outline-success">
+                            <i class="bi bi-list-check"></i> Verification status
+                        </a>
+                    @endif
+                    @if($user->isSelfRegisteredRole())
+                        <a href="{{ route('account.settings') }}" class="btn btn-outline-secondary">
+                            <i class="bi bi-gear"></i> {{ __('account.settings_title') }}
+                        </a>
+                    @endif
+                    <a href="{{ route('notifications.index') }}" class="btn btn-outline-secondary">
+                        <i class="bi bi-bell"></i> Notifications
+                        @if(auth()->user()->unreadNotifications->count() > 0)
+                            <span class="badge bg-danger">{{ auth()->user()->unreadNotifications->count() }}</span>
+                        @endif
+                    </a>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <div class="col-lg-7 col-xl-8">
+        <div class="dashboard-card h-100 profile-edit-card">
+            <div class="card-header">
+                <h5 class="card-title mb-0"><i class="bi bi-shield-lock"></i> {{ __('auth.profile_change_password') }}</h5>
+            </div>
+            @if($user->isSelfRegisteredRole())
+                <p class="text-muted small mb-3">{{ __('auth.profile_password_self_service_hint') }}</p>
+            @else
+                <p class="text-muted small mb-3">{{ __('auth.profile_password_admin_hint') }}</p>
+            @endif
+            <a href="{{ route('profile.edit') }}#change-password" class="btn btn-primary">
+                <i class="bi bi-shield-lock"></i> Change password
+            </a>
         </div>
     </div>
 </div>

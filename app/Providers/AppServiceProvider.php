@@ -53,6 +53,8 @@ class AppServiceProvider extends ServiceProvider
         $currencyService = app(CurrencyService::class);
         View::share('displayCurrency', $currencyService->current());
         View::share('currencyOptions', $currencyService->supported());
+        View::share('phoneCountries', config('phone.countries', []));
+        View::share('defaultPhoneCountryCode', config('phone.default_country_code', '255'));
 
         View::composer('*', function ($view) {
             $user = auth()->user();

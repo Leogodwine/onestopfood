@@ -17,11 +17,11 @@
             <div class="card-header">
                 <h5 class="card-title mb-0"><i class="bi bi-receipt"></i> Summary</h5>
             </div>
-            <div class="table-responsive">
-                <table class="table">
+            <div class="table-responsive table-responsive-fit">
+                <table class="table order-detail-meta-table mb-0">
                     <tbody>
                         <tr>
-                            <td class="fw-semibold" style="width: 180px;">Customer</td>
+                            <td class="fw-semibold">Customer</td>
                             <td>{{ $order->customer->name ?? 'N/A' }} <br><small class="text-muted">{{ $order->customer->email ?? '' }}</small></td>
                         </tr>
                         <tr>
@@ -54,8 +54,8 @@
             <div class="card-header">
                 <h5 class="card-title mb-0"><i class="bi bi-basket"></i> Items</h5>
             </div>
-            <div class="table-responsive">
-                <table class="table">
+            <div class="table-responsive table-responsive-fit">
+                <table class="table order-detail-items-table mb-0">
                     <thead>
                         <tr>
                             <th>Meal</th>
@@ -82,11 +82,11 @@
             <div class="card-header">
                 <h5 class="card-title mb-0"><i class="bi bi-truck"></i> Delivery</h5>
             </div>
-            <div class="table-responsive">
-                <table class="table">
+            <div class="table-responsive table-responsive-fit">
+                <table class="table order-detail-meta-table mb-0">
                     <tbody>
                         <tr>
-                            <td class="fw-semibold" style="width: 180px;">Traveler</td>
+                            <td class="fw-semibold">Traveler</td>
                             <td>{{ $order->delivery?->traveler?->name ?? 'Unassigned' }}</td>
                         </tr>
                         <tr>

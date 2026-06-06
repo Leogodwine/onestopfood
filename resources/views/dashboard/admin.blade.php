@@ -2,7 +2,7 @@
 
 @section('content')
 <div class="page-header page-header-split">
-    <div class="page-header-top page-header-top--solo">
+    <div class="d-flex justify-content-between align-items-center page-header-top">
         <h2 class="mb-0">
             @if($adminTitle === 'ceo')
                 {{ __('dashboard.executive_dashboard') }}
@@ -14,26 +14,29 @@
                 {{ __('dashboard.manager_dashboard') }}
             @endif
         </h2>
+        @if(!empty($adminPermissions['users.create']) || !empty($adminPermissions['users.view']))
+        <div class="page-header-actions">
+            @if(!empty($adminPermissions['users.create']))
+                <button type="button" class="btn btn-sm btn-outline-success page-header-action-btn" onclick="openCreateUserModal()">
+                    <i class="bi bi-person-plus"></i> Create User
+                </button>
+            @endif
+            @if(!empty($adminPermissions['users.view']))
+                <a class="btn btn-sm btn-success page-header-action-btn" href="{{ route('admin.users.index', ['filter' => 'pending_approvals']) }}#pending-approvals">
+                    <i class="bi bi-person-check"></i> Pending
+                    @if(($stats['pending_approvals'] ?? 0) > 0)
+                        <span class="badge bg-light text-success ms-1">{{ number_format($stats['pending_approvals']) }}</span>
+                    @endif
+                </a>
+            @endif
+        </div>
+        @endif
     </div>
     <p class="text-muted page-header-subtitle mb-1">{{ $adminTitleDescription }}</p>
     @if($adminTitle === 'ceo')
     <span class="badge bg-{{ app(\App\Services\AdminAccessService::class)->titleBadge($adminTitle) }}">
         {{ $adminTitleLabel }}
     </span>
-    @endif
-    @if(!empty($adminPermissions['users.create']) || !empty($adminPermissions['users.view']))
-    <div class="page-header-actions page-header-actions-secondary">
-        @if(!empty($adminPermissions['users.create']))
-            <button type="button" class="btn btn-sm btn-outline-success page-header-action-btn" onclick="openCreateUserModal()">
-                <i class="bi bi-person-plus"></i> Create User
-            </button>
-        @endif
-        @if(!empty($adminPermissions['users.view']))
-            <a class="btn btn-sm btn-success page-header-action-btn" href="{{ route('admin.users.index', ['filter' => 'pending_approvals']) }}#pending-approvals">
-                <i class="bi bi-person-check"></i> Pending
-            </a>
-        @endif
-    </div>
     @endif
 </div>
 

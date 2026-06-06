@@ -24,13 +24,13 @@
     <form method="POST" action="{{ route('orders.pay.mobile', $order) }}" class="row g-2 align-items-end">
         @csrf
         <div class="col-12">
-            <label for="mobile_money_phone" class="form-label small mb-1">{{ $label }} phone</label>
-            <input type="text" name="phone" id="mobile_money_phone" class="form-control form-control-sm"
-                   placeholder="255712345678" required
-                   value="{{ old('phone', $payment->provider_reference ?? auth()->user()->phone) }}">
-            @error('phone')
-                <div class="text-danger small">{{ $message }}</div>
-            @enderror
+            @include('partials.phone-input', [
+                'label' => $label . ' ' . __('auth.phone_label'),
+                'value' => old('phone', $payment->provider_reference ?? auth()->user()->phone),
+                'inputId' => 'mobile_money_phone_number',
+                'selectId' => 'mobile_money_phone_country_code',
+                'size' => 'sm',
+            ])
         </div>
         <div class="col-12">
             <button type="submit" class="btn btn-success btn-sm w-100">

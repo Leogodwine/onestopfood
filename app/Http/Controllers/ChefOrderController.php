@@ -22,7 +22,7 @@ class ChefOrderController extends Controller
 
         $query = Order::query()
             ->forChef($chefId)
-            ->with(['customer', 'items.meal', 'payment', 'sharedPayment', 'delivery', 'orderChefs', 'chef']);
+            ->with(['customer', 'items.meal', 'payment', 'sharedPayment', 'delivery.traveler', 'orderChefs', 'chef']);
 
         if ($request->filled('status') && $request->input('status') !== 'all') {
             $query->where('status', $request->input('status'));
@@ -48,21 +48,33 @@ class ChefOrderController extends Controller
         $chefPortion = $orderChef ?? null;
 
         $delivery = $order->delivery;
-        $needsAssignment = $delivery && (empty($delivery->traveler_id) || $delivery->status === 'unassigned');
-        $canReassign = $delivery && $delivery->traveler_id && ! in_array($delivery->status, ['delivered', 'cancelled'], true);
+        $canManageDelivery = $this->canChefManageDelivery($order);
+        $needsAssignment = $canManageDelivery && (! $delivery || empty($delivery->traveler_id) || $delivery->status === 'unassigned');
+        $canReassign = $canManageDelivery && $delivery && $delivery->traveler_id && ! in_array($delivery->status, ['delivered', 'cancelled', 'unassigned'], true);
         $orderQuantity = $this->assignment->orderItemQuantity($order);
 
-        $nearbyTravelers = collect();
-        if ($needsAssignment || $canReassign) {
-            $nearbyTravelers = $this->assignment->rankTravelersForOrder($order, $request->user());
-        }
+        $nearbyTravelers = $canManageDelivery
+            ? $this->assignment->rankTravelersForOrder($order, $request->user())
+            : collect();
+
+        $availableTravelers = $canManageDelivery
+            ? User::query()
+                ->where('role', User::ROLE_TRAVELER)
+                ->where('status', User::STATUS_APPROVED)
+                ->whereHas('travelerProfile')
+                ->with('travelerProfile')
+                ->orderBy('name')
+                ->get()
+            : collect();
 
         return view('chef.orders.show', compact(
             'order',
             'chefPortion',
             'nearbyTravelers',
+            'availableTravelers',
             'needsAssignment',
             'canReassign',
+            'canManageDelivery',
             'orderQuantity'
         ));
     }
@@ -77,11 +89,15 @@ class ChefOrderController extends Controller
             abort(403);
         }
 
+        if (! $this->canChefManageDelivery($order)) {
+            return back()->withErrors(['error' => 'This order can no longer be assigned to a traveler.']);
+        }
+
         $data = $request->validate([
             'traveler_id' => ['required', 'integer', 'exists:users,id'],
         ]);
 
-        $order->load(['deliveryLocation', 'items', 'delivery']);
+        $order->load(['deliveryLocation', 'items', 'delivery', 'chef.chefProfile']);
 
         $traveler = User::query()
             ->where('id', $data['traveler_id'])
@@ -90,14 +106,15 @@ class ChefOrderController extends Controller
             ->with(['travelerProfile', 'location'])
             ->firstOrFail();
 
+        $hadTraveler = (bool) $order->delivery?->traveler_id;
         $exceptDeliveryId = $order->delivery?->id;
-        $error = $this->assignment->validateAssignment($order, $traveler, $request->user(), true, $exceptDeliveryId);
+        $error = $this->assignment->validateAssignment($order, $traveler, $request->user(), false, $exceptDeliveryId);
         if ($error) {
             return back()->withErrors(['error' => $error]);
         }
 
-        if (! $this->assignment->assignTravelerToOrder($order, $traveler, $request->user(), true, $exceptDeliveryId)) {
-            return back()->withErrors(['error' => 'Could not assign traveler. Please try another traveler.']);
+        if (! $this->assignment->assignTravelerToOrder($order, $traveler, $request->user(), false, $exceptDeliveryId)) {
+            return back()->withErrors(['error' => 'Could not assign traveler. Check distance, vehicle capacity, and availability.']);
         }
 
         try {
@@ -106,7 +123,21 @@ class ChefOrderController extends Controller
             report($e);
         }
 
-        return back()->with('status', 'Delivery assigned to ' . $traveler->name . '.');
+        return back()->with('status', 'Delivery '.($hadTraveler ? 'reassigned' : 'assigned').' to '.$traveler->name.'.');
+    }
+
+    private function canChefManageDelivery(Order $order): bool
+    {
+        if (in_array($order->status, ['cancelled', 'delivered'], true)) {
+            return false;
+        }
+
+        $delivery = $order->delivery;
+        if ($delivery && in_array($delivery->status, ['delivered', 'cancelled'], true)) {
+            return false;
+        }
+
+        return true;
     }
 
     public function accept(Order $order, Request $request)

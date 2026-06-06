@@ -44,7 +44,12 @@ class AdminOrderController extends Controller
             $query->whereDate('created_at', '<=', $to);
         }
 
-        $orders = $query->paginate(20)->withQueryString();
+        $perPage = (int) $request->integer('per_page', 20);
+        if (! in_array($perPage, [10, 20, 50, 100], true)) {
+            $perPage = 20;
+        }
+
+        $orders = $query->paginate($perPage)->withQueryString();
 
         return view('admin.orders', [
             'orders' => $orders,
@@ -52,6 +57,7 @@ class AdminOrderController extends Controller
             'from' => $from,
             'to' => $to,
             'orderId' => $orderId,
+            'perPage' => $perPage,
         ]);
     }
 

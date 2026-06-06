@@ -118,9 +118,16 @@
                                 <label class="form-label">Contact Name</label>
                                 <input type="text" name="emergency_contact_name" class="form-control" value="{{ old('emergency_contact_name', $profile->emergency_contact_name) }}" required>
                             </div>
-                            <div class="col-md-4">
-                                <label class="form-label">Contact Phone</label>
-                                <input type="text" name="emergency_contact_phone" class="form-control" value="{{ old('emergency_contact_phone', $profile->emergency_contact_phone) }}" required>
+                            <div class="col-md-6">
+                                @include('partials.phone-input', [
+                                    'label' => 'Contact Phone',
+                                    'countryCodeName' => 'emergency_contact_phone_country_code',
+                                    'numberName' => 'emergency_contact_phone_number',
+                                    'inputId' => 'traveler_emergency_contact_phone_number',
+                                    'selectId' => 'traveler_emergency_contact_phone_country_code',
+                                    'value' => old('emergency_contact_phone', $profile->emergency_contact_phone),
+                                    'required' => true,
+                                ])
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label">Relationship</label>

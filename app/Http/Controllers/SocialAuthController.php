@@ -103,10 +103,10 @@ class SocialAuthController extends Controller
                 ->withErrors(['email' => 'Admin accounts must sign in with email and password.']);
         }
 
-        if ($user->status === User::STATUS_SUSPENDED) {
+        if ($user->status === User::STATUS_SUSPENDED && $user->suspended_by !== User::SUSPENDED_BY_SELF) {
             return redirect()
                 ->route('login')
-                ->withErrors(['email' => 'Your account is suspended. Contact support for assistance.']);
+                ->withErrors(['email' => __('account.admin_suspended_desc')]);
         }
 
         $intent = $request->session()->pull('oauth_intended_role');
@@ -143,6 +143,11 @@ class SocialAuthController extends Controller
             return redirect()
                 ->route('verification.show')
                 ->with('success', 'Welcome! Complete your '.$label.' verification profile to submit for admin approval.');
+        }
+
+        if ($user->isSelfDeactivated()) {
+            return redirect()->route('account.settings')
+                ->with('status', __('account.reactivate_desc'));
         }
 
         return redirect()->intended(route('dashboard'));

@@ -50,15 +50,19 @@ class SocialSignupController extends Controller
             return redirect()->route('login');
         }
 
+        \App\Support\PhoneNumber::mergeIntoRequest($request);
+
         $data = $request->validateWithBag('social_signup', [
             'role' => ['required', Rule::in(PartnerApplicationService::SIGNUP_ROLES)],
+            'phone_country_code' => ['required', 'string', Rule::in(array_keys(\App\Support\PhoneNumber::countries()))],
+            'phone_number' => \App\Support\PhoneNumber::nationalNumberRules('phone_country_code'),
             'phone' => [
                 'required',
                 'string',
                 'max:30',
                 Rule::unique('users', 'phone')->ignore($user->id),
             ],
-        ]);
+        ], \App\Support\PhoneNumber::validationMessages());
 
         try {
             $user = $this->partnerApplication->setSignupRole($user, $data['role']);

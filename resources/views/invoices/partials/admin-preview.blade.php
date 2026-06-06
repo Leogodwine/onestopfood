@@ -29,7 +29,7 @@
     </div>
 </div>
 
-<div class="table-responsive">
+<div class="table-responsive table-responsive-fit">
     <table class="table table-sm align-middle mb-0 order-line-table">
         @include('partials.order-line-colgroup')
         <thead class="table-light">

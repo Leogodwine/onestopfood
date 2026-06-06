@@ -81,7 +81,7 @@
             @forelse($meals as $meal)
                 <div class="col-12 col-sm-6 col-lg-4">
                     <div class="meal-card">
-                        <div class="meal-card-image-wrap">
+                        <div class="meal-card-image-wrap meal-image-zoom-wrap">
                             @if($meal->image_url)
                                 <img src="{{ $meal->image_url }}" class="meal-card-img" alt="{{ $meal->name }}">
                             @else

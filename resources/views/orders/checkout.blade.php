@@ -278,9 +278,17 @@
                             </div>
                             <div id="paymentDetails" class="mb-4" style="display: {{ ($paymentMethod ?? '') && ($paymentMethod ?? '') !== 'cod' ? 'block' : 'none' }};">
                                 <div class="mb-3">
-                                    <label for="payment_phone" class="form-label">Mobile money number <span id="paymentPhoneRequired" class="text-danger" style="display:none;">*</span></label>
-                                    <input type="text" class="form-control" name="payment_phone" id="payment_phone" placeholder="e.g. 255712345678" value="{{ $paymentPhone ?? old('payment_phone', auth()->user()->phone) }}">
-                                    <small class="text-muted" id="paymentPhoneHint">Required for M-Pesa, Tigo Pesa, or Airtel Money — you will receive a PIN prompt on this number.</small>
+                                    @include('partials.phone-input', [
+                                        'label' => 'Mobile money number <span id="paymentPhoneRequired" class="text-danger" style="display:none;">*</span>',
+                                        'countryCodeName' => 'payment_phone_country_code',
+                                        'numberName' => 'payment_phone_number',
+                                        'inputId' => 'payment_phone_number',
+                                        'selectId' => 'payment_phone_country_code',
+                                        'value' => $paymentPhone ?? old('payment_phone', auth()->user()->phone),
+                                        'required' => false,
+                                        'size' => 'lg',
+                                    ])
+                                    <small class="text-muted d-block mt-1" id="paymentPhoneHint">Required for M-Pesa, Tigo Pesa, or Airtel Money — you will receive a PIN prompt on this number.</small>
                                 </div>
                                 <div class="mb-3">
                                     <label for="payment_reference" class="form-label">Payment Reference (Optional)</label>
@@ -599,7 +607,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const paymentDetails = document.getElementById('paymentDetails');
     const paymentMethods = document.querySelectorAll('input[name="payment_method"]');
     
-    const paymentPhone = document.getElementById('payment_phone');
+    const paymentPhone = document.getElementById('payment_phone_number');
     const phoneRequiredMark = document.getElementById('paymentPhoneRequired');
 
     const mobileMethods = ['mpesa', 'tigo', 'airtel'];

@@ -66,6 +66,8 @@ class AdminVerificationController extends Controller
         $document->expires_at = $data['expires_at'] ?? null;
         $document->save();
 
+        app(\App\Services\AccountLifecycleNotifier::class)->documentReviewed($document->fresh('user'), 'approved');
+
         // Optionally mark user as approved if all docs are approved and user was pending
         $user = $document->user;
         if ($user && $user->status === User::STATUS_PENDING) {
@@ -74,6 +76,7 @@ class AdminVerificationController extends Controller
                 $user->status = User::STATUS_APPROVED;
                 $user->approved_at = now();
                 $user->save();
+                app(\App\Services\AccountLifecycleNotifier::class)->accountApprovedAfterDocuments($user->fresh());
             }
         }
 
@@ -91,6 +94,8 @@ class AdminVerificationController extends Controller
         $document->status = 'rejected';
         $document->admin_notes = $data['admin_notes'] ?? null;
         $document->save();
+
+        app(\App\Services\AccountLifecycleNotifier::class)->documentReviewed($document->fresh('user'), 'rejected');
 
         $this->logAdminAction('verify_document_reject', $document);
 

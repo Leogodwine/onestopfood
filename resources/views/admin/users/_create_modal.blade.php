@@ -48,18 +48,13 @@
                         </div>
 
                         <div class="col-md-6">
-                            <label class="form-label fw-semibold mb-1" for="create_user_phone">Phone</label>
-                            <input type="text"
-                                   name="phone"
-                                   id="create_user_phone"
-                                   class="form-control form-control-sm @if($createUserErrors->has('phone')) is-invalid @endif"
-                                   value="{{ old('phone') }}"
-                                   required
-                                   autocomplete="tel"
-                                   placeholder="e.g. +255 7xx xxx xxx">
-                            @if($createUserErrors->has('phone'))
-                                <div class="invalid-feedback">{{ $createUserErrors->first('phone') }}</div>
-                            @endif
+                            @include('partials.phone-input', [
+                                'label' => __('auth.phone_label'),
+                                'errorBag' => 'create_user',
+                                'value' => old('phone'),
+                                'inputId' => 'create_user_phone_number',
+                                'selectId' => 'create_user_phone_country_code',
+                            ])
                         </div>
 
                         <div class="col-md-6">

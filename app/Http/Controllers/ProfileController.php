@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Support\PasswordRules;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
@@ -27,10 +28,13 @@ class ProfileController extends Controller
      */
     public function edit(Request $request)
     {
-        $user = User::query()->find($request->user()->id);
+        $user = User::query()
+            ->with('socialAccounts')
+            ->find($request->user()->id);
 
         return view('profile.edit', [
             'user' => $user,
+            'isSocialOnlyUser' => $user->isSocialOnlyUser(),
         ]);
     }
 
@@ -54,9 +58,9 @@ class ProfileController extends Controller
 
     public function update(Request $request)
     {
-        $user = $request->user();
+        $user = User::query()->find($request->user()->id);
 
-        $rules = [
+        $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'avatar' => [
                 'nullable',
@@ -65,9 +69,7 @@ class ProfileController extends Controller
                 'max:2048',
             ],
             'remove_avatar' => ['nullable', 'boolean'],
-        ];
-
-        $data = $request->validate($rules);
+        ]);
 
         $user->name = $data['name'];
 
@@ -88,7 +90,31 @@ class ProfileController extends Controller
 
         Auth::setUser($user->fresh());
 
-        return redirect()->route('profile.show')->with('status', 'Profile updated successfully.');
+        return redirect()->route('profile.show')->with('status', __('auth.profile_updated'));
+    }
+
+    public function updatePassword(Request $request)
+    {
+        $user = User::query()
+            ->with('socialAccounts')
+            ->find($request->user()->id);
+
+        $rules = [
+            'password' => PasswordRules::forReset(),
+        ];
+
+        if (! $user->isSocialOnlyUser()) {
+            $rules['current_password'] = ['required', 'current_password'];
+        }
+
+        $data = $request->validate($rules, PasswordRules::validationMessages());
+
+        $user->password = $data['password'];
+        $user->save();
+
+        Auth::setUser($user->fresh());
+
+        return redirect()->route('profile.show')->with('status', __('auth.password_updated'));
     }
 
     private function avatarFileResponse(User $user)

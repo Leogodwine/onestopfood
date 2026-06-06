@@ -400,6 +400,43 @@
             </div>
         </div>
 
+        @if(!empty($pendingDeletionRequest) && !empty($adminPermissions['users.manage']))
+        <div class="dashboard-card mt-4 border-danger" id="account-requests">
+            <div class="card-header">
+                <h5 class="card-title text-danger mb-0"><i class="bi bi-trash"></i> Pending deletion request</h5>
+            </div>
+            <p class="small text-muted">Submitted {{ $pendingDeletionRequest->created_at->format('M d, Y H:i') }}</p>
+            <div class="alert alert-warning small mb-3">
+                <strong>Reason from user:</strong><br>{{ $pendingDeletionRequest->reason }}
+            </div>
+            @unless($canHardDelete)
+                <div class="alert alert-secondary small">Cannot delete yet: {{ $dependencyMessage }}</div>
+            @endunless
+            <div class="d-flex flex-wrap gap-2">
+                @if($canHardDelete)
+                <form method="POST" action="{{ route('admin.account-requests.approve', $pendingDeletionRequest) }}" onsubmit="return confirm('Permanently delete this account? This cannot be undone.');">
+                    @csrf
+                    <div class="mb-2">
+                        <input type="text" name="admin_notes" class="form-control form-control-sm" placeholder="Optional admin note to user">
+                    </div>
+                    <button type="submit" class="btn btn-danger btn-sm">
+                        <i class="bi bi-check-circle"></i> Approve & delete permanently
+                    </button>
+                </form>
+                @endif
+                <form method="POST" action="{{ route('admin.account-requests.reject', $pendingDeletionRequest) }}">
+                    @csrf
+                    <div class="mb-2">
+                        <input type="text" name="admin_notes" class="form-control form-control-sm" placeholder="Reason for rejection (sent to user)">
+                    </div>
+                    <button type="submit" class="btn btn-outline-secondary btn-sm">
+                        <i class="bi bi-x-circle"></i> Reject request
+                    </button>
+                </form>
+            </div>
+        </div>
+        @endif
+
         <!-- User Statistics -->
         <div class="dashboard-card mt-4">
             <div class="card-header">

@@ -5,11 +5,16 @@ namespace App\Http\Controllers;
 use App\Models\Meal;
 use App\Models\OrderItem;
 use App\Models\Review;
+use App\Services\MealImageService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
 
 class MealController extends Controller
 {
+    public function __construct(
+        private readonly MealImageService $mealImages,
+    ) {}
     public function index(Request $request)
     {
         $query = Meal::query()
@@ -165,14 +170,17 @@ class MealController extends Controller
         $data = $request->validate($this->mealValidationRules(true), [
             'image.required' => 'Please select an image for the meal.',
             'image.image' => 'The uploaded file must be an image.',
-            'image.mimes' => 'The image must be a file of type: jpeg, jpg, png, gif.',
-            'image.max' => 'The image may not be greater than 2MB.',
+            'image.mimes' => 'The image must be a file of type: jpeg, jpg, png, webp, or gif.',
+            'image.max' => 'The image may not be greater than 5MB.',
+            'image.dimensions' => sprintf(
+                'The image must be at least %d×%d pixels for a clear display.',
+                MealImageService::MIN_WIDTH,
+                MealImageService::MIN_HEIGHT,
+            ),
         ]);
 
-        // Handle image upload
         if ($request->hasFile('image')) {
-            $imagePath = $request->file('image')->store('meals', 'public');
-            $data['image_path'] = $imagePath;
+            $data['image_path'] = $this->mealImages->store($request->file('image'));
         }
 
         Meal::create([
@@ -213,13 +221,20 @@ class MealController extends Controller
     {
         $this->authorizeChefMeal($request, $meal);
 
-        $data = $request->validate($this->mealValidationRules(false));
+        $data = $request->validate($this->mealValidationRules(false), [
+            'image.image' => 'The uploaded file must be an image.',
+            'image.mimes' => 'The image must be a file of type: jpeg, jpg, png, webp, or gif.',
+            'image.max' => 'The image may not be greater than 5MB.',
+            'image.dimensions' => sprintf(
+                'The image must be at least %d×%d pixels for a clear display.',
+                MealImageService::MIN_WIDTH,
+                MealImageService::MIN_HEIGHT,
+            ),
+        ]);
 
         if ($request->hasFile('image')) {
-            if ($meal->image_path) {
-                Storage::disk('public')->delete($meal->image_path);
-            }
-            $data['image_path'] = $request->file('image')->store('meals', 'public');
+            $this->mealImages->delete($meal->image_path);
+            $data['image_path'] = $this->mealImages->store($request->file('image'));
         }
 
         $meal->update([
@@ -264,7 +279,7 @@ class MealController extends Controller
         }
 
         if ($meal->image_path) {
-            Storage::disk('public')->delete($meal->image_path);
+            $this->mealImages->delete($meal->image_path);
         }
 
         $meal->delete();
@@ -293,7 +308,15 @@ class MealController extends Controller
             'price' => ['required', 'numeric', 'min:0'],
             'category' => ['nullable', 'string', 'max:255'],
             'dietary_tags' => ['nullable', 'string', 'max:255'],
-            'image' => [$creating ? 'nullable' : 'nullable', 'image', 'mimes:jpeg,jpg,png,gif', 'max:2048'],
+            'image' => [
+                $creating ? 'nullable' : 'nullable',
+                'image',
+                'mimes:jpeg,jpg,png,gif,webp',
+                'max:5120',
+                Rule::dimensions()
+                    ->minWidth(MealImageService::MIN_WIDTH)
+                    ->minHeight(MealImageService::MIN_HEIGHT),
+            ],
             'is_available' => ['nullable', 'boolean'],
             'is_heritage' => ['nullable', 'boolean'],
             'is_popular' => ['nullable', 'boolean'],

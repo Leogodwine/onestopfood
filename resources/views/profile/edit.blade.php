@@ -10,19 +10,19 @@
             </a>
         </div>
     </div>
-    <p class="text-muted mb-0 page-header-subtitle">Update your name and profile picture</p>
+    <p class="text-muted mb-0 page-header-subtitle">{{ __('auth.edit_profile_subtitle') }}</p>
 </div>
 
-<div class="row justify-content-center">
-    <div class="col-md-8 col-lg-6">
-        <div class="dashboard-card">
+<div class="row g-3 g-lg-4 profile-edit-row">
+    <div class="col-lg-5 col-xl-4">
+        <div class="dashboard-card h-100 profile-edit-card">
             <div class="card-header">
-                <h5 class="card-title mb-0"><i class="bi bi-person-circle"></i> Edit Profile</h5>
+                <h5 class="card-title mb-0"><i class="bi bi-person-circle"></i> {{ __('dashboard.profile') }}</h5>
             </div>
             <form method="POST" action="{{ route('profile.update') }}" enctype="multipart/form-data">
                 @csrf
 
-                <div class="mb-4 text-center">
+                <div class="mb-4 text-center profile-avatar-block">
                     <label class="form-label d-block">Profile Picture</label>
                     <div class="position-relative d-inline-block">
                         @if($user->avatar_url)
@@ -56,10 +56,123 @@
                     @enderror
                 </div>
 
-                <div class="d-flex justify-content-between align-items-center">
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
                     <a href="{{ route('profile.show') }}" class="btn btn-outline-secondary">Cancel</a>
                     <button type="submit" class="btn btn-primary">
-                        <i class="bi bi-check2-circle"></i> Save changes
+                        <i class="bi bi-check2-circle"></i> Save profile
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="col-lg-7 col-xl-8">
+        <div class="dashboard-card h-100 profile-edit-card" id="change-password">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-shield-lock"></i>
+                    {{ ($isSocialOnlyUser ?? false) ? __('auth.profile_set_password') : __('auth.profile_change_password') }}
+                </h5>
+            </div>
+            <form method="POST" action="{{ route('profile.password.update') }}">
+                @csrf
+
+                @if($isSocialOnlyUser ?? false)
+                    <p class="text-muted small mb-3">{{ __('auth.profile_set_password_social') }}</p>
+                @elseif($user->isSelfRegisteredRole())
+                    <p class="text-muted small mb-3">{{ __('auth.profile_password_self_service_hint') }}</p>
+                @else
+                    <p class="text-muted small mb-3">{{ __('auth.profile_password_admin_hint') }}</p>
+                @endif
+
+                @unless($isSocialOnlyUser ?? false)
+                    <div class="mb-3">
+                        <label class="form-label" for="current_password">{{ __('auth.current_password_label') }}</label>
+                        <div class="input-group password-input-group">
+                            <input
+                                type="password"
+                                name="current_password"
+                                id="current_password"
+                                class="form-control @error('current_password') is-invalid @enderror"
+                                placeholder="{{ __('auth.current_password_placeholder') }}"
+                                autocomplete="current-password"
+                                value="{{ old('current_password') }}"
+                            >
+                            <button
+                                type="button"
+                                class="btn btn-outline-secondary btn-toggle-password js-toggle-password"
+                                data-target="current_password"
+                                data-show-label="{{ __('auth.show_password') }}"
+                                data-hide-label="{{ __('auth.hide_password') }}"
+                                aria-label="{{ __('auth.show_password') }}"
+                            >
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </div>
+                        @error('current_password')
+                            <div class="invalid-feedback d-block">{{ $message }}</div>
+                        @enderror
+                    </div>
+                @endunless
+
+                <div class="mb-2">
+                    <p class="small text-muted mb-2 password-generate-row d-flex flex-wrap align-items-center gap-2">
+                        <span>{{ __('auth.password_own_or_generate') }}</span>
+                        <button type="button"
+                                class="btn btn-outline-success btn-sm js-generate-password"
+                                data-password="#profile_password"
+                                data-confirm="#profile_password_confirmation">
+                            <i class="bi bi-stars"></i> {{ __('auth.generate_password') }}
+                        </button>
+                    </p>
+                    <span class="small text-success d-none js-generate-status">{{ __('auth.password_generated') }}</span>
+                </div>
+
+                <div class="mb-3">
+                    @include('auth.partials.password-input', [
+                        'inputId' => 'profile_password',
+                        'name' => 'password',
+                        'label' => __('auth.password_label'),
+                        'size' => 'sm',
+                        'required' => true,
+                        'withHint' => true,
+                        'invalid' => $errors->has('password'),
+                        'errorMessage' => $errors->has('password') ? $errors->first('password') : null,
+                    ])
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label" for="profile_password_confirmation">{{ __('auth.password_confirm_label') }}</label>
+                    <div class="input-group password-input-group">
+                        <input
+                            type="password"
+                            name="password_confirmation"
+                            id="profile_password_confirmation"
+                            class="form-control @error('password_confirmation') is-invalid @enderror"
+                            placeholder="{{ __('auth.password_confirm_placeholder') }}"
+                            minlength="8"
+                            autocomplete="new-password"
+                            required
+                        >
+                        <button
+                            type="button"
+                            class="btn btn-outline-secondary btn-toggle-password js-toggle-password"
+                            data-target="profile_password_confirmation"
+                            data-show-label="{{ __('auth.show_password') }}"
+                            data-hide-label="{{ __('auth.hide_password') }}"
+                            aria-label="{{ __('auth.show_password') }}"
+                        >
+                            <i class="bi bi-eye"></i>
+                        </button>
+                    </div>
+                    @error('password_confirmation')
+                        <div class="invalid-feedback d-block">{{ $message }}</div>
+                    @enderror
+                </div>
+
+                <div class="d-flex flex-wrap justify-content-end">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-shield-check"></i> Update password
                     </button>
                 </div>
             </form>

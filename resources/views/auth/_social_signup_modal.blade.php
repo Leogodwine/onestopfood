@@ -64,21 +64,13 @@
                         </div>
 
                         <div class="mb-4">
-                            <label for="social_phone" class="form-label fw-semibold small">
-                                Phone number <span class="text-danger">*</span>
-                            </label>
-                            <input
-                                type="text"
-                                name="phone"
-                                id="social_phone"
-                                class="form-control form-control-sm @if($errors->social_signup->has('phone')) is-invalid @endif"
-                                value="{{ old('phone', $verifyUser->phone) }}"
-                                placeholder="e.g., +255 7xx xxx xxx"
-                                required
-                            >
-                            @if($errors->social_signup->has('phone'))
-                                <div class="invalid-feedback">{{ $errors->social_signup->first('phone') }}</div>
-                            @endif
+                            @include('partials.phone-input', [
+                                'label' => __('auth.phone_label'),
+                                'errorBag' => 'social_signup',
+                                'value' => old('phone', $verifyUser->phone ?? ''),
+                                'inputId' => 'social_phone_number',
+                                'selectId' => 'social_phone_country_code',
+                            ])
                         </div>
 
                         <button type="submit" class="btn btn-success btn-sm w-100">

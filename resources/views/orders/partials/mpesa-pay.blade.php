@@ -17,13 +17,13 @@
     <form method="POST" action="{{ route('orders.pay.mpesa', $order) }}" class="row g-2 align-items-end">
         @csrf
         <div class="col-12">
-            <label for="mpesa_phone" class="form-label small mb-1">M-Pesa phone</label>
-            <input type="text" name="phone" id="mpesa_phone" class="form-control form-control-sm"
-                   placeholder="255712345678" required
-                   value="{{ old('phone', $order->payment->provider_reference ?? auth()->user()->phone) }}">
-            @error('phone')
-                <div class="text-danger small">{{ $message }}</div>
-            @enderror
+            @include('partials.phone-input', [
+                'label' => 'M-Pesa ' . __('auth.phone_label'),
+                'value' => old('phone', $order->payment->provider_reference ?? auth()->user()->phone),
+                'inputId' => 'mpesa_phone_number',
+                'selectId' => 'mpesa_phone_country_code',
+                'size' => 'sm',
+            ])
         </div>
         <div class="col-12">
             <button type="submit" class="btn btn-success btn-sm w-100">

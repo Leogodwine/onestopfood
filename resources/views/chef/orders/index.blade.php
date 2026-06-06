@@ -41,6 +41,7 @@
                     <th class="text-end">Total</th>
                     <th>Status</th>
                     <th>Payment</th>
+                    <th>Traveler</th>
                     <th>Date</th>
                     <th>Action</th>
                 </tr>
@@ -90,6 +91,17 @@
                                 <span class="text-muted small">—</span>
                             @endif
                         </td>
+                        <td>
+                            @if($order->delivery?->traveler)
+                                <span class="small">{{ $order->delivery->traveler->name }}</span>
+                            @elseif(!in_array($order->status, ['cancelled', 'delivered'], true))
+                                <a class="btn btn-sm btn-outline-success" href="{{ route('chef.orders.show', ['order' => $order, 'assign' => 1]) }}#assign-traveler">
+                                    <i class="bi bi-truck"></i> Assign
+                                </a>
+                            @else
+                                <span class="text-muted small">—</span>
+                            @endif
+                        </td>
                         <td>{{ $order->created_at->format('M d, Y') }}</td>
                         <td>
                             <a class="btn btn-sm btn-outline-primary" href="{{ route('chef.orders.show', $order) }}">
@@ -99,7 +111,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="8" class="text-center text-muted">No orders yet</td>
+                        <td colspan="9" class="text-center text-muted">No orders yet</td>
                     </tr>
                 @endforelse
             </tbody>

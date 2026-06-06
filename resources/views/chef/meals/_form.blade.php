@@ -66,12 +66,20 @@
     <label class="form-label">Meal Image</label>
     @if($meal?->image_url)
         <div class="mb-2">
-            <img src="{{ $meal->image_url }}" alt="{{ $meal->name }}" class="rounded border" style="max-height: 120px;">
+            <img src="{{ $meal->image_url }}" alt="{{ $meal->name }}" class="rounded border meal-upload-preview">
             <div class="form-text">Upload a new image to replace the current one.</div>
         </div>
     @endif
-    <input class="form-control @error('image') is-invalid @enderror" type="file" name="image" accept="image/jpeg,image/jpg,image/png,image/gif">
-    <div class="form-text">Max 2MB. JPG, PNG, GIF</div>
+    <div id="mealImagePreviewWrap" class="mb-2 d-none">
+        <img id="mealImagePreview" src="" alt="Selected meal image preview" class="rounded border meal-upload-preview">
+        <div class="form-text">Preview of the image you selected.</div>
+    </div>
+    <input class="form-control @error('image') is-invalid @enderror" type="file" name="image" id="mealImageInput" accept="image/jpeg,image/jpg,image/png,image/webp,image/gif">
+    <div class="form-text">
+        Recommended <strong>{{ \App\Services\MealImageService::RECOMMENDED_WIDTH }} × {{ \App\Services\MealImageService::RECOMMENDED_HEIGHT }} px</strong>
+        (3:2 landscape). Minimum {{ \App\Services\MealImageService::MIN_WIDTH }} × {{ \App\Services\MealImageService::MIN_HEIGHT }} px.
+        JPG, PNG, WebP, or GIF — max 5MB. Images are auto-resized for sharp display on menu cards.
+    </div>
     @error('image')
         <div class="invalid-feedback d-block">{{ $message }}</div>
     @enderror
@@ -124,6 +132,22 @@
 
     select.addEventListener('change', syncCategory);
     syncCategory();
+
+    var mealInput = document.getElementById('mealImageInput');
+    var mealPreview = document.getElementById('mealImagePreview');
+    var mealPreviewWrap = document.getElementById('mealImagePreviewWrap');
+    if (mealInput && mealPreview && mealPreviewWrap) {
+        mealInput.addEventListener('change', function () {
+            var file = mealInput.files && mealInput.files[0];
+            if (!file) {
+                mealPreviewWrap.classList.add('d-none');
+                mealPreview.removeAttribute('src');
+                return;
+            }
+            mealPreview.src = URL.createObjectURL(file);
+            mealPreviewWrap.classList.remove('d-none');
+        });
+    }
 })();
 </script>
 @endpush

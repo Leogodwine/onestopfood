@@ -3,7 +3,7 @@
 @section('content')
 <div class="page-header page-header-split">
     <h2 class="mb-0">Notifications</h2>
-    <p class="text-muted mb-0 page-header-subtitle">In-app notifications sent to users (database channel). Broadcast campaigns remain a future enhancement.</p>
+    <p class="text-muted mb-0 page-header-subtitle">Account creation, pending approvals, document reviews, orders, and delivery alerts (database + email; SMS when configured).</p>
 </div>
 
 <div class="row g-3 mb-4">

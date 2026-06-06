@@ -105,7 +105,17 @@ Route::middleware(['auth', 'social.signup.complete'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
     Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::post('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::post('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password.update');
     Route::get('/profile/avatar', [ProfileController::class, 'avatar'])->name('profile.avatar');
+
+    Route::prefix('account')->name('account.')->group(function () {
+        Route::get('/settings', [\App\Http\Controllers\AccountSettingsController::class, 'index'])->name('settings');
+        Route::post('/location', [\App\Http\Controllers\AccountSettingsController::class, 'updateLocation'])->name('location.update');
+        Route::post('/deactivate', [\App\Http\Controllers\AccountSettingsController::class, 'deactivate'])->name('deactivate');
+        Route::post('/reactivate', [\App\Http\Controllers\AccountSettingsController::class, 'reactivate'])->name('reactivate');
+        Route::post('/deletion-request', [\App\Http\Controllers\AccountSettingsController::class, 'requestDeletion'])->name('deletion.request');
+        Route::post('/deletion-cancel', [\App\Http\Controllers\AccountSettingsController::class, 'cancelDeletion'])->name('deletion.cancel');
+    });
 
     Route::post('/partner/apply', [PartnerApplicationController::class, 'apply'])->name('partner.apply');
 
@@ -116,6 +126,11 @@ Route::middleware(['auth', 'social.signup.complete'])->group(function () {
     // User Verification Workflow (Chefs & Travelers)
     Route::get('/verify', [VerificationController::class, 'showVerificationForm'])->name('verification.show');
     Route::post('/verify', [VerificationController::class, 'submitVerificationForm'])->name('verification.submit');
+    Route::get('/verification/status', [\App\Http\Controllers\VerificationStatusController::class, 'show'])->name('verification.status');
+
+    Route::get('/notifications', [\App\Http\Controllers\UserNotificationController::class, 'index'])->name('notifications.index');
+    Route::post('/notifications/{id}/read', [\App\Http\Controllers\UserNotificationController::class, 'markRead'])->name('notifications.read');
+    Route::post('/notifications/read-all', [\App\Http\Controllers\UserNotificationController::class, 'markAllRead'])->name('notifications.read-all');
     Route::prefix('documents')->name('documents.')->group(function () {
         Route::get('/verifications/{document}', [DocumentFileController::class, 'verification'])
             ->name('verifications.show');
@@ -178,6 +193,8 @@ Route::middleware(['auth', 'social.signup.complete'])->group(function () {
         Route::middleware('admin.permission:users.manage')->group(function () {
             Route::post('/users/bulk', [AdminController::class, 'bulkUpdate'])->name('users.bulk');
             Route::post('/users/{user}/suspend', [AdminController::class, 'suspend'])->name('users.suspend');
+            Route::post('/account-requests/{accountActionRequest}/approve', [AdminController::class, 'approveDeletionRequest'])->name('account-requests.approve');
+            Route::post('/account-requests/{accountActionRequest}/reject', [AdminController::class, 'rejectDeletionRequest'])->name('account-requests.reject');
         });
 
         Route::middleware('admin.permission:users.approve')->group(function () {

@@ -5,6 +5,7 @@
     $myItems = $chefPortion ? $order->items->filter(fn($i) => $i->meal && (int)$i->meal->chef_id === (int)auth()->id()) : $order->items;
     $mySubtotal = $chefPortion ? (float)$chefPortion->subtotal : (float)$order->subtotal;
     $myStatus = $chefPortion ? $chefPortion->status : $order->status;
+    $assignBtnLabel = !empty($canReassign) ? 'Reassign Traveler' : 'Assign Traveler';
 @endphp
 <div class="page-header page-header-split">
     <div class="d-flex justify-content-between align-items-center page-header-top">
@@ -23,6 +24,13 @@
         @endif
     </p>
 </div>
+
+@if(session('status'))
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        {{ session('status') }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+@endif
 
 <div class="row g-3 g-md-4">
     <div class="col-md-8">
@@ -51,6 +59,31 @@
                         @endif
                     </div>
                 </div>
+
+                @if(!empty($canManageDelivery))
+                    <hr class="my-4" id="assign-traveler">
+                    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3">
+                        <div>
+                            <div class="fw-semibold mb-1"><i class="bi bi-truck me-1"></i> Delivery traveler</div>
+                            @if($order->delivery?->traveler)
+                                <div class="text-muted small">
+                                    Assigned to <strong class="text-body">{{ $order->delivery->traveler->name }}</strong>
+                                    · {{ ucfirst(str_replace('_', ' ', $order->delivery->status)) }}
+                                </div>
+                            @else
+                                <div class="text-muted small">No traveler assigned yet for this delivery.</div>
+                            @endif
+                        </div>
+                        <button
+                            type="button"
+                            class="btn btn-success btn-sm flex-shrink-0"
+                            data-bs-toggle="modal"
+                            data-bs-target="#assignTravelerModal"
+                        >
+                            <i class="bi bi-person-check"></i> {{ $assignBtnLabel }}
+                        </button>
+                    </div>
+                @endif
             </div>
         </div>
 
@@ -130,67 +163,53 @@
             <div class="card-body">
                 <div class="mb-2"><strong>Customer:</strong> {{ $order->customer->name }}</div>
                 @if($order->delivery)
-                    <div class="mb-2"><strong>Delivery:</strong> {{ ucfirst($order->delivery->status) }}</div>
-                    @if($order->delivery->traveler)
-                        <div class="mb-2"><strong>Traveler:</strong> {{ $order->delivery->traveler->name }}</div>
-                    @endif
+                    <div class="mb-2"><strong>Delivery:</strong> {{ ucfirst(str_replace('_', ' ', $order->delivery->status)) }}</div>
+                    <div class="mb-2">
+                        <strong>Traveler:</strong>
+                        @if($order->delivery->traveler)
+                            {{ $order->delivery->traveler->name }}
+                        @else
+                            <span class="text-muted">Not assigned</span>
+                        @endif
+                    </div>
+                @else
+                    <div class="mb-2 text-muted">Delivery not created yet.</div>
+                @endif
+                @if(!empty($canManageDelivery))
+                    <button
+                        type="button"
+                        class="btn btn-outline-success btn-sm w-100 mt-2"
+                        data-bs-toggle="modal"
+                        data-bs-target="#assignTravelerModal"
+                    >
+                        <i class="bi bi-truck"></i> {{ $assignBtnLabel }}
+                    </button>
                 @endif
             </div>
         </div>
-
-        @if((!empty($needsAssignment) || !empty($canReassign)) && $nearbyTravelers->isNotEmpty())
-            <div class="dashboard-card mt-4">
-                <div class="card-header">
-                    <h5 class="card-title"><i class="bi bi-truck"></i> Nearby Travelers (online)</h5>
-                </div>
-                <div class="card-body">
-                    <p class="text-muted small mb-3">
-                        Order quantity: <strong>{{ $orderQuantity }}</strong> item(s).
-                        Ranked by distance to your kitchen and customer, vehicle capacity, and live GPS when available.
-                    </p>
-                    <ul class="list-group list-group-flush">
-                        @foreach($nearbyTravelers as $item)
-                            @php $t = $item->user; @endphp
-                            <li class="list-group-item d-flex justify-content-between align-items-center px-0">
-                                <div>
-                                    <strong>{{ $t->name }}</strong>
-                                    @if($item->recommended)
-                                        <span class="badge bg-success ms-1">Best match</span>
-                                    @endif
-                                    <div class="small text-muted mt-1">
-                                        {{ ucfirst($item->vehicle_type ?? 'vehicle') }}
-                                        · cap {{ $item->vehicle_capacity }}
-                                        @if($item->max_load_capacity) (max {{ $item->max_load_capacity }}) @endif
-                                        · {{ $item->location_source === 'gps' ? 'Live GPS' : 'Registered address' }}
-                                    </div>
-                                    @if($item->distance_km_to_chef !== null || $item->distance_km_to_customer !== null)
-                                        <div class="small text-muted">
-                                            @if($item->distance_km_to_chef !== null) {{ number_format($item->distance_km_to_chef, 1) }} km to kitchen @endif
-                                            @if($item->distance_km_to_customer !== null) · {{ number_format($item->distance_km_to_customer, 1) }} km to customer @endif
-                                            @if($item->combined_km !== null) · <strong>{{ number_format($item->combined_km, 1) }} km total</strong> @endif
-                                        </div>
-                                    @endif
-                                </div>
-                                <form method="POST" action="{{ route('chef.orders.assign-traveler', $order) }}" class="d-inline">
-                                    @csrf
-                                    <input type="hidden" name="traveler_id" value="{{ $t->id }}">
-                                    <button type="submit" class="btn btn-sm btn-success">{{ !empty($canReassign) ? 'Reassign' : 'Assign' }}</button>
-                                </form>
-                            </li>
-                        @endforeach
-                    </ul>
-                </div>
-            </div>
-        @elseif((!empty($needsAssignment) || !empty($canReassign)) && $nearbyTravelers->isEmpty())
-            <div class="dashboard-card mt-4">
-                <div class="card-header">
-                    <h5 class="card-title"><i class="bi bi-truck"></i> Nearby Travelers</h5>
-                </div>
-                <div class="card-body">
-                    <p class="text-muted mb-0">No suitable online travelers nearby. They must be online, within delivery radius, have GPS/location, and vehicle capacity for {{ $orderQuantity }} item(s).</p>
-                </div>
-            </div>
-        @endif
     </div>
 </div>
+
+@if(!empty($canManageDelivery))
+    @include('chef.orders.partials.assign-traveler-modal')
+@endif
 @endsection
+
+@push('scripts')
+@if(!empty($canManageDelivery))
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    var modalEl = document.getElementById('assignTravelerModal');
+    if (!modalEl || typeof bootstrap === 'undefined') {
+        return;
+    }
+
+    var shouldOpen = @json(request()->boolean('assign') || request()->has('assign') || $errors->has('error'));
+
+    if (shouldOpen || window.location.hash === '#assign-traveler') {
+        bootstrap.Modal.getOrCreateInstance(modalEl).show();
+    }
+});
+</script>
+@endif
+@endpush

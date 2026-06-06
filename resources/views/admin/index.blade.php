@@ -4,11 +4,21 @@
 <div class="page-header page-header-split">
     <div class="d-flex justify-content-between align-items-center page-header-top">
         <h2 class="mb-0">User Management</h2>
-        @if(!empty($adminPermissions['users.create']))
+        @if(!empty($adminPermissions['users.create']) || !empty($adminPermissions['users.view']))
         <div class="page-header-actions">
-            <a class="btn btn-sm btn-success page-header-action-btn" href="javascript:void(0)" onclick="openCreateUserModal()">
-                <i class="bi bi-person-plus"></i> Create
-            </a>
+            @if(!empty($adminPermissions['users.create']))
+                <button type="button" class="btn btn-sm btn-outline-success page-header-action-btn" onclick="openCreateUserModal()">
+                    <i class="bi bi-person-plus"></i> Create
+                </button>
+            @endif
+            @if(!empty($adminPermissions['users.view']))
+                <a class="btn btn-sm btn-success page-header-action-btn" href="{{ route('admin.users.index', ['filter' => 'pending_approvals']) }}#pending-approvals">
+                    <i class="bi bi-person-check"></i> Pending
+                    @if(($pendingApprovalsCount ?? 0) > 0)
+                        <span class="badge bg-light text-success ms-1">{{ number_format($pendingApprovalsCount) }}</span>
+                    @endif
+                </a>
+            @endif
         </div>
         @endif
     </div>
@@ -27,12 +37,18 @@
     <div class="card-header py-2">
         <h5 class="card-title mb-0"><i class="bi bi-filter"></i> Filters</h5>
     </div>
-    <form method="GET" action="{{ route('admin.users.index') }}" class="dashboard-filter-form row g-2 align-items-end">
-        <div class="col-6 col-lg-3">
+    <form id="admin-users-filter-form" method="GET" action="{{ route('admin.users.index') }}" class="dashboard-filter-form dashboard-filter-form--inline">
+        @if($filter !== '')
+            <input type="hidden" name="filter" value="{{ $filter }}">
+        @endif
+        @if($perPage)
+            <input type="hidden" name="per_page" value="{{ $perPage }}">
+        @endif
+        <div class="dashboard-filter-field">
             <label class="form-label dashboard-filter-label" for="user-search">Search</label>
             <input type="text" id="user-search" name="search" value="{{ $search }}" class="form-control" placeholder="Name, email, phone, ID">
         </div>
-        <div class="col-6 col-lg-3">
+        <div class="dashboard-filter-field">
             <label class="form-label dashboard-filter-label" for="user-role">Role</label>
             <select id="user-role" name="role" class="form-select">
                 <option value="">All roles</option>
@@ -42,7 +58,7 @@
                 <option value="admin" @selected($role === 'admin')>Admin</option>
             </select>
         </div>
-        <div class="col-6 col-lg-3">
+        <div class="dashboard-filter-field">
             <label class="form-label dashboard-filter-label" for="user-status">Status</label>
             <select id="user-status" name="status" class="form-select">
                 <option value="">All statuses</option>
@@ -52,7 +68,7 @@
                 <option value="suspended" @selected($status === 'suspended')>Suspended</option>
             </select>
         </div>
-        <div class="col-6 col-lg-3 dashboard-filter-actions">
+        <div class="dashboard-filter-actions dashboard-filter-actions--end">
             <button type="submit" class="btn btn-primary">
                 <i class="bi bi-funnel"></i> Apply
             </button>
@@ -128,13 +144,13 @@
                     <i class="bi bi-person-check"></i> Pending Chefs ({{ $pendingChefs->count() }})
                 </h5>
             </div>
-            <div class="table-responsive">
-                <table class="table table-hover">
+            <div class="table-responsive table-responsive-fit">
+                <table class="table table-hover pending-users-table">
                     <thead>
                         <tr>
                             <th>Name</th>
                             <th>Email</th>
-                            <th>Action</th>
+                            <th class="text-end">Action</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -146,8 +162,8 @@
                                         <small class="text-muted">{{ $chef->phone }}</small>
                                     @endif
                                 </td>
-                                <td>{{ $chef->email }}</td>
-                                <td>
+                                <td class="text-break">{{ $chef->email }}</td>
+                                <td class="text-end text-nowrap">
                                     <a class="btn btn-sm btn-primary" href="{{ route('admin.users.show', $chef) }}">
                                         <i class="bi bi-eye"></i> Review
                                     </a>
@@ -172,13 +188,13 @@
                     <i class="bi bi-truck"></i> Pending Travelers ({{ $pendingTravelers->count() }})
                 </h5>
             </div>
-            <div class="table-responsive">
-                <table class="table table-hover">
+            <div class="table-responsive table-responsive-fit">
+                <table class="table table-hover pending-users-table">
                     <thead>
                         <tr>
                             <th>Name</th>
                             <th>Email</th>
-                            <th>Action</th>
+                            <th class="text-end">Action</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -190,8 +206,8 @@
                                         <small class="text-muted">{{ $traveler->phone }}</small>
                                     @endif
                                 </td>
-                                <td>{{ $traveler->email }}</td>
-                                <td>
+                                <td class="text-break">{{ $traveler->email }}</td>
+                                <td class="text-end text-nowrap">
                                     <a class="btn btn-sm btn-primary" href="{{ route('admin.users.show', $traveler) }}">
                                         <i class="bi bi-eye"></i> Review
                                     </a>
@@ -210,36 +226,60 @@
 </div>
 
 <!-- All Users Table -->
+@php
+    $usersListQuery = array_filter([
+        'filter' => $filter ?: null,
+        'search' => $search ?: null,
+        'role' => $role ?: null,
+        'status' => $status ?: null,
+        'per_page' => $perPage,
+    ]);
+    $usersListQueryNoPageFilter = array_filter([
+        'search' => $search ?: null,
+        'role' => $role ?: null,
+        'status' => $status ?: null,
+        'per_page' => $perPage,
+    ]);
+@endphp
 <div class="dashboard-card mt-4" id="all-users">
-    <div class="card-header">
-        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+    <div class="card-header all-users-card-header">
+        <div class="all-users-header-row">
             <h5 class="card-title mb-0">
                 <i class="bi bi-people"></i> {{ $filterLabel }}
             </h5>
-            <div class="d-flex align-items-center gap-2">
-                @if(!empty($adminPermissions['users.export']))
-                <a class="btn btn-sm btn-outline-success" href="{{ route('admin.users.export', request()->query()) }}">
-                    <i class="bi bi-download"></i> Export CSV
-                </a>
-                @endif
-                <a class="btn btn-sm btn-outline-secondary" href="{{ route('admin.users.index') }}#all-users">
-                    Clear filter
-                </a>
-                <div class="dropdown">
-                    <button class="btn btn-sm btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                        Per page: {{ (int)$perPage }}
-                    </button>
-                    <ul class="dropdown-menu dropdown-menu-end">
-                        @foreach([10, 20, 50, 100] as $size)
-                            <li>
-                                <a class="dropdown-item @if((int)$perPage === $size) active @endif"
-                                   href="{{ route('admin.users.index', array_filter(['filter' => $filter ?: null, 'per_page' => $size])) }}#all-users">
-                                    {{ $size }} per page
-                                </a>
-                            </li>
-                        @endforeach
-                    </ul>
+            <div class="all-users-table-toolbar">
+                <div class="all-users-toolbar-group all-users-pager-group">
+                    <span class="all-users-toolbar-label">Per page</span>
+                    <div class="dropdown">
+                        <button class="btn btn-sm btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            {{ (int) $perPage }}
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            @foreach([10, 20, 50, 100] as $size)
+                                <li>
+                                    <a class="dropdown-item @if((int) $perPage === $size) active @endif"
+                                       href="{{ route('admin.users.index', array_merge($usersListQuery, ['per_page' => $size])) }}#all-users">
+                                        {{ $size }} per page
+                                    </a>
+                                </li>
+                            @endforeach
+                        </ul>
+                    </div>
                 </div>
+                @if($filter !== '')
+                    <div class="all-users-toolbar-group">
+                        <a class="btn btn-sm btn-outline-secondary" href="{{ route('admin.users.index', $usersListQueryNoPageFilter) }}#all-users">
+                            <i class="bi bi-x-circle"></i> Clear filter
+                        </a>
+                    </div>
+                @endif
+                @if(!empty($adminPermissions['users.export']))
+                    <div class="all-users-toolbar-group">
+                        <a class="btn btn-sm btn-outline-success" href="{{ route('admin.users.export', request()->query()) }}">
+                            <i class="bi bi-download"></i> Export CSV
+                        </a>
+                    </div>
+                @endif
             </div>
         </div>
     </div>

@@ -18,3 +18,17 @@ if (! function_exists('display_currency')) {
         return app(CurrencyService::class)->current();
     }
 }
+
+if (! function_exists('home_url')) {
+    /**
+     * Homepage URL — safe for error pages when route cache is stale.
+     */
+    function home_url(): string
+    {
+        if (\Illuminate\Support\Facades\Route::has('home')) {
+            return route('home');
+        }
+
+        return url('/');
+    }
+}

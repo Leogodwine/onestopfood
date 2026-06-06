@@ -28,6 +28,8 @@ class User extends Authenticatable
         'is_super_admin',
         'admin_title',
         'status',
+        'suspended_by',
+        'deactivated_at',
         'locale',
         'approved_at',
         'failed_login_attempts',
@@ -65,6 +67,7 @@ class User extends Authenticatable
             'phone_verified_at' => 'datetime',
             'password' => 'hashed',
             'approved_at' => 'datetime',
+            'deactivated_at' => 'datetime',
             'is_super_admin' => 'boolean',
             'two_factor_enabled' => 'boolean',
             'last_login_at' => 'datetime',
@@ -86,6 +89,10 @@ class User extends Authenticatable
     public const STATUS_APPROVED = 'approved';
     public const STATUS_REJECTED = 'rejected';
     public const STATUS_SUSPENDED = 'suspended';
+
+    public const SUSPENDED_BY_SELF = 'self';
+
+    public const SUSPENDED_BY_ADMIN = 'admin';
 
     public function location()
     {
@@ -140,6 +147,43 @@ class User extends Authenticatable
     public function isSocialOnlyUser(): bool
     {
         return $this->socialAccounts()->exists() && empty($this->password);
+    }
+
+    /**
+     * Roles that can create their own account (register or partner signup).
+     */
+    public function isSelfRegisteredRole(): bool
+    {
+        return in_array($this->role, [
+            self::ROLE_CUSTOMER,
+            self::ROLE_CHEF,
+            self::ROLE_TRAVELER,
+        ], true);
+    }
+
+    public function isSelfDeactivated(): bool
+    {
+        return $this->status === self::STATUS_SUSPENDED
+            && $this->suspended_by === self::SUSPENDED_BY_SELF;
+    }
+
+    public function canSelfReactivate(): bool
+    {
+        return $this->isSelfDeactivated();
+    }
+
+    public function accountActionRequests()
+    {
+        return $this->hasMany(AccountActionRequest::class);
+    }
+
+    public function pendingDeletionRequest(): ?AccountActionRequest
+    {
+        return $this->accountActionRequests()
+            ->where('action', AccountActionRequest::ACTION_DELETION)
+            ->where('status', AccountActionRequest::STATUS_PENDING)
+            ->latest()
+            ->first();
     }
 
     public function effectiveAdminTitle(): ?string

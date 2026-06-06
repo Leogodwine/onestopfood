@@ -57,7 +57,7 @@
             <h1 class="h4 mb-2">@yield('heading')</h1>
             <p class="text-muted mb-4">@yield('message')</p>
             <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
-                <a href="{{ route('home') }}" class="btn btn-home px-4">
+                <a href="{{ home_url() }}" class="btn btn-home px-4">
                     <i class="bi bi-house-door me-1"></i> Back to Home
                 </a>
                 @hasSection('secondary_action')

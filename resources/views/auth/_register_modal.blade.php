@@ -53,20 +53,14 @@
                         </div>
 
                         <div class="col-12">
-                            <label class="form-label fw-semibold mb-1">
-                                <i class="bi bi-telephone"></i> Phone <span class="text-danger">*</span>
-                            </label>
-                            <input
-                                class="form-control form-control-sm @if($errors->register->has('phone')) is-invalid @endif"
-                                name="phone"
-                                value="{{ old('phone') }}"
-                                autocomplete="tel"
-                                required
-                                placeholder="e.g., +255 7xx xxx xxx"
-                            >
-                            @if($errors->register->has('phone'))
-                                <div class="invalid-feedback">{{ $errors->register->first('phone') }}</div>
-                            @endif
+                            @include('partials.phone-input', [
+                                'label' => __('auth.phone_label'),
+                                'labelIcon' => 'bi-telephone',
+                                'errorBag' => 'register',
+                                'value' => old('phone'),
+                                'inputId' => 'register_phone_number',
+                                'selectId' => 'register_phone_country_code',
+                            ])
                         </div>
 
                         <div class="col-12">

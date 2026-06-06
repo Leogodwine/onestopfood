@@ -7,8 +7,10 @@ use App\Services\Airtel\AirtelMoneyService;
 use App\Services\Mpesa\MpesaDarajaService;
 use App\Services\Payments\MobileMoneyDispatcher;
 use App\Services\Tigo\TigoPesaService;
+use App\Support\PhoneNumber;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\Rule;
 
 class MobileMoneyPaymentController extends Controller
 {
@@ -73,9 +75,13 @@ class MobileMoneyPaymentController extends Controller
             return back()->with('status', 'This order is already paid.');
         }
 
+        PhoneNumber::mergeIntoRequest($request);
+
         $data = $request->validate([
-            'phone' => ['required', 'string', 'max:20'],
-        ]);
+            'phone_country_code' => ['required', 'string', Rule::in(array_keys(PhoneNumber::countries()))],
+            'phone_number' => PhoneNumber::nationalNumberRules('phone_country_code'),
+            'phone' => ['required', 'string', 'max:30'],
+        ], PhoneNumber::validationMessages());
 
         $result = $this->dispatcher->initiate($payment, $data['phone']);
 

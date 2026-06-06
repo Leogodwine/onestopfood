@@ -13,6 +13,7 @@ use App\Services\InvoiceService;
 use App\Services\MultiChefCheckoutService;
 use App\Services\OrderPricingService;
 use App\Services\Payments\MobileMoneyDispatcher;
+use App\Support\PhoneNumber;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -119,17 +120,26 @@ class OrderController extends Controller
 
     public function storePaymentStep(Request $request)
     {
-        $request->validate([
+        PhoneNumber::mergeIntoRequest($request, 'payment_phone', 'payment_phone_country_code', 'payment_phone_number');
+
+        $mobileMoney = in_array($request->payment_method, ['mpesa', 'tigo', 'airtel'], true);
+        $paymentRules = [
             'payment_method' => ['required', Rule::in(['mpesa', 'tigo', 'airtel', 'card', 'cod'])],
-            'payment_phone' => [
-                Rule::requiredIf(in_array($request->payment_method, ['mpesa', 'tigo', 'airtel'], true)),
-                'nullable',
-                'string',
-                'max:50',
-            ],
             'payment_reference' => ['nullable', 'string', 'max:100'],
             'special_instructions' => ['nullable', 'string', 'max:2000'],
-        ]);
+        ];
+
+        if ($mobileMoney) {
+            $paymentRules['payment_phone_country_code'] = ['required', 'string', Rule::in(array_keys(PhoneNumber::countries()))];
+            $paymentRules['payment_phone_number'] = PhoneNumber::nationalNumberRules('payment_phone_country_code');
+            $paymentRules['payment_phone'] = ['required', 'string', 'max:50'];
+        }
+
+        $request->validate($paymentRules, PhoneNumber::validationMessages(
+            'payment_phone_country_code',
+            'payment_phone_number',
+            'payment_phone'
+        ));
         $request->session()->put('checkout_payment_method', $request->payment_method);
         $request->session()->put('checkout_payment_phone', $request->payment_phone);
         $request->session()->put('checkout_payment_reference', $request->payment_reference);
@@ -153,18 +163,27 @@ class OrderController extends Controller
                 ->withErrors(['payment_method' => 'Please select a payment method before placing your order.']);
         }
 
-        $data = $request->validate([
+        PhoneNumber::mergeIntoRequest($request, 'payment_phone', 'payment_phone_country_code', 'payment_phone_number');
+
+        $mobileMoney = in_array($request->payment_method, ['mpesa', 'tigo', 'airtel'], true);
+        $placeRules = [
             'payment_method' => ['required', Rule::in(['mpesa', 'tigo', 'airtel', 'card', 'cod'])],
             'special_instructions' => ['nullable', 'string', 'max:2000'],
             'delivery_location_id' => ['nullable', 'exists:locations,id'],
-            'payment_phone' => [
-                Rule::requiredIf(fn () => in_array($request->payment_method, ['mpesa', 'tigo', 'airtel'], true)),
-                'nullable',
-                'string',
-                'max:50',
-            ],
             'payment_reference' => ['nullable', 'string', 'max:100'],
-        ]);
+        ];
+
+        if ($mobileMoney) {
+            $placeRules['payment_phone_country_code'] = ['required', 'string', Rule::in(array_keys(PhoneNumber::countries()))];
+            $placeRules['payment_phone_number'] = PhoneNumber::nationalNumberRules('payment_phone_country_code');
+            $placeRules['payment_phone'] = ['required', 'string', 'max:50'];
+        }
+
+        $data = $request->validate($placeRules, PhoneNumber::validationMessages(
+            'payment_phone_country_code',
+            'payment_phone_number',
+            'payment_phone'
+        ));
 
         $cart = $request->session()->get('cart', []);
         if (! $cart) {
